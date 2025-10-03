@@ -23,6 +23,22 @@
   - Add role to previously created user: `sudo pveum aclmod / -user terraform@pve -role Terraform`
   - Create an API token for the user: `sudo pveum user token add terraform@pve provider --privsep=0`
   - Take note of the API token and save it into bitwarden
+- Create a user for Terraform with `sudo` privileges:
+  - still in `ssh`, install sudo: `apt install sudo`
+  - create terraform user: `useradd -m terraform`
+  - give terraform user sudo permissions: `visudo -f /etc/sudoers.d/terraform`. This will open a file. Put the following in that file:
+    ```
+    terraform ALL=(root) NOPASSWD: /sbin/pvesm
+    terraform ALL=(root) NOPASSWD: /sbin/qm
+    terraform ALL=(root) NOPASSWD: /usr/bin/tee /var/lib/vz/*
+    ```
+  - Leave `ssh` and copy your SSH public key `cat /path/to/your/public/.ssh/key | pbcopy`
+  - `ssh` into your server again and paste that key into `~/.ssh/authorized_keys` where `~` represents the `home` directory of the terraform user. The filepath will most likely be `/home/terraform/.ssh/authorized_keys`.
+  - Verify that it worked by running this from your local computer: `ssh -i /path/to/your/private/.ssh/key terraform@1.2.3.4 sudo pvesm apiinfo`. You should see something like this:
+    ```
+    APIVER 12
+    APIAGE 3
+    ```
 - `ssh` into your server and create the `/mnt/media` directory
 - Create a file in this directory called `terraform.tfvars` it should look like this:
 ```
