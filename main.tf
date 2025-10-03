@@ -8,10 +8,10 @@ terraform {
 }
 
 provider "proxmox" {
- endpoint = var.endpoint
- username = var.username
- password = var.password
- insecure = true
+  endpoint = var.endpoint
+  username = var.username
+  password = var.password
+  insecure = true
 }
 
 data "local_file" "ssh_public_key" {
@@ -61,7 +61,7 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
 }
 
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  name = "terraform-provider-proxmox-ubuntu-vm"
+  name        = "terraform-provider-proxmox-ubuntu-vm"
   description = "Managed by Terraform"
   tags        = ["terraform", "ubuntu"]
   node_name   = var.node
@@ -86,16 +86,16 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   disk {
     datastore_id = "local-lvm"
     # here, we are telling our VM to scaffold itself with the template we created with the `proxmox_virtual_environment_download_file` resource
-    import_from  = proxmox_virtual_environment_download_file.ubuntu_cloud_image.id
-    interface    = "virtio0"
-    iothread     = true
-    discard      = "on"
-    size         = 20
+    import_from = proxmox_virtual_environment_download_file.ubuntu_cloud_image.id
+    interface   = "virtio0"
+    iothread    = true
+    discard     = "on"
+    size        = 20
   }
 
   network_device {
     bridge = "vmbr0"
-    model = "virtio"
+    model  = "virtio"
   }
 
   # this initialization block works because:
@@ -124,8 +124,8 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   # a proxmox directory mapping that we created as a resource below.
   # you can think of this as physically plugging-in the aforementioned USB drive to our VM
   virtiofs {
-    mapping = "media_mount"
-    cache = "always"
+    mapping   = "media_mount"
+    cache     = "always"
     direct_io = true
   }
 }
@@ -149,8 +149,8 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
 # to a computer, that computer will see a new folder. that new folder will be a symlink
 # to a folder on another computer
 resource "proxmox_virtual_environment_hardware_mapping_dir" "media_mount" {
-  name     = "media_mount"
-  comment  = "media bind mount"
+  name    = "media_mount"
+  comment = "media bind mount"
   map = [
     {
       node = "proxmox"
