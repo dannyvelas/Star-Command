@@ -1,8 +1,4 @@
 variable "endpoint" { type = string }
-variable "username" { type = string }
-variable "password" {
-  type = string
-  sensitive = true
-}
+variable "api_token" { type = string }
 variable "ssh_public_key" { type = string }
 variable "node" { type = string }
