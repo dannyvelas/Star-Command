@@ -16,29 +16,53 @@
   - For gateway, put the IP address of your router
   - For DNS server, put either your router's IP address or use a public DNS server like `1.1.1.1` (Cloudflare) `8.8.8.8` (Google)
 - Verify that from another computer you can `ping 1.2.3.4` and access `https://1.2.3.4:8006`.
-- Add an `ssh` key so you can access a pseudo-terminal of your server from another computer.
+- Add an `ssh` key so you have remote access to your server from another computer.
+- `ssh` into your server and install sudo: `apt install sudo`. This is important because we will be creating a non-root user for yourself and a terraform user and both need `sudo` access.
+- Create a non-root user for yourself:
+  - Still in `ssh`, create a new user for yourself with full `sudo` permissions: `useradd -G sudo -m dannyvelasquez -s /bin/bash`
+  - Create a password for that user: `passwd dannyvelasquez`. Save the password on Bitwarden.
+  - Add `ssh` capability to `dannyvelasquez`:
+    - Leave `ssh` and copy your SSH public key `cat /path/to/your/public/.ssh/key | pbcopy`
+    - `ssh` into the server again and:
+      - `cd /home/dannyvelasquez`
+      - `mkdir .ssh`
+      - `chmod 700 .ssh`
+      - `chown dannyvelasquez:dannyvelasquez .ssh`
+      - `touch authorized_keys`
+      - Paste your key into `authorized_keys`
+      - `chmod 600 authorized_keys`
+      - `chown terraform:terraform authorized_keys`
+    - Verify that it worked by running this from your local computer: `ssh -i /path/to/your/private/.ssh/key dannyvelasquez@1.2.3.4`
 - Create an API token for Terraform. `ssh` into the VM and:
   - Create new user for terraform: `sudo pveum user add terraform@pve`
   - Create new role with terraform permissions: `sudo pveum role add Terraform -privs "Realm.AllocateUser, VM.PowerMgmt, VM.GuestAgent.Unrestricted, Sys.Console, Sys.Audit, Sys.AccessNetwork, VM.Config.Cloudinit, VM.Replicate, Pool.Allocate, SDN.Audit, Realm.Allocate, SDN.Use, Mapping.Modify, VM.Config.Memory, VM.GuestAgent.FileSystemMgmt, VM.Allocate, SDN.Allocate, VM.Console, VM.Clone, VM.Backup, Datastore.AllocateTemplate, VM.Snapshot, VM.Config.Network, Sys.Incoming, Sys.Modify, VM.Snapshot.Rollback, VM.Config.Disk, Datastore.Allocate, VM.Config.CPU, VM.Config.CDROM, Group.Allocate, Datastore.Audit, VM.Migrate, VM.GuestAgent.FileWrite, Mapping.Use, Datastore.AllocateSpace, Sys.Syslog, VM.Config.Options, Pool.Audit, User.Modify, VM.Config.HWType, VM.Audit, Sys.PowerMgmt, VM.GuestAgent.Audit, Mapping.Audit, VM.GuestAgent.FileRead, Permissions.Modify"`
   - Add role to previously created user: `sudo pveum aclmod / -user terraform@pve -role Terraform`
   - Create an API token for the user: `sudo pveum user token add terraform@pve provider --privsep=0`
-  - Take note of the API token and save it into bitwarden
+  - Take note of the API token and save it into Bitwarden
 - Create a user for Terraform with `sudo` privileges:
-  - still in `ssh`, install sudo: `apt install sudo`
   - create terraform user: `useradd -m terraform`
-  - give terraform user sudo permissions: `visudo -f /etc/sudoers.d/terraform`. This will open a file. Put the following in that file:
+  - give terraform user partial `sudo` permissions. Run: `visudo -f /etc/sudoers.d/terraform`. This will open a file. Put the following in that file:
     ```
     terraform ALL=(root) NOPASSWD: /sbin/pvesm
     terraform ALL=(root) NOPASSWD: /sbin/qm
     terraform ALL=(root) NOPASSWD: /usr/bin/tee /var/lib/vz/*
     ```
-  - Leave `ssh` and copy your SSH public key `cat /path/to/your/public/.ssh/key | pbcopy`
-  - `ssh` into your server again and paste that key into `~/.ssh/authorized_keys` where `~` represents the `home` directory of the terraform user. The filepath will most likely be `/home/terraform/.ssh/authorized_keys`.
-  - Verify that it worked by running this from your local computer: `ssh -i /path/to/your/private/.ssh/key terraform@1.2.3.4 sudo pvesm apiinfo`. You should see something like this:
-    ```
-    APIVER 12
-    APIAGE 3
-    ```
+  - Add `ssh` capability to `terraform`:
+    - Leave `ssh` and copy your SSH public key `cat /path/to/your/public/.ssh/key | pbcopy`
+    - `ssh` into the server again and:
+      - `cd /home/terraform`
+      - `mkdir .ssh`
+      - `chmod 700 .ssh`
+      - `chown terraform:terraform .ssh`
+      - `touch authorized_keys`
+      - Paste your key into `authorized_keys`
+      - `chmod 600 authorized_keys`
+      - `chown terraform:terraform authorized_keys`
+    - Verify that it worked by running this from your local computer: `ssh -i /path/to/your/private/.ssh/key terraform@1.2.3.4 sudo pvesm apiinfo`. You should see something like this:
+      ```
+      APIVER 12
+      APIAGE 3
+      ```
 - Create a file in this directory called `terraform.tfvars` it should look like this:
 ```
 endpoint        = "https://1.2.3.4:8006/"
