@@ -26,7 +26,7 @@ data "local_file" "ssh_public_key" {
 resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
   content_type = "snippets"
   datastore_id = "local"
-  node_name    = "proxmox"
+  node_name    = var.node
 
   source_raw {
     data = <<-EOF
@@ -158,7 +158,7 @@ resource "proxmox_virtual_environment_hardware_mapping_dir" "media_mount" {
   comment = "media bind mount"
   map = [
     {
-      node = "proxmox"
+      node = var.node
       path = "/mnt/media"
     },
   ]
