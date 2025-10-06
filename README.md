@@ -26,7 +26,7 @@
 - After running the script, it will:
   - Prompt you for a password, enter one and save it in Bitwarden.
   - Show you the API token that was created for the Terraform Proxmox user. Save this in Bitwarden.
-  - Show you a port that was randomly chosen for `ssh`. Suppose it is `1234`. Save it in `~/.ssh/config`:
+  - Show you a port that was randomly chosen port for `ssh`. Suppose it is `1234`. Save it in `~/.ssh/config`:
     ```
     Host proxmox
       Hostname 1.2.3.4
