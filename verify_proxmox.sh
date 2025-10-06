@@ -2,16 +2,16 @@
 
 # Check if required arguments are provided
 if [ $# -ne 2 ]; then
-  echo "Usage: $0 <host> <path-to-private-key>"
+  echo "Usage: $0 <ip-addr> <path-to-private-key>"
   echo "Example: $0 192.168.1.100 ~/.ssh/id_ed25519"
   exit 1
 fi
 
-HOST=$1
+IP=$1
 PRIVATE_KEY_PATH=$2
 
 echo "Verifying SSH access for dannyvelasquez user..."
-if ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i "$PRIVATE_KEY_PATH" "dannyvelasquez@$HOST" "echo 'SSH access successful for dannyvelasquez'"; then
+if ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i "$PRIVATE_KEY_PATH" "dannyvelasquez@$IP" "echo 'SSH access successful for dannyvelasquez'"; then
   echo "dannyvelasquez SSH access verified"
 else
   echo "Error: Unable to verify SSH access for dannyvelasquez"
