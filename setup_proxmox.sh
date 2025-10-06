@@ -34,10 +34,10 @@ PORT=$((RANDOM % 64512 + 1024))
 # SSH commands to be executed on the remote server
 ssh root@"$IP" bash -c "'
     # stop if there is an error
-    set  -e
+    set -e
 
     # Install sudo
-    apt update && apt install -y sudo
+    apt update && apt upgrade && apt install -y sudo
 
     # Create dannyvelasquez user
     useradd -G sudo -m dannyvelasquez -s /bin/bash
