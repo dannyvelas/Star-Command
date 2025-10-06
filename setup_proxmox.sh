@@ -64,9 +64,9 @@ ssh root@"$IP" bash -c "'
     useradd -m terraform
 
     # Setup sudo permissions for terraform
-    echo 'terraform ALL=(root) NOPASSWD: /sbin/pvesm' > /etc/sudoers.d/terraform
-    echo 'terraform ALL=(root) NOPASSWD: /sbin/qm' >> /etc/sudoers.d/terraform
-    echo 'terraform ALL=(root) NOPASSWD: /usr/bin/tee /var/lib/vz/*' >> /etc/sudoers.d/terraform
+    echo \"terraform ALL=(root) NOPASSWD: /sbin/pvesm\" > /etc/sudoers.d/terraform
+    echo \"terraform ALL=(root) NOPASSWD: /sbin/qm\" >> /etc/sudoers.d/terraform
+    echo \"terraform ALL=(root) NOPASSWD: /usr/bin/tee /var/lib/vz/*\" >> /etc/sudoers.d/terraform
     chmod 440 /etc/sudoers.d/terraform
 
     # Setup SSH for terraform user
@@ -79,11 +79,11 @@ ssh root@"$IP" bash -c "'
 
     # Harden SSH login
     cat > /etc/ssh/sshd_config.d/10-hardening.conf <<EOF
-    # SSH Hardening Configuration
-    Port $PORT
-    PasswordAuthentication no
-    PermitRootLogin no
-    EOF
+# SSH Hardening Configuration
+Port $PORT
+PasswordAuthentication no
+PermitRootLogin no
+EOF
 
     # Verify config
     sshd -t || {
@@ -98,5 +98,5 @@ ssh root@"$IP" bash -c "'
     # Create media directory
     mkdir -p /mnt/media
 
-    echo 'Setup completed successfully!'
+    echo \"Setup completed successfully!\"
 '"
