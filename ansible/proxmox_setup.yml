@@ -1,11 +1,10 @@
----
 - name: Setup Proxmox Server
   hosts: all
   become: yes
   vars:
-    ssh_port: "{{ lookup('env', 'RANDOM') | int % 64512 + 1024 }}"
     ssh_public_key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
-    tailscale_key: "{{ lookup('env', 'TAILSCALE_KEY') }}"
+  vars_files:
+    - vars.yaml
 
   tasks:
     - name: Add Tailscale GPG key
@@ -43,6 +42,27 @@
         state: present
         key: "{{ ssh_public_key }}"
 
+    - name: Create local terraform user
+      user:
+        name: terraform
+        state: present
+
+    - name: Set up SSH for terraform user
+      authorized_key:
+        user: terraform
+        state: present
+        key: "{{ ssh_public_key }}"
+
+    - name: Set up sudo permissions for terraform
+      copy:
+        dest: /etc/sudoers.d/terraform
+        content: |
+          terraform ALL=(root) NOPASSWD: /sbin/pvesm
+          terraform ALL=(root) NOPASSWD: /sbin/qm
+          terraform ALL=(root) NOPASSWD: /usr/bin/tee /var/lib/vz/*
+        mode: "0440"
+        validate: /usr/sbin/visudo -cf %s
+
     - name: Create terraform user in Proxmox
       shell: pveum user add terraform@pve
       register: terraform_user_result
@@ -70,36 +90,29 @@
       failed_when: role_assign_result.rc != 0 and 'ACL entry already exists' not in role_assign_result.stderr
       changed_when: role_assign_result.rc == 0
 
-    - name: Create local terraform user
-      user:
-        name: terraform
-        state: present
+    - name: Create Terraform API token
+      command: pveum user token add terraform@pve provider --privsep=0
+      register: token_output
 
-    - name: Set up sudo permissions for terraform
-      copy:
-        dest: /etc/sudoers.d/terraform
-        content: |
-          terraform ALL=(root) NOPASSWD: /sbin/pvesm
-          terraform ALL=(root) NOPASSWD: /sbin/qm
-          terraform ALL=(root) NOPASSWD: /usr/bin/tee /var/lib/vz/*
-        mode: "0440"
-        validate: /usr/sbin/visudo -cf %s
-
-    - name: Set up SSH for terraform user
-      authorized_key:
-        user: terraform
-        state: present
-        key: "{{ ssh_public_key }}"
+    - name: Display Terraform API token
+      debug:
+        msg: |
+          ===============================
+          SAVE THIS TERRAFORM API TOKEN:
+          {{ token_output.stdout }}
+          ===============================
 
     - name: Configure SSH hardening
-      ansible.posix.sshd_config:
-        backup: yes
-        sshd_config: /etc/ssh/sshd_config.d/10-hardening.conf
-        settings:
-          Port: "{{ ssh_port }}"
-          PasswordAuthentication: "no"
-          PermitRootLogin: "no"
-      notify: Restart sshd
+      become: yes
+      blockinfile:
+        path: "/etc/ssh/sshd_config.d/00-user.conf"
+        create: true
+        marker: "# {mark} ANSIBLE MANAGED SSH CONFIG"
+        block: |
+          Port {{ ssh_port }}
+          PasswordAuthentication no
+          PermitRootLogin no
+      notify: restart sshd
 
     - name: Create media directory
       file:
