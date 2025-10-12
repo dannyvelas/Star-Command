@@ -4,8 +4,6 @@
   become: yes
   vars:
     ssh_public_key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
-  vars_files:
-    - vars.yaml
 
   tasks:
     - name: Install sudo
