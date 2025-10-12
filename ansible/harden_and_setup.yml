@@ -1,46 +1,19 @@
-- name: Setup Proxmox Server
-  hosts: all
+---
+- name: Harden SSH, setup terraform and tailscale
+  hosts: proxmox
   become: yes
-  vars:
-    ssh_public_key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
-  vars_files:
-    - vars.yaml
-
   tasks:
-    - name: Add Tailscale GPG key
-      apt_key:
-        url: https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg
-        keyring: /usr/share/keyrings/tailscale-archive-keyring.gpg
-        state: present
-
-    - name: Add Tailscale repository
-      apt_repository:
-        repo: deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/debian trixie main
-        filename: tailscale
-        state: present
-
-    - name: Install required packages
-      apt:
-        name:
-          - sudo
-          - tailscale
-        state: present
-        update_cache: yes
-        cache_valid_time: 3600
-
-    - name: Create dannyvelasquez user
-      user:
-        name: dannyvelasquez
-        shell: /bin/bash
-        groups: sudo
-        append: yes
-        state: present
-
-    - name: Set up SSH for dannyvelasquez
-      authorized_key:
-        user: dannyvelasquez
-        state: present
-        key: "{{ ssh_public_key }}"
+    - name: Configure SSH hardening
+      become: yes
+      blockinfile:
+        path: "/etc/ssh/sshd_config.d/00-user.conf"
+        create: true
+        marker: "# {mark} ANSIBLE MANAGED SSH CONFIG"
+        block: |
+          Port {{ ssh_port }}
+          PasswordAuthentication no
+          PermitRootLogin no
+      notify: restart sshd
 
     - name: Create local terraform user
       user:
@@ -102,29 +75,38 @@
           {{ token_output.stdout }}
           ===============================
 
-    - name: Configure SSH hardening
-      become: yes
-      blockinfile:
-        path: "/etc/ssh/sshd_config.d/00-user.conf"
-        create: true
-        marker: "# {mark} ANSIBLE MANAGED SSH CONFIG"
-        block: |
-          Port {{ ssh_port }}
-          PasswordAuthentication no
-          PermitRootLogin no
-      notify: restart sshd
+    - name: Add Tailscale GPG key
+      apt_key:
+        url: https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg
+        keyring: /usr/share/keyrings/tailscale-archive-keyring.gpg
+        state: present
 
-    - name: Create media directory
-      file:
-        path: /mnt/media
-        state: directory
-        mode: "0755"
+    - name: Add Tailscale repository
+      apt_repository:
+        repo: deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/debian trixie main
+        filename: tailscale
+        state: present
+
+    - name: Install required packages
+      apt:
+        name:
+          - tailscale
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
 
     - name: Start Tailscale
       shell: tailscale up --authkey={{ tailscale_key }}
       args:
         creates: /var/lib/tailscale/tailscaled.state
       when: tailscale_key is defined
+
+    # this is the directory that will be used as a mount point for VMs
+    - name: Create media directory
+      file:
+        path: /mnt/media
+        state: directory
+        mode: "0755"
 
   handlers:
     - name: Restart sshd
