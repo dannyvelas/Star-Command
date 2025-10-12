@@ -63,10 +63,10 @@
       changed_when: terraform_role_result.rc == 0
 
     - name: Assign role to terraform user
-      shell: pveum aclmod / -user terraform@pve -role Terraform
+      command: pveum aclmod / -user terraform@pve -role Terraform
       register: role_assign_result
-      failed_when: role_assign_result.rc != 0 and 'ACL entry already exists' not in role_assign_result.stderr
-      changed_when: role_assign_result.rc == 0
+      failed_when: role_assign_result.rc != 0
+      changed_when: false
 
     - name: Create Terraform API token
       command: pveum user token add terraform@pve provider --privsep=0
@@ -89,7 +89,7 @@
         block: |
           deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 
-    - name: Add tailscale
+    - name: Add tailscale key and repository
       ansible.builtin.deb822_repository:
         name: tailscale
         types: [deb]
@@ -100,7 +100,7 @@
         state: present
         enabled: true
 
-    - name: Install required packages
+    - name: Install tailscale
       apt:
         name:
           - tailscale
