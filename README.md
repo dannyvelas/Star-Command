@@ -34,7 +34,7 @@
     Port 22
   ```
 
-- Run `ansible-playbook -i ansible/inventory.ini ansible/create_admin.yml`, this will:
+- Run `ansible-playbook -i ansible/inventory.ini ansible/create_admin.yml -u root`, this will:
   - Install `sudo`.
   - Create an `admin` user with full `sudo` permissions, that can log-in via SSH with the same key as root.
 
@@ -43,7 +43,7 @@
 - Pick a random port: `echo $RANDOM | jq '. + 1024 | . % 65535'`, this will be used in future steps. Let's suppose it's `1234`.
 - Save this port into `/var/homelab.yml`.
 - [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden and put it in `/var/homelab.yml`.
-- Run `ansible-playbook -i ansible/inventory.ini ansible/harden_and_setup.yml`, this will:
+- Run `ansible-playbook -i ansible/inventory.ini ansible/harden_and_setup.yml -u admin`, this will:
   - Harden SSH access so that root and password logins become not permitted.
   - Create a `terraform` user with partial `sudo` permissions and SSH access `/path/to/your/public/.ssh/key`.
   - Create a Proxmox `terraform` user with an API token with limited permissions.
