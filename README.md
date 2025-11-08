@@ -29,7 +29,7 @@
 - Save this port into `/var/homelab.yml`.
 - [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden and put it in `/var/homelab.yml`.
 
-### Main playbook
+### Run playbook
 - If your public key is anything other than `~/.ssh/id_ed25519.pub`, change it `./ansible/setup.yml`.
 - Add the following to your `~/.ssh/config` file, this will be used by the `./ansible/setup.yml` playbook:
   ```
