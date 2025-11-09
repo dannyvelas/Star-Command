@@ -174,12 +174,16 @@
         update_cache: yes
         cache_valid_time: 3600
 
+    - name: Check Tailscale backend state
+      command: tailscale status --json
+      register: tailscale_status
+      changed_when: false
+      failed_when: false
+
     - name: Start Tailscale
       command: tailscale up --authkey={{ tailscale_key }}
       register: tailscale_output
-      args:
-        creates: /var/lib/tailscale/tailscaled.state
-      when: tailscale_key is defined
+      when: tailscale_status.stdout | from_json | json_query('BackendState') != 'Running'
 
     - name: Display Tailscale running message
       debug:
