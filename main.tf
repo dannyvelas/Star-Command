@@ -56,13 +56,6 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
       - systemctl enable qemu-guest-agent
       - systemctl start qemu-guest-agent
       - echo "done" > /tmp/cloud-config.done
-      # there are three steps to sharing a host directory with a VM. this is step 3:
-      # telling our VM that if it ever detects a drive called "media_mount", that it
-      # can simply mount that drive at a local directory called /mnt/media.
-      # so /mnt/media will act as the symlink to folder on the other computer
-      - mkdir -p /mnt/media
-      - echo "media_mount /mnt/media virtiofs defaults 0 0" >> /etc/fstab
-      - mount -a
     EOF
 
     file_name = "user-data-cloud-config.yaml"
