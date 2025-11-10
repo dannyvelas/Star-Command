@@ -66,3 +66,6 @@ node            = "whatever-node-name-you-chose-earlier"
 ```
 - The x's in `api_token` should be replaced with the api token you received in the step before.
 - Run `terraform apply`. This should create an Ubuntu VM that has a shared mount to the `/mnt/media` directory of its host.
+
+## Ansible for Plex VM
+- Run `ansible-playbook -i ansible/inventory.ini ansible/setup-plex-vm.yml -u ubuntu`
