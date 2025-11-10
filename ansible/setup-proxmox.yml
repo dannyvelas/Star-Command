@@ -1,5 +1,5 @@
 ---
-- name: Harden SSH, setup terraform and tailscale
+- name: Harden SSH, setup terraform and tailscale in proxmox
   hosts: proxmox
   become: true
   vars:
