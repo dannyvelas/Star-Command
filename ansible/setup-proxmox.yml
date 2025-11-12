@@ -166,6 +166,10 @@
         signed_by: https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg
         state: present
         enabled: true
+      notify:
+        - apt update
+
+    - meta: flush_handlers
 
     - name: Install tailscale
       apt:
