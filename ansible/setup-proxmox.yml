@@ -43,8 +43,6 @@
         owner: root
         group: root
         mode: "0644"
-      notify:
-        - apt update
 
     ## sudo
     - name: Install sudo
@@ -89,9 +87,13 @@
           Port {{ ssh_port }}
           PasswordAuthentication no
           PermitRootLogin no
-      notify: Restart sshd
+      register: ssh_config
 
-    - meta: flush_handlers
+    - name: Restart sshd immediately
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
+      when: ssh_config.changed
 
     ### Terraform
     - name: Create local terraform user
@@ -168,10 +170,12 @@
         signed_by: https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg
         state: present
         enabled: true
-      notify:
-        - apt update
+      register: tailscale_repo
 
-    - meta: flush_handlers
+    - name: apt update if repo changed
+      apt:
+        update_cache: yes
+      when: tailscale_repo.changed
 
     - name: Install tailscale
       apt:
@@ -207,12 +211,3 @@
         path: /mnt/media
         state: directory
         mode: "0755"
-
-  handlers:
-    - name: Restart sshd
-      service:
-        name: sshd
-        state: restarted
-    - name: apt update
-      ansible.builtin.apt:
-        update_cache: yes

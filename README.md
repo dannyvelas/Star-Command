@@ -46,7 +46,7 @@
     IdentityFile /path/to/your/private/.ssh/key
     Port 22
   ```
-- Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root`, this will:
+- Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml`, this will:
   - Install `sudo`.
   - Create an `admin` user with full `sudo` permissions, that can log-in via SSH with the same key as root.
   - Harden SSH access so that root and password logins become not permitted.
@@ -57,9 +57,12 @@
   - Create a `/mnt/media` directory that will be used for mounting.
 - After running this playbook:
   - It will show you the API token that was created for the Terraform Proxmox user. Save this in Bitwarden.
-  - ssh logins with the `root` user or port 22 will no longer work, so update the `User` in `~/.ssh/config` to be `admin` instead of `root`. Also update the `Port` to be the port from before.
-  - You should be able to run it as many times as you want, except as admin (`-u admin`) and not as root as we did above.
-  - You should be able to go to the [Tailscale machines page](https://login.tailscale.com/admin/machines) and see your server there as a Tailscale node.
+  - ssh logins with the `root` user or port 22 will no longer work, so:
+    - Update the `User` in `~/.ssh/config` to be `admin` instead of `root`. Also update the `Port` to be the port from before. Also update 
+    - Change the proxmox host of `./ansible/inventory.ini` to have these values: `ansible_port=1234 ansible_user=admin`.
+  - You should now be able to:
+    - Run this playbook as many times as you want.
+    - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).
 
 ## Terraform
 - Decide on the IP address that you would want for a new Plex VM. From now on, we will use the special value `<plex-vm-ip>` to represent your plex VM's IP address.
