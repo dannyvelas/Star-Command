@@ -31,17 +31,3 @@
         fstype: ext4
         opts: defaults
         state: mounted
-
-    - name: Define Proxmox storage "media-storage"
-      ansible.builtin.blockinfile:
-        path: /etc/pve/storage.cfg
-        marker: "# {mark} ANSIBLE MANAGED MEDIA STORAGE"
-        block: |
-          dir: media-storage
-              path /mnt/media
-              content none
-      notify: reload proxmox storage
-
-  handlers:
-    - name: reload proxmox storage
-      ansible.builtin.command: pvesm status
