@@ -67,8 +67,9 @@
 - Run `ansible-playbook -i ansible/inventory.ini ansible/add-media-lv.yml`. This will create a new logical volume called "media" in the `pve` volume group of size 120GiB.
 
 ## Terraform
+- `cd terraform/vm`.
 - Decide on the IP address that you would want for a new Plex VM. From now on, we will use the special value `<plex-vm-ip>` to represent your plex VM's IP address.
-- Create a file in this directory called `terraform.tfvars`. It should look like this:
+- Create a file called `terraform.tfvars`. It should look like this:
 ```
 node            = "<node-name>"
 router_ip       = "10.0.0.1"
