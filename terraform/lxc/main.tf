@@ -13,19 +13,10 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint  = var.endpoint
-  api_token = var.api_token
-  insecure  = true
-  ssh {
-    agent       = false
-    username    = "terraform"
-    private_key = file(var.ssh_private_key)
-    node {
-      name    = "proxmox"
-      address = var.ssh_address
-      port    = var.ssh_port
-    }
-  }
+  endpoint = var.endpoint
+  username = var.username
+  password = var.password
+  insecure = true
 }
 
 data "local_file" "ssh_public_key" {
