@@ -205,4 +205,4 @@
     - name: Enable import and snippets on local storage
       ansible.builtin.command: >
         pvesm set local --content iso,vztmpl,backup,import,snippets
-      when: "('import' not in pve_storage_config.stdout) or ('snippets' not in pve_storage_config.stdout)"
+      when: "('import' not in pve_storage_config.stdout) or ('snippets' not in pve_storage_config.stdout) or ('vztmpl' not in pve_storage_config.stdout)"
