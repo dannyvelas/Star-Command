@@ -56,7 +56,7 @@
         update_cache: yes
       when: pve_repo.changed or del_enterprise_repo.changed or ceph_repo.changed or tailscale_repo.changed
 
-    ## sudo
+    ## necessary software
     - name: Install sudo
       apt:
         name:
@@ -64,6 +64,11 @@
         state: present
         update_cache: yes
         cache_valid_time: 3600
+
+    - name: Install parted
+      apt:
+        name: parted
+        state: present
 
     ## Create admin
     - name: Create admin user
@@ -191,41 +196,7 @@
       when: tailscale_status.stdout | from_json | json_query('BackendState') != 'Running'
 
     ### Mount point for VMs
-    - name: Create new partition for media storage
-      parted:
-        device: /dev/sda
-        number: 4
+    - name: Install parted
+      apt:
+        name: parted
         state: present
-        part_start: 120GiB
-        part_end: 238.5GiB
-
-    - name: Create physical volume on new partition
-      lvg:
-        vg: pve
-        pvs: /dev/sda4
-
-    - name: Create media logical volume
-      lvol:
-        vg: pve
-        lv: media
-        size: 118g
-        pvs: /dev/sda4
-
-    - name: Format media volume with ext4
-      filesystem:
-        fstype: ext4
-        dev: /dev/pve/media
-
-    - name: Create media mount point
-      file:
-        path: /mnt/media
-        state: directory
-        mode: "0755"
-
-    - name: Mount media volume
-      mount:
-        path: /mnt/media
-        src: /dev/pve/media
-        fstype: ext4
-        state: mounted
-        opts: defaults
