@@ -73,6 +73,8 @@
     - Run this playbook as many times as you want (without the `-u root` argument, as that won't work anymore).
     - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).</details>
 
+</details>
+
 <details>
 
 <summary><details>Create Media logical volume with Ansible</details></summary>
