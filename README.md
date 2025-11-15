@@ -32,14 +32,22 @@
 
 </details>
 
-## Set Ansible variables
+<details>
+
+<summary><h2>Set Ansible variables</h2></summary>
+
 - `cp ansible/vars.example.yml /var/homelab.yml`.
 - Pick a random port: `echo $RANDOM | jq '. + 1024 | . % 65535'`, this will be used in future steps. From now on, we will use the special value `1234` to represent this randomly generated port.
 - Save this port into `/var/homelab.yml`.
 - [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden and put it in `/var/homelab.yml`.
 - Update `./ansible/inventory.ini` so that the `proxmox` host has IP address `1.2.3.4`.
 
-## Set up Proxmox with Ansible
+</details>
+
+<details>
+
+<summary><h2>Set up Proxmox with Ansible</h2></summary>
+
 - If your public key is anything other than `~/.ssh/id_ed25519.pub`, change it in `./ansible/setup-proxmox.yml`.
 - Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root`, this will:
   - Install `sudo`.
@@ -63,13 +71,21 @@
   - Change the proxmox host of `./ansible/inventory.ini` to have these values: `ansible_port=1234 ansible_user=admin`.
   - You should now be able to:
     - Run this playbook as many times as you want (without the `-u root` argument, as that won't work anymore).
-    - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).
+    - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).</details>
 
-## Create Media logical volume with Ansible
+<details>
+
+<summary><details>Create Media logical volume with Ansible</details></summary>
+
 - NOTE: This assumes you have at least 120GiB of space in your `pve` volume group.
 - Run `ansible-playbook -i ansible/inventory.ini ansible/add-media-lv.yml`. This will create a new logical volume called "media" in the `pve` volume group of size 120GiB.
 
-## Create a new VM with Terraform
+</details>
+
+<details>
+
+<summary><h2>Create a new VM with Terraform</h2></summary>
+
 - `cd terraform/vm`.
 - Decide on the IP address that you would want for a VM. From now on, we will use the special value `<vm-ip>` to represent your VM's IP address.
 - Create a file called `terraform.tfvars`. It should look like this:
@@ -88,7 +104,12 @@ vm_ip           = "<vm-ip>"
 - Run `terraform apply`. This should create an Ubuntu VM that can mount to `/mnt/media` on the Proxmox host.
 - At this point, you should be able to ssh into the ubuntu VM: `ssh ubuntu@<vm-ip> -i /path/to/your/private/.ssh/key`.
 
-## Create a new LXC container with Terraform
+</details>
+
+<details>
+
+<summary><h2>Create a new LXC container with Terraform</h2></summary>
+
 - `cd terraform/lxc`.
 - Decide on the IP address that you would want for an LXC container. From now on, we will use the special value `<lxc-ip>` to represent your container's IP address.
 - Create a file called `terraform.tfvars`. It should look like this:
@@ -109,3 +130,5 @@ ip             = "<lxc-ip>"
 - Update `./ansible/inventory.ini` so that the `plex` host has IP address `<lxc-ip>`.
 - Run `ansible-playbook -i ansible/inventory.ini ansible/install-plex.yml -u root`
 - After this, you should be able to go to visit `http://<lxc-ip>:32400` and see the Plex welcome screen.
+
+</details>
