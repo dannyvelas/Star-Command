@@ -27,14 +27,16 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_lxc_template" {
   content_type = "vztmpl"
   datastore_id = "local"
   node_name    = var.node
-  url          = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64-root.tar.xz"
-  file_name    = "ubuntu-24.04-lxc-template.tar.xz"
+  url          = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+  file_name    = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 }
 
 resource "proxmox_virtual_environment_container" "ubuntu_container" {
-  description = "Managed by Terraform"
-  tags        = ["terraform", "ubuntu"]
-  node_name   = var.node
+  description  = "Managed by Terraform"
+  tags         = ["terraform", "ubuntu"]
+  node_name    = var.node
+  vm_id        = 100
+  unprivileged = true
 
   cpu {
     cores = 2
