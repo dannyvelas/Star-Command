@@ -17,7 +17,7 @@
     - "root", for your OS and file system. From what I've seen, this takes up around 30% of `hdsize`.
     - "data", for VM disks, which ends up being of size `hdsize - rootsize - swapsize - minfree`.
   - If you have a smaller hard-drive and can't easily add storage, you might want to make these two logical volumes a bit smaller. I made the root logical volume 39.9GiB and the data logical volume 55GiB. This gave me around 135GiB of free space in the `pve` volume group.
-- After, you will be asked for an administrator email and password. Create a password, enter it, and store it in Bitwarden. This will be the "root" password.
+- After, you will be asked for an administrator email and password. Create a password, enter it, and store it in Bitwarden. This will be the "root" password. From here on, we will use the special value `<password>` to represent this password.
 - In setup, on the "Management Network Configuration" page:
   - For management interface, pick the network card that is being used for ethernet.
   - For Hostname (FQDN), put `proxmox.lan`. The part before the first `.` will become your Proxmox node name. In this case, my node name is `proxmox`. From here on, we will use the special value `<node-name>` to represent your node name.
@@ -83,3 +83,25 @@ vm_ip           = "<vm-ip>"
 - The x's in `api_token` should be replaced with the api token you received in the step before.
 - Run `terraform apply`. This should create an Ubuntu VM that can mount to `/mnt/media` on the Proxmox host.
 - At this point, you should be able to ssh into the ubuntu VM: `ssh ubuntu@<vm-ip> -i /path/to/your/private/.ssh/key`.
+
+### Create a new LXC container with Terraform
+- `cd terraform/lxc`.
+- Decide on the IP address that you would want for an LXC container. From now on, we will use the special value `<lxc-ip>` to represent your container's IP address.
+- Create a file called `terraform.tfvars`. It should look like this:
+```
+node           = "proxmox"
+router_ip      = "10.0.0.1"
+endpoint       = "https://10.0.0.50:8006/"
+username       = "root@pam"
+password       = "<password>"
+ssh_public_key = "/Users/dannyvelasquez/.ssh/id_ed25519.pub"
+ip             = "<lxc-ip>"
+```
+- Unfortunately, Proxmox doesn't support some things in this `main.tf` file without root login, so the authentication here is just root username and password.
+- Run `terraform apply`. This should create an Ubuntu LXC container mounted to `/mnt/media` on the Proxmox host.
+- At this point, you should be able to ssh into it: `ssh root@<lxc-ip> -i /path/to/your/private/.ssh/key`.
+
+### Install Plex in LXC container
+- Update `./ansible/inventory.ini` so that the `plex` host has IP address `<lxc-ip>`.
+- Run `ansible-playbook -i ansible/inventory.ini ansible/install-plex.yml -u root`
+- After this, you should be able to go to visit `http://<lxc-ip>:32400` and see the Plex welcome screen.
