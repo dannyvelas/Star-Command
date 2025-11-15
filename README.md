@@ -9,7 +9,7 @@
 
 ## Instructions
 
-### Set up Proxmox manually
+### Install proxmox
 - Flash [Proxmox](https://www.proxmox.com/en/downloads) ISO onto a USB or SSD or disk and then connect that to your server so that you can boot your server with the Proxmox VE OS.
 - After accepting the terms and conditions, you can configure your filesystem and how your disk will be provisioned by Proxmox:
   - You probably want `ext4` or `xfs`, unless you know what you're doing.
@@ -28,15 +28,14 @@
 - Run: `ssh-copy-id -i /path/to/your/public/.ssh/key root@1.2.3.4`. In other words, add an `ssh` key to your Proxmox server and verify afterward that you have remote `ssh` access to your server from your other computer.
 - If you're using a laptop as a server, you might want to run this as well so that you can close the lid without it sleeping: `sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target`.
 
-## Ansible
-### Variables set up
+### Set Ansible variables
 - `cp ansible/vars.example.yml /var/homelab.yml`.
 - Pick a random port: `echo $RANDOM | jq '. + 1024 | . % 65535'`, this will be used in future steps. From now on, we will use the special value `1234` to represent this randomly generated port.
 - Save this port into `/var/homelab.yml`.
 - [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden and put it in `/var/homelab.yml`.
 - Update `./ansible/inventory.ini` so that the `proxmox` host has IP address `1.2.3.4`.
 
-### Run Proxmox setup playbooks
+### Set up Proxmox with Ansible
 - If your public key is anything other than `~/.ssh/id_ed25519.pub`, change it in `./ansible/setup-proxmox.yml`.
 - Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root`, this will:
   - Install `sudo`.
@@ -62,13 +61,13 @@
     - Run this playbook as many times as you want (without the `-u root` argument, as that won't work anymore).
     - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).
 
-### Run Media logical volume playbook
+### Create Media logical volume with Ansible
 - NOTE: This assumes you have at least 120GiB of space in your `pve` volume group.
 - Run `ansible-playbook -i ansible/inventory.ini ansible/add-media-lv.yml`. This will create a new logical volume called "media" in the `pve` volume group of size 120GiB.
 
-## Terraform
+### Create a new VM with Terraform
 - `cd terraform/vm`.
-- Decide on the IP address that you would want for a new Plex VM. From now on, we will use the special value `<plex-vm-ip>` to represent your plex VM's IP address.
+- Decide on the IP address that you would want for a VM. From now on, we will use the special value `<vm-ip>` to represent your VM's IP address.
 - Create a file called `terraform.tfvars`. It should look like this:
 ```
 node            = "<node-name>"
@@ -79,13 +78,8 @@ ssh_address     = "1.2.3.4"
 ssh_port        = 1234
 ssh_public_key  = "/path/to/your/public/.ssh/key"
 ssh_private_key = "/path/to/your/private/.ssh/key"
-plex_vm_ip      = "<plex-vm-ip>"
+vm_ip           = "<vm-ip>"
 ```
 - The x's in `api_token` should be replaced with the api token you received in the step before.
-- Run `terraform apply`. This should create an Ubuntu VM on IP that can mount to `/mnt/media` on the Proxmox host.
-- At this point, you should be able to ssh into the ubuntu VM: `ssh ubuntu@<plex-vm-ip> -i /path/to/your/private/.ssh/key`.
-
-## Ansible for Plex VM
-- Update `./ansible/inventory.ini` so that the `plex` host has IP address `<plex-vm-ip>`.
-- Run `ansible-playbook -i ansible/inventory.ini ansible/setup-plex-vm.yml`
-- After this, you should be able to go to visit `http://<plex-vm-ip>:32400` and see the Plex welcome screen.
+- Run `terraform apply`. This should create an Ubuntu VM that can mount to `/mnt/media` on the Proxmox host.
+- At this point, you should be able to ssh into the ubuntu VM: `ssh ubuntu@<vm-ip> -i /path/to/your/private/.ssh/key`.
