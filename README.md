@@ -77,7 +77,7 @@
 
 <details>
 
-<summary><details>Create Media logical volume with Ansible</details></summary>
+<summary><h2>Create Media logical volume with Ansible</h2></summary>
 
 - NOTE: This assumes you have at least 120GiB of space in your `pve` volume group.
 - Run `ansible-playbook -i ansible/inventory.ini ansible/add-media-lv.yml`. This will create a new logical volume called "media" in the `pve` volume group of size 120GiB.
