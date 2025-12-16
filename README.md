@@ -121,7 +121,7 @@ router_ip      = "10.0.0.1"
 endpoint       = "https://10.0.0.50:8006/"
 username       = "root@pam"
 password       = "<password>"
-ssh_public_key = "/Users/dannyvelasquez/.ssh/id_ed25519.pub"
+ssh_public_key = "/path/to/your/public/.ssh/key"
 ip             = "<lxc-ip>"
 ```
 - Unfortunately, Proxmox doesn't support some things in this `main.tf` file without root login, so the authentication here is just root username and password.
