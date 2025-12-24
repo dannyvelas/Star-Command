@@ -7,7 +7,6 @@
 * [Ansible](https://formulae.brew.sh/formula/ansible) installed on that computer.
 * A [Tailscale](https://login.tailscale.com/start) account.
 
-
 <details>
 
 <summary><h2>Install proxmox</h2></summary>
@@ -36,10 +35,11 @@
 
 <summary><h2>Set Ansible variables</h2></summary>
 
-- `cp ansible/vars.example.yml /var/homelab.yml`.
+- Copy the example secrets file: `cp ./ansible/example.secrets.yml ./ansible/secrets.yml`.
+- Encrypt it using a password that you'll save in Bitwarden: `ansible-vault encrypt ./ansible/secrets.yml`.
 - Pick a random port: `echo $RANDOM | jq '. + 1024 | . % 65535'`, this will be used in future steps. From now on, we will use the special value `1234` to represent this randomly generated port.
-- Save this port into `/var/homelab.yml`.
-- [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden and put it in `/var/homelab.yml`.
+- Save this port into `./ansible/secrets.yml`.
+- [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden and put it in `./ansible/secrets.yml` as well.
 - Update `./ansible/inventory.ini` so that the `proxmox` host has IP address `1.2.3.4`.
 
 </details>
@@ -49,7 +49,7 @@
 <summary><h2>Set up Proxmox with Ansible</h2></summary>
 
 - If your public key is anything other than `~/.ssh/id_ed25519.pub`, change it in `./ansible/setup-proxmox.yml`.
-- Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root`, this will:
+- Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root --ask-vault-pass`, this will:
   - Install `sudo`.
   - Create an `admin` user with full `sudo` permissions, that can log-in via SSH with the same key as root.
   - Harden SSH access so that root and password logins become not permitted.
@@ -71,7 +71,7 @@
   - Change the proxmox host of `./ansible/inventory.ini` to have these values: `ansible_port=1234 ansible_user=admin`.
   - You should now be able to:
     - Run this playbook as many times as you want (without the `-u root` argument, as that won't work anymore).
-    - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).</details>
+    - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).
 
 </details>
 
@@ -126,7 +126,7 @@ ip             = "<lxc-ip>"
 <summary><h2>Install Plex in LXC container</h2></summary>
 
 - Update `./ansible/inventory.ini` so that the `plex` host has IP address `<lxc-ip>`.
-- Run `ansible-playbook -i ansible/inventory.ini ansible/install-plex.yml -u root`
+- Run `ansible-playbook -i ansible/inventory.ini ansible/install-plex.yml -u root`.
 - After this, you should be able to go to visit `http://<lxc-ip>:32400` and see the Plex welcome screen.
 
 </details>
