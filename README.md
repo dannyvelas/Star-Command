@@ -143,14 +143,15 @@ ip             = "<lxc-ip>"
   vpn ansible_host=10.20.30.40
   ```
 - Update `./ansible/setup-server.yml` so that the `hosts:` field is set to `vpn`.
-- Update `./ansible/secrets.yml` so that under `admin_passwords`, there is a new entry called `vpn:`. The value of this entry should be the admin password you want to use for this server.
+- Update `./ansible/host_vars/` so that there is a new directory called `vpn`.
+- Run `ansible-vault create ./ansible/host_vars/vpn/vault.yml`, using your vault password.
+- In that file put the following, except use an actual password that you'll save to Bitwarden:
+  ```
+  ---
+  vault_admin_password: "my super secret password"
+  ```
 - In your first run, you'll use root permissions to run the playbook: `ansible-playbook -i ansible/inventory.ini ansible/setup-server.yml -u root --ask-vault-pass --ask-pass`.
 - After this, root login with password will be disabled. You'll only be able to login as admin using `/path/to/private/key` at the port specified in `./ansible/secrets.yml`.
-- To re-run this playbook, update the `vpn_grup` of `./ansible/inventory.ini` to look like this:
-  ```
-  [vpn_group]
-  vpn ansible_host=10.20.30.40 ansible_user=admin ansible_port=1234
-  ```
 - You can now re-run this playbook with: `ansible-playbook -i ansible/inventory.ini ansible/setup-server.yml --ask-vault-pass`.
 
 </details>
