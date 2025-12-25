@@ -49,10 +49,15 @@
         enabled: true
       register: tailscale_repo
 
-    - name: apt update and upgrade
-      apt:
+    - name: Update and upgrade all packages
+      ansible.builtin.apt:
         update_cache: yes
-        upgrade: yes
+        upgrade: dist # 'dist' is recommended for security hardening
+
+    - name: Install UFW
+      ansible.builtin.apt:
+        name: ufw
+        state: present
 
     ### Harden SSH
     - name: Harden SSH
