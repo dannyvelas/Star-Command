@@ -37,7 +37,7 @@
 
 - [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden.
 - Pick an admin password for your home server. Save it into Bitwarden as well.
-- Run: `ansible-vault create ./ansible/host_vars/proxmox_server/vault.yml`, using a vault password (let's call it `vp`). Save `vp` in Bitwarden.
+- Run: `ansible-vault create ./ansible/host_vars/proxmox_server/vault.yml`, using a vault password. Save this vault password in Bitwarden.
 - In the content of that file put:
   ```
   vault_tailscale_key: "<tailscale auth key here>"
