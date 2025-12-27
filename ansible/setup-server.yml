@@ -7,3 +7,4 @@
   roles:
     - ssh_harden
     - automated_updates
+    - postfix_relay
