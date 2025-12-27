@@ -1,0 +1,35 @@
+- name: Install unattended-upgrades and mail utilities
+  ansible.builtin.apt:
+    name:
+      - unattended-upgrades
+      - apt-listchanges
+      - bsd-mailx
+    state: present
+    update_cache: yes
+
+- name: Enable unattended-upgrades non-interactively # 'dpkg-reconfigure -plow'
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+
+- name: Create custom unattended-upgrades overrides
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/51custom-unattended-upgrades
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      // Override settings from 50unattended-upgrades
+      Unattended-Upgrade::Mail "{{ admin_email }}";
+      Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+      Unattended-Upgrade::Remove-Unused-Dependencies "true";
+      Unattended-Upgrade::Automatic-Reboot "true";
+      Unattended-Upgrade::Automatic-Reboot-Time "05:00";
+
+- name: Restart unattended-upgrades service
+  ansible.builtin.service:
+    name: unattended-upgrades
+    state: restarted
+    enabled: yes
