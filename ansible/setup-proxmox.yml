@@ -59,9 +59,12 @@
         name: ufw
         state: present
 
-    ### Harden SSH
+    ### Server setup stuff
     - name: Harden SSH
       include_tasks: tasks/harden-ssh.yml
+
+    - name: Automated updates
+      include_tasks: tasks/automated-updates.yml
 
     ## necessary software
     - name: Install sudo
