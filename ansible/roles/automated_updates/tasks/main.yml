@@ -1,3 +1,4 @@
+---
 - name: Install unattended-upgrades and mail utilities
   ansible.builtin.apt:
     name:
@@ -7,7 +8,7 @@
     state: present
     update_cache: yes
 
-- name: Enable unattended-upgrades non-interactively # 'dpkg-reconfigure -plow'
+- name: Enable unattended-upgrades non-interactively
   ansible.builtin.copy:
     dest: /etc/apt/apt.conf.d/20auto-upgrades
     content: |
@@ -26,10 +27,10 @@
       Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
       Unattended-Upgrade::Remove-Unused-Dependencies "true";
       Unattended-Upgrade::Automatic-Reboot "true";
-      Unattended-Upgrade::Automatic-Reboot-Time "05:00";
+      Unattended-Upgrade::Automatic-Reboot-Time "{{ reboot_time }}";
 
-- name: Restart unattended-upgrades service
+- name: Ensure unattended-upgrades service is enabled
   ansible.builtin.service:
     name: unattended-upgrades
-    state: restarted
+    state: started
     enabled: yes
