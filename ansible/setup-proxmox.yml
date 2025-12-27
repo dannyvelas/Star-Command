@@ -56,6 +56,7 @@
   roles:
     - ssh_harden
     - automated_updates
+    - postfix_relay
 
   tasks:
     ## necessary software
