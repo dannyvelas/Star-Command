@@ -140,33 +140,37 @@ vm_ip           = "<vm-ip>"
 
 <details>
 
-<summary><h2>Create a new LXC container with Terraform</h2></summary>
+<summary><h2>Create a new Plex LXC container with Terraform</h2></summary>
 
-- `cd terraform/lxc`.
-- Decide on the IP address that you would want for an LXC container. From now on, we will use the special value `<lxc-ip>` to represent your container's IP address.
+- `cd terraform/plex_lxc`.
+- Decide on the IP address that you would want for your Plex LXC container. From now on, we will use the special value `<plex-lxc-ip>` to represent your Plex container's IP address.
 - Create a file called `terraform.tfvars`. It should look like this:
 ```
-node           = "proxmox"
+node           = "<node-name>"
 router_ip      = "10.0.0.1"
 endpoint       = "https://10.0.0.50:8006/"
 username       = "root@pam"
 password       = "<password>"
 ssh_public_key = "/path/to/your/public/.ssh/key"
-ip             = "<lxc-ip>"
+ip             = "<plex-lxc-ip>"
 ```
 - Unfortunately, Proxmox doesn't support some things in this `main.tf` file without root login, so the authentication here is just root username and password.
 - Run `terraform apply`. This should create an Ubuntu LXC container mounted to `/mnt/media` on the Proxmox host.
-- At this point, you should be able to ssh into it: `ssh root@<lxc-ip> -i /path/to/your/private/.ssh/key`.
+- At this point, you should be able to ssh into it: `ssh root@<plex-lxc-ip> -i /path/to/your/private/.ssh/key`.
 
 </details>
 
 <details>
 
-<summary><h2>Install Plex in LXC container</h2></summary>
+<summary><h2>Install Plex in the Plex LXC container</h2></summary>
 
-- Update `./ansible/inventory.ini` so that the `plex` host has IP address `<lxc-ip>`.
+- Update `./ansible/inventory.ini` so that it has this:
+  ```
+  [plex]
+  plex_lxc ansible_host=<plex-lxc-ip>
+  ```
 - Run `ansible-playbook -i ansible/inventory.ini ansible/install-plex.yml -u root`.
-- After this, you should be able to go to visit `http://<lxc-ip>:32400` and see the Plex welcome screen.
+- After this, you should be able to go to visit `http://<plex-lxc-ip>:32400` and see the Plex welcome screen.
 
 </details>
 
