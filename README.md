@@ -67,7 +67,6 @@
   - Create an `admin` user with full `sudo` permissions, that can log-in via SSH with the same key as root.
   - Harden SSH access so that root and password logins become not permitted.
   - Make SSH happen in port `17031` instead of `22`.
-  - Configure `UFW`.
   - Create a `terraform` user with partial `sudo` permissions and SSH access via your public key: `/path/to/your/public/.ssh/key`.
   - Create a Proxmox `terraform` user with an API token with limited permissions.
   - Install `tailscale`.
