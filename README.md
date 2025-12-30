@@ -40,7 +40,6 @@
 
 <summary><h2>Set Ansible variables</h2></summary>
 
-- [Generate a Tailscale auth key](https://login.tailscale.com/admin/settings/keys), save it in Bitwarden.
 - Pick an admin password for your home server. Save it into Bitwarden as well.
 - Run: `ansible-vault create ./ansible/host_vars/proxmox_server/vault.yml`, using a vault password. Save this vault password in Bitwarden.
 - In the content of that file put:
@@ -63,14 +62,14 @@
 
 - If your public key is anything other than `~/.ssh/id_ed25519.pub`, change it in `./ansible/setup-proxmox.yml`.
 - Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root --ask-vault-pass`, this will:
+  - Configures apt so that it can install non-enterprise packages 
   - Install `sudo`.
-  - Create an `admin` user with full `sudo` permissions, that can log-in via SSH with the same key as root.
+  - Create an `admin` user with full `sudo` permissions, that can log-in via SSH with a private key.
   - Harden SSH access so that root and password logins become not permitted.
   - Make SSH happen in port `17031` instead of `22`.
+  - Enables auto-updates, notifying you via email every time one happens.
   - Create a `terraform` user with partial `sudo` permissions and SSH access via your public key: `/path/to/your/public/.ssh/key`.
   - Create a Proxmox `terraform` user with an API token with limited permissions.
-  - Install `tailscale`.
-  - Run `tailscale` and add your server to be a Tailscale node.
   - Make sure that proxmox "local" storage can have items of type "import" and "snippets".
 - After running this playbook:
   - It will show you the API token that was created for the Terraform Proxmox user. Save this in Bitwarden.
@@ -85,6 +84,32 @@
   - You should now be able to:
     - Run this playbook as many times as you want (without the `-u root` argument, as that won't work anymore).
     - See your server as a Tailscale node in the [Tailscale machines page](https://login.tailscale.com/admin/machines).
+
+</details>
+
+<details>
+
+<summary><h2>Create Proxmox Firewall</h2></summary>
+
+- cd `terraform/global`
+- Create a file called `terraform.tfvars`. It should look like this:
+```
+node            = "<node-name>"
+endpoint        = "https://1.2.3.4:8006/"
+api_token       = "terraform@pve!provider=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+ssh_address     = "1.2.3.4"
+ssh_port        = 17031
+ssh_private_key = "/path/to/your/private/.ssh/key"
+```
+- Run `terraform init`.
+- Run `terraform apply`.
+- Change directory back to the root of this repo: `cd ../../`.
+- Make sure that `./ansible/group_vars/all/all.yml` has the following variable:
+  ```
+  proxmox_node_name: "<node-name>"
+  ```
+- Run ansible playbook to enable firewall: `ansible-playbook -i ansible/inventory.ini ansible/activate-firewall.yml --ask-vault-pass`.
+- At this point, only ports `17031` and `8006` will be allowed incoming traffic.
 
 </details>
 
@@ -107,6 +132,7 @@ ssh_private_key = "/path/to/your/private/.ssh/key"
 vm_ip           = "<vm-ip>"
 ```
 - The x's in `api_token` should be replaced with the API token that you received when you set up proxmox with Ansible.
+- Run `terraform init`.
 - Run `terraform apply`. This should create an Ubuntu VM that can mount to `/mnt/media` on the Proxmox host.
 - At this point, you should be able to ssh into the ubuntu VM: `ssh ubuntu@<vm-ip> -i /path/to/your/private/.ssh/key`.
 
@@ -163,7 +189,7 @@ The instructions will make it so that only non-root private-key logins are allow
   ```
 - In your first run, you'll use root permissions to run the playbook: `ansible-playbook -i ansible/inventory.ini ansible/setup-server.yml -u root --ask-vault-pass --ask-pass --limit vpn`.
   - Note: this command makes it so that the `./ansible/setup-server.yml` playbook is only run for your new server (`--limit vpn`). Without this part, the playbook will be run for all hosts under the `remote_vps` group.
-- After this, root login with password will be disabled. You'll only be able to login as admin using `/path/to/private/key` at the port specified in `./ansible/group_vars/all/all.yml`.
+- After this, root login with password will be disabled. You'll only be able to login as admin using `/path/to/private/key` at port `17031`
 - You can now re-run this playbook with: `ansible-playbook -i ansible/inventory.ini ansible/setup-server.yml --ask-vault-pass --limit vpn`.
 
 </details>
