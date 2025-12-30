@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.83.2"
+      version = "0.90.0"
     }
     local = {
       source  = "hashicorp/local"
@@ -40,6 +40,7 @@ resource "proxmox_virtual_environment_firewall_options" "node_firewall_config" {
   node_name = var.node
   enabled   = true
 }
+
 
 # Define the Security Group (Reusable for any VM/LXC)
 resource "proxmox_virtual_environment_cluster_firewall_security_group" "mgmt" {
