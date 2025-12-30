@@ -1,0 +1,10 @@
+---
+- name: Final Activation - Enable Proxmox Node Firewall
+  hosts: proxmox
+  become: true
+  tasks:
+    - name: Flip the master firewall switch
+      command: pvesh set /nodes/{{ ansible_hostname }}/firewall/options --enable 1
+      # Only run if it is not currently enabled
+      unless: |
+        pvesh get /nodes/{{ ansible_hostname }}/firewall/options --output-format yaml | grep -q "enable: 1"
