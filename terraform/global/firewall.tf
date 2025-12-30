@@ -35,8 +35,8 @@ resource "proxmox_virtual_environment_cluster_firewall" "cluster" {
   input_policy = "DROP"
 }
 
-# Define the Security Group (Reusable for any VM/LXC)
-resource "proxmox_virtual_environment_cluster_firewall_security_group" "mgmt" {
+# Create security group specifically for managing the proxmox host
+resource "proxmox_virtual_environment_cluster_firewall_security_group" "host_mgmt" {
   name    = "management"
   comment = "Essential Admin Access"
 
@@ -57,13 +57,28 @@ resource "proxmox_virtual_environment_cluster_firewall_security_group" "mgmt" {
   }
 }
 
-# Apply the group to the Node (Host) itself
+# Apply the host management security group to the node itself
 resource "proxmox_virtual_environment_firewall_rules" "node_rules" {
   node_name = var.node
 
   rule {
-    security_group = proxmox_virtual_environment_cluster_firewall_security_group.mgmt.name
+    security_group = proxmox_virtual_environment_cluster_firewall_security_group.host_mgmt.name
     iface          = "vmbr0"
+  }
+}
+
+# create generic security group for VMs/LXCs. this will allow us to use port 17031
+# to SSH into VMs/LXCs
+resource "proxmox_virtual_environment_cluster_firewall_security_group" "guest_mgmt" {
+  name    = "guest_mgmt"
+  comment = "Management access for all containers"
+
+  rule {
+    type    = "in"
+    action  = "ACCEPT"
+    proto   = "tcp"
+    dport   = "17031"
+    comment = "SSH to Container"
   }
 }
 
