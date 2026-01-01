@@ -13,8 +13,10 @@
 - [x] make it so that proxmox also gets server updates
 - [x] add postfix support so that VPS server updates actually go to your email 
 - [x] test that firewall actually works and that plex is still working
+- [x] rename LXC to plexLXC in readme and otherwise
 - [ ] see if there are any changes that need to be made to vm/plexLXC for firewall
-- [ ] rename LXC to plexLXC in readme and otherwise
 - [ ] add jump-host LXC (re-adding tailscale stuff to README for it)
 - [ ] add jump-host LXC to readme
 - [ ] see if there are any changes that need to be made to jumpLXC for firewall
+- [ ] figure out how to share variables
+  - vm_id = 100 is both in `terraform/plex_lxc/main.tf` and `ansible/inventory.ini`
