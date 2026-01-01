@@ -162,7 +162,7 @@ ip              = "<plex-lxc-ip>"
 - Update `./ansible/inventory.ini` so that it has this:
   ```
   [plex]
-  plex_lxc ansible_host=<plex-lxc-ip> vmid=100 guest_type=lxc
+  plex_lxc ansible_host=<plex-lxc-ip>
   ```
 - Run `ansible-playbook -i ansible/inventory.ini ansible/setup-plex-lxc.yml -u root --ask-vault-pass`.`.
 - After this, you should be able to go to visit `http://<plex-lxc-ip>:32400` and see the Plex welcome screen.
