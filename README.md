@@ -14,7 +14,7 @@
 
 <details>
 
-<summary><h2>Install proxmox</h2></summary>
+<summary><h2>Install Proxmox</h2></summary>
 
 - Flash [Proxmox](https://www.proxmox.com/en/downloads) ISO onto a USB or SSD or disk and then connect that to your server so that you can boot your server with the Proxmox VE OS.
 - After accepting the terms and conditions, you can configure your filesystem and how your disk will be provisioned by Proxmox:
@@ -70,7 +70,7 @@
   - Enables auto-updates, notifying you via email every time one happens.
   - Create a `terraform` user with partial `sudo` permissions and SSH access via your public key: `/path/to/your/public/.ssh/key`.
   - Create a Proxmox `terraform` user with an API token with limited permissions.
-  - Make sure that proxmox "local" storage can have items of type "import" and "snippets".
+  - Make sure that Proxmox "local" storage can have items of type "import" and "snippets".
 - After running this playbook:
   - It will show you the API token that was created for the Terraform Proxmox user. Save this in Bitwarden.
   - Add the following to your `~/.ssh/config` file, this will be used by the `./ansible/setup-proxmox.yml` playbook:
@@ -115,9 +115,9 @@ ssh_private_key = "/path/to/your/private/.ssh/key"
 
 <details>
 
-<summary><h2>Create a new VM with Terraform</h2></summary>
+<summary><h2>Create a new VM that is bound to a WireGuard VPN</h2></summary>
 
-- `cd terraform/vm`.
+- `cd terraform/wireguard-vm`.
 - Decide on the IP address that you would want for a VM. From now on, we will use the special value `<vm-ip>` to represent your VM's IP address.
 - Create a file called `terraform.tfvars`. It should look like this:
 ```
@@ -131,7 +131,7 @@ ssh_public_key  = "/path/to/your/public/.ssh/key"
 ssh_private_key = "/path/to/your/private/.ssh/key"
 vm_ip           = "<vm-ip>"
 ```
-- The x's in `api_token` should be replaced with the API token that you received when you set up proxmox with Ansible.
+- The x's in `api_token` should be replaced with the API token that you received when you set up Proxmox with Ansible.
 - Run `terraform init`.
 - Run `terraform apply`. This should create an Ubuntu VM that can mount to `/mnt/media` on the Proxmox host.
 - At this point, you should be able to ssh into the ubuntu VM: `ssh ubuntu@<vm-ip> -i /path/to/your/private/.ssh/key`.
