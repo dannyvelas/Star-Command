@@ -169,3 +169,41 @@ resource "proxmox_virtual_environment_hardware_mapping_dir" "media_mount" {
     },
   ]
 }
+
+# firewall killswitch: stops the VM from talking to the internet directly if the internal rules aren't met
+resource "proxmox_virtual_environment_firewall_options" "wg_fw_options" {
+  node_name = var.node
+  vm_id     = proxmox_virtual_environment_vm.wireguard-vm.vm_id
+
+  enabled      = true
+  input_policy = "DROP"
+
+  # THE KILLSWITCH: Stop the VM from talking to your LAN/Internet directly if the internal rules aren't met.
+  output_policy = "DROP"
+}
+
+resource "proxmox_virtual_environment_firewall_rules" "wg_rules" {
+  node_name = var.node
+  vm_id     = proxmox_virtual_environment_vm.wireguard-vm.vm_id
+
+  # 1. Allow Management (SSH)
+  rule {
+    security_group = "guest_mgmt"
+    iface          = "net0"
+  }
+
+  # 2. Allow the Handshake (The only way OUT to the internet)
+  rule {
+    security_group = "vpn-handshake"
+    iface          = "net0"
+  }
+
+  # 3. Allow DNS (Usually needed to resolve the VPN provider's endpoint)
+  rule {
+    type   = "out"
+    action = "ACCEPT"
+    proto  = "udp"
+    dport  = "53"
+    iface  = "net0"
+  }
+}

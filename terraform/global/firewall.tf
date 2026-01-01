@@ -94,3 +94,17 @@ resource "proxmox_virtual_environment_cluster_firewall_security_group" "plex_lxc
     comment = "Plex Web UI / Media Stream"
   }
 }
+
+# security group for wireguard-vm. establishes VPN tunnel
+resource "proxmox_virtual_environment_cluster_firewall_security_group" "vpn_outbound" {
+  name    = "vpn-handshake"
+  comment = "Allow VM to reach VPN Providers"
+
+  rule {
+    type    = "out" # Notice this is OUT
+    action  = "ACCEPT"
+    proto   = "udp"
+    dport   = "51820" # Standard WG port, change if your provider uses different
+    comment = "Allow encrypted tunnel setup"
+  }
+}
