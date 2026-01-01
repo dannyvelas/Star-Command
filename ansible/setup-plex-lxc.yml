@@ -47,7 +47,3 @@
         name: plexmediaserver
         state: started
         enabled: yes
-
-    - name: Setup the firewall for this LXC
-      import_role:
-        name: pve_firewall
