@@ -1,0 +1,14 @@
+- name: Ensure SSH port is responding before locking down
+  ansible.builtin.wait_for:
+    port: 17031
+    host: "{{ inventory_hostname }}"
+    timeout: 30
+    msg: "Safety check failed: SSH is not responding on 17031. Aborting firewall enable to prevent lockout."
+
+- name: Enable Proxmox Firewall for the Guest
+  delegate_to: "{{ pve_host }}"
+  become: true
+  ansible.builtin.command: >
+    pvesh set /nodes/{{ proxmox_node_name }}/{{ guest_type }}/{{ vmid }}/firewall/options --enable 1
+  register: fw_enable
+  changed_when: fw_enable.rc == 0

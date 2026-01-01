@@ -157,17 +157,10 @@ ip             = "<plex-lxc-ip>"
 - Unfortunately, Proxmox doesn't support some things in this `main.tf` file without root login, so the authentication here is just root username and password.
 - Run `terraform apply`. This should create an Ubuntu LXC container mounted to `/mnt/media` on the Proxmox host.
 - At this point, you should be able to ssh into it: `ssh root@<plex-lxc-ip> -i /path/to/your/private/.ssh/key`.
-
-</details>
-
-<details>
-
-<summary><h2>Install Plex in the Plex LXC container</h2></summary>
-
 - Update `./ansible/inventory.ini` so that it has this:
   ```
   [plex]
-  plex_lxc ansible_host=<plex-lxc-ip>
+  plex_lxc ansible_host=<plex-lxc-ip> vmid=100 guest_type=lxc
   ```
 - Run `ansible-playbook -i ansible/inventory.ini ansible/install-plex.yml -u root`.
 - After this, you should be able to go to visit `http://<plex-lxc-ip>:32400` and see the Plex welcome screen.
