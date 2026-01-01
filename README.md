@@ -188,9 +188,9 @@ The instructions will make it so that only non-root private-key logins are allow
   ```
   vault_admin_password: "my super secret password"
   ```
-- In your first run, you'll use root permissions to run the playbook: `ansible-playbook -i ansible/inventory.ini ansible/setup-server.yml -u root --ask-vault-pass --ask-pass --limit vpn`.
+- In your first run, you'll use root permissions and port 22 to run the playbook: `ansible-playbook -i ansible/inventory.ini ansible/setup-server.yml -e "ansible_user=root" -e "ansible_port=22" --ask-vault-pass --ask-pass --limit vpn`.
   - Note: this command makes it so that the `./ansible/setup-server.yml` playbook is only run for your new server (`--limit vpn`). Without this part, the playbook will be run for all hosts under the `remote_vps` group.
-- After this, root login with password will be disabled. You'll only be able to login as admin using `/path/to/private/key` at port `17031`
+- After this, root login with password will be disabled. You'll only be able to login as admin using `/path/to/private/key` at port `17031`.
 - You can now re-run this playbook with: `ansible-playbook -i ansible/inventory.ini ansible/setup-server.yml --ask-vault-pass --limit vpn`.
 
 </details>
