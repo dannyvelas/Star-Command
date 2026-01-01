@@ -67,8 +67,7 @@ resource "proxmox_virtual_environment_firewall_rules" "node_rules" {
   }
 }
 
-# create generic security group for VMs/LXCs. this will allow us to use port 17031
-# to SSH into VMs/LXCs
+# create generic security group for VMs/LXCs. this will allow us to use port 17031 for ssh
 resource "proxmox_virtual_environment_cluster_firewall_security_group" "guest_mgmt" {
   name    = "guest_mgmt"
   comment = "Management access for all containers"
