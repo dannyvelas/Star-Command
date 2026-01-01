@@ -24,8 +24,7 @@
     state: present
     key: "{{ ssh_public_key }}"
 
-### Harden SSH
-- name: Configure SSH hardening
+- name: Switch port
   ansible.builtin.blockinfile:
     path: "/etc/ssh/sshd_config.d/00-user.conf"
     create: true
