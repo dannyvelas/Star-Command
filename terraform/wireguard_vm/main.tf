@@ -45,7 +45,7 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
     package_upgrade: true
     users:
       - default
-      - name: ubuntu
+      - name: admin
         groups:
           - sudo
         shell: /bin/bash
@@ -57,6 +57,9 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
       - net-tools
       - curl
     runcmd:
+      # switch port 22 to be 17031
+      - sed -i 's/#Port 22/Port 17031/' /etc/ssh/sshd_config
+      - systemctl restart ssh
       # enable qemu-guest-agent
       - systemctl enable qemu-guest-agent
       - systemctl start qemu-guest-agent
