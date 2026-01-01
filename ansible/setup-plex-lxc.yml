@@ -2,6 +2,8 @@
 - name: Install Plex Media Server via APT
   hosts: plex_lxc
   become: yes
+  roles:
+    - ssh_harden
 
   tasks:
     - name: Install APT prerequisites
