@@ -15,10 +15,10 @@
 - [x] test that firewall actually works and that plex is still working
 - [x] rename LXC to plexLXC in readme and otherwise
 - [x] see if there are any changes that need to be made to plexLXC for firewall
-- [ ] rename VM to be called wireguard VM
-- [ ] switch VM to be on port 17031 instead of 22
-- [ ] add firewall rules to VM
-- [ ] see if there are any changes that need to be made to VM for firewall
+- [x] rename VM to be called wireguard VM
+- [x] switch VM to be on port 17031 instead of 22
+- [x] add firewall rules to VM
+- [ ] test VM firewall
 - [ ] create a "base" terraform LXC module
 - [ ] create a "base" terraform VM module
 - [ ] add jump-host LXC (re-adding tailscale stuff to README for it)
