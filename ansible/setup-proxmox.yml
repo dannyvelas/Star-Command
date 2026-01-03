@@ -1,5 +1,5 @@
 ---
-- name: Harden SSH, setup terraform and tailscale in proxmox
+- name: Set up APT, Harden SSH, set up terraform and proxmox storage
   hosts: proxmox
   become: true
   vars:
@@ -35,18 +35,6 @@
         state: present
         enabled: true
       register: ceph_repo
-
-    - name: Add tailscale key and repository
-      ansible.builtin.deb822_repository:
-        name: tailscale
-        types: [deb]
-        uris: "https://pkgs.tailscale.com/stable/debian"
-        suites: [trixie]
-        components: [main]
-        signed_by: https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg
-        state: present
-        enabled: true
-      register: tailscale_repo
 
     - name: Update and upgrade all packages
       ansible.builtin.apt:
