@@ -18,7 +18,14 @@
 - [x] rename VM to be called wireguard VM
 - [x] switch VM to be on port 17031 instead of 22
 - [x] add firewall rules to VM
-- [ ] test VM firewall
+- [x] test VM firewall
+  - output:
+    ```
+    PORT      STATE SERVICE
+    3128/tcp  open  squid-http
+    8006/tcp  open  wpl-analytics
+    17031/tcp open  unknown
+    ```
 - [ ] create a "base" terraform LXC module
 - [ ] create a "base" terraform VM module
 - [ ] add jump-host LXC (re-adding tailscale stuff to README for it)
