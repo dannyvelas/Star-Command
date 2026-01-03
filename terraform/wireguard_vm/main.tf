@@ -21,7 +21,7 @@ provider "proxmox" {
     username    = "terraform"
     private_key = file(var.ssh_private_key)
     node {
-      name    = "proxmox"
+      name    = var.node
       address = var.ssh_address
       port    = var.ssh_port
     }
