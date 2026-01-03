@@ -35,3 +35,4 @@
   - vm_id = 100 is both in `terraform/plex_lxc/main.tf` and `ansible/inventory.ini`
   - `proxmox_node_name` is both in terraform variables and `./ansible/group_vars/all/all.yml`
   - port 17031 is both in `./ansible/group_vars/all/all.yml` and `terraform/global/firewall.tf` and `terraform/plex_lxc/main.tf`.
+- [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
