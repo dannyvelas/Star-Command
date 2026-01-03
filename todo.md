@@ -36,3 +36,10 @@
   - `proxmox_node_name` is both in terraform variables and `./ansible/group_vars/all/all.yml`
   - port 17031 is both in `./ansible/group_vars/all/all.yml` and `terraform/global/firewall.tf` and `terraform/plex_lxc/main.tf`.
 - [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
+- [ ] move configure apt stuff from ansible to terraform
+
+## terraform-provider-proxmox repo
+- [ ] make PR to correct the steps necessary to run `make example`
+  - create directory `mkdir -p /mnt/bindmounts/shared`
+  - use username and password without ssh section at all
+- [ ] make PR to fix broken link in README for instructions to setup local proxmox 
