@@ -52,6 +52,13 @@
   smtp_user: "your-email@example.com"
   smtp_pass: "your 16-character code if gmail, otherwise regular password"
   ```
+- Make sure `./ansible/group_vars/all/all.yml` looks something like this:
+  ```
+  ssh_port: 17031
+  ansible_user: admin
+  ansible_port: "{{ ssh_port }}"
+  proxmox_node_name: "<node-name>"
+  ```
 
 </details>
 
@@ -60,6 +67,12 @@
 <summary><h2>Set up Proxmox with Ansible</h2></summary>
 
 - If your public key is anything other than `~/.ssh/id_ed25519.pub`, change it in `./ansible/setup-proxmox.yml`.
+- Make sure `./ansible/host_vars/proxmox_server/all.yml` looks something like this:
+  ```
+  node_cidr_address: 10.0.0.50/24
+  gateway_address: 10.0.0.1
+  physical_nic: "enx6c1ff7135975"
+  ```
 - Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root --ask-vault-pass`, this will:
   - Configures apt so that it can install non-enterprise packages 
   - Install `sudo`.
