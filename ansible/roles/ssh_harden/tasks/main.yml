@@ -35,11 +35,25 @@
       PermitRootLogin no
   register: ssh_config
 
-- name: restart ssh stuff
-  ansible.builtin.systemd:
-    name: "{{ item }}"
+- name: Determine SSH management type
+  service_facts:
+
+- name: Restart SSH service (if traditional)
+  systemd:
+    name: ssh
     state: restarted
     daemon_reload: true
-  loop:
-    - ssh.socket
-    - ssh.service
+  # Only run if the service is already running and the socket isn't the leader
+  when:
+    - ansible_facts.services['ssh.service'] is defined
+    - ansible_facts.services['ssh.service'].state == 'running'
+    - ansible_facts.services['ssh.socket'] is not defined or ansible_facts.services['ssh.socket'].state != 'active'
+
+- name: Restart SSH socket (if socket-activated)
+  systemd:
+    name: ssh.socket
+    state: restarted
+    daemon_reload: true
+  when:
+    - ansible_facts.services['ssh.socket'] is defined
+    - ansible_facts.services['ssh.socket'].state == 'active'
