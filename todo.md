@@ -40,6 +40,8 @@
 - [ ] it seems like sometimes "terraform destroy" on the "global" terraform project doesn't actually clean the `/etc/pve/firewall/cluster.fw` settings. check if this is consistent and why this is happening. also, fix it
 - [ ] see how we can convert the README to a program
 - [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox
+- [ ] make Ansible playbook send terraform API token directly to Bitwarden Secrets Manager (BWS)
+- [ ] figure out a way to make it so that plex data (about watch history, users with access to my plex) is stored somewhere externally so that if I nuke Proxmox, it doesn't get lost.
 
 ## terraform-provider-proxmox repo
 - [x] make PR to correct the steps necessary to run `make example`
