@@ -14,13 +14,36 @@ const configDir = "./config"
 
 var fallbackConfigFile = filepath.Join(configDir, "all.yml")
 
+const (
+	keySSHPublicKeyPath     = "ssh_public_key_path"
+	keyNodeCIDRAddress      = "node_cidr_address"
+	keyGatewayAddress       = "gateway_address"
+	keyPhysicalNIC          = "physical_nic"
+	keyVaultAdminPassword   = "vault_admin_password"
+	keySSHPort              = "ssh_port"
+	keyAutoUpdateRebootTime = "auto_update_reboot_time"
+	keyAdminEmail           = "admin_email"
+	keySMTPUser             = "smtp_user"
+	keySMTPPassword         = "smtp_password"
+)
+
+var hostRequiredKeys = map[string][]string{
+	"proxmox": {
+		keySSHPublicKeyPath,
+		keyNodeCIDRAddress,
+		keyGatewayAddress,
+		keyPhysicalNIC,
+		keyVaultAdminPassword,
+		keySSHPort,
+		keyAutoUpdateRebootTime,
+		keyAdminEmail,
+		keySMTPUser,
+		keySMTPPassword,
+	},
+}
+
 func ResolveConfig(verbose bool, hostName string) (map[string]string, error) {
-	conf := map[string]string{
-		"node_cidr_address":   "10.0.0.50/24",
-		"gateway_address":     "10.0.0.1",
-		"physical_nic":        "enx6c1ff7135975",
-		"ssh_public_key_path": "~/.ssh/id_ed25519.pub",
-	}
+	conf := make(map[string]string)
 
 	hostConfigFile := filepath.Join(configDir, fmt.Sprintf("%s.yml", hostName))
 	for _, file := range []string{fallbackConfigFile, hostConfigFile} {
@@ -37,6 +60,19 @@ func ResolveConfig(verbose bool, hostName string) (map[string]string, error) {
 			return nil, fmt.Errorf("error unmarshalling config file (%s): %v", file, err)
 		}
 	}
+
+	// validate whether all necessary configs are present
+	requiredKeys := hostRequiredKeys[hostName]
+	missingKeys := make([]string, 0)
+	for _, requiredKey := range requiredKeys {
+		if _, ok := conf[requiredKey]; !ok {
+			missingKeys = append(missingKeys, requiredKey)
+		}
+	}
+	if len(missingKeys) > 0 {
+		return nil, fmt.Errorf("error: missing values for the following keys: %v", missingKeys)
+	}
+
 	conf["node_ip"] = strings.Split(conf["node_cidr_address"], "/")[0]
 	return conf, nil
 }

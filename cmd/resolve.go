@@ -19,7 +19,7 @@ var resolveCmd = &cobra.Command{
 		host := args[0]
 		config, err := resolve.ResolveConfig(verbose, host)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s", err.Error())
+			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 			os.Exit(1)
 		}
 
