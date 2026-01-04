@@ -37,9 +37,12 @@
   - port 17031 is both in `./ansible/group_vars/all/all.yml` and `terraform/global/firewall.tf` and `terraform/plex_lxc/main.tf`.
 - [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
 - [ ] move configure apt stuff from ansible to terraform
+- [ ] it seems like sometimes "terraform destroy" on the "global" terraform project doesn't actually clean the `/etc/pve/firewall/cluster.fw` settings. check if this is consistent and why this is happening. also, fix it
+- [ ] see how we can convert the README to a program
+- [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox
 
 ## terraform-provider-proxmox repo
-- [ ] make PR to correct the steps necessary to run `make example`
+- [x] make PR to correct the steps necessary to run `make example`
   - create directory `mkdir -p /mnt/bindmounts/shared`
   - use username and password without ssh section at all
-- [ ] make PR to fix broken link in README for instructions to setup local proxmox 
+- [x] make PR to fix broken link in README for instructions to setup local proxmox 
