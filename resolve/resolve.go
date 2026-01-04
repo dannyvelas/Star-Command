@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"gopkg.in/yaml.v2"
 )
@@ -65,7 +66,7 @@ func ResolveConfig(verbose bool, hostName string) (map[string]string, error) {
 	requiredKeys := hostRequiredKeys[hostName]
 	missingKeys := getMissingKeys(conf, requiredKeys)
 	if len(missingKeys) > 0 {
-		return nil, fmt.Errorf("error: missing values for the following keys: %v", missingKeys)
+		return nil, fmt.Errorf("error: missing values for the following keys: %s", toBulletedList(missingKeys))
 	}
 
 	conf["node_ip"] = strings.Split(conf["node_cidr_address"], "/")[0]
@@ -80,4 +81,21 @@ func getMissingKeys(conf map[string]string, requiredKeys []string) []string {
 		}
 	}
 	return missingKeys
+}
+
+func toBulletedList(items []string) string {
+	const tpl = `
+{{- range . }}
+- {{ . }}
+{{- end }}
+`
+	var sb strings.Builder
+	t := template.Must(template.New("list").Parse(tpl))
+
+	err := t.Execute(&sb, items)
+	if err != nil {
+		panic(err)
+	}
+
+	return sb.String()
 }
