@@ -3,3 +3,4 @@ terraform.tfstate*
 *.tfvars
 ansible/vars.yml
 .task
+.env
