@@ -4,12 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v2"
 )
 
-const fallbackConfigFile = "./configs/all.yml"
+const configDir = "./config"
+
+var fallbackConfigFile = filepath.Join(configDir, "all.yml")
 
 func ResolveConfig(verbose bool, hostName string) (map[string]string, error) {
 	conf := map[string]string{
@@ -19,7 +22,7 @@ func ResolveConfig(verbose bool, hostName string) (map[string]string, error) {
 		"ssh_public_key_path": "~/.ssh/id_ed25519.pub",
 	}
 
-	hostConfigFile := fmt.Sprintf("./configs/%s.yml", hostName)
+	hostConfigFile := filepath.Join(configDir, fmt.Sprintf("%s.yml", hostName))
 	for _, file := range []string{fallbackConfigFile, hostConfigFile} {
 		data, err := os.ReadFile(file)
 		if errors.Is(err, os.ErrNotExist) {
