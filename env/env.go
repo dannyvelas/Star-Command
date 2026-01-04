@@ -3,6 +3,7 @@ package env
 import (
 	"os"
 
+	"github.com/dannyvelas/homelab/helpers"
 	"github.com/joho/godotenv"
 )
 
@@ -31,7 +32,7 @@ func New() (Env, []string) {
 
 	bitwardenStateFilePath := os.Getenv("BWS_STATE_FILE_PATH")
 	if bitwardenStateFilePath == "" {
-		missing = append(missing, "BWS_STATE_FILE_PATH")
+		bitwardenStateFilePath = helpers.AtProjectRoot("bw-state")
 	}
 
 	if len(missing) > 0 {
