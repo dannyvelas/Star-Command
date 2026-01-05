@@ -43,8 +43,13 @@ func (c BitwardenClient) FillStruct(v any) error {
 		return fmt.Errorf("error listing secrets: %v", err)
 	}
 
+	tagToFieldMap, err := getTagToFieldMap(v)
+	if err != nil {
+		return fmt.Errorf("error getting tag to field map: %v", err)
+	}
+
 	for _, secret := range listResponse.Data {
-		field, ok := getFieldByTag(v, secret.Key)
+		field, ok := tagToFieldMap[secret.Key]
 		if !ok {
 			continue
 		}
@@ -60,9 +65,10 @@ func (c BitwardenClient) FillStruct(v any) error {
 	return nil
 }
 
-// getFieldByTag takes a struct and returns the value of a field with a yaml tag that equals `tag`.
-// If no field was found, nil and false are returned.
-func getFieldByTag(v any, tag string) (reflect.Value, bool) {
+// getTagToFieldMap takes a struct and returns a map where each key is
+// the value of the "bw" tag. each value is a reflect.Value.
+// if now "bw" tag is present, this falls back to use the value "json" tag.
+func getTagToFieldMap(v any) (map[string]reflect.Value, error) {
 	rv := reflect.ValueOf(v)
 
 	// If a pointer is passed, get the underlying element (the actual struct)
@@ -72,8 +78,10 @@ func getFieldByTag(v any, tag string) (reflect.Value, bool) {
 
 	// If it's not a struct, we can't look up tags
 	if rv.Kind() != reflect.Struct {
-		return reflect.Value{}, false
+		return nil, fmt.Errorf("expected a struct as argument")
 	}
+
+	tagToFieldMap := make(map[string]reflect.Value)
 
 	rt := rv.Type()
 	for i := 0; i < rt.NumField(); i++ {
@@ -85,10 +93,8 @@ func getFieldByTag(v any, tag string) (reflect.Value, bool) {
 			foundTag = field.Tag.Get("json")
 		}
 
-		if foundTag == tag {
-			return rv.Field(i), true
-		}
+		tagToFieldMap[foundTag] = rv.Field(i)
 	}
 
-	return reflect.Value{}, false
+	return tagToFieldMap, nil
 }
