@@ -14,7 +14,7 @@ type proxmoxConfig struct {
 	NodeCIDRAddress      string `json:"node_cidr_address"`
 	GatewayAddress       string `json:"gateway_address"`
 	PhysicalNIC          string `json:"physical_nic"`
-	ProxmoxAdminPassword string `json:"proxmox_admin_password"`
+	AdminPassword        string `json:"admin_password" bw:"proxmox_admin_password"`
 	SSHPort              string `json:"ssh_port"`
 	AutoUpdateRebootTime string `json:"auto_update_reboot_time"`
 	AdminEmail           string `json:"admin_email"`
@@ -53,7 +53,7 @@ func (p *proxmoxConfig) Validate() map[string]string {
 		keyErrors["physical_nic"] = errMissing
 	}
 
-	if p.ProxmoxAdminPassword == "" {
+	if p.AdminPassword == "" {
 		keyErrors["admin_password"] = errMissing
 	}
 
