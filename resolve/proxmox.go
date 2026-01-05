@@ -86,7 +86,7 @@ func (p *proxmoxConfig) RequiredKeys() []string {
 		"node_cidr_address",
 		"gateway_address",
 		"physical_nic",
-		"admin_password",
+		"proxmox_admin_password",
 		"ssh_port",
 		"auto_update_reboot_time",
 		"admin_email",
