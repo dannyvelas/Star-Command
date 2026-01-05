@@ -17,14 +17,14 @@ const configDir = "./config"
 
 var fallbackConfigFile = filepath.Join(configDir, "all.yml")
 
-var hostRequiredKeys = map[string]Config{
+var hostToConfig = map[string]Config{
 	"proxmox": NewProxmoxConfig(),
 }
 
 func ResolveConfig(env env.Env, verbose bool, hostName string) (map[string]string, error) {
 	rootConfig := defaultRootConfig
 
-	hostConfig, ok := hostRequiredKeys[hostName]
+	hostConfig, ok := hostToConfig[hostName]
 	if !ok {
 		return nil, fmt.Errorf("unrecognized host: %s", hostName)
 	}
@@ -79,6 +79,17 @@ func ResolveConfig(env env.Env, verbose bool, hostName string) (map[string]strin
 	}
 
 	return m, nil
+}
+
+func GetRequiredKeys(hostName string) (string, error) {
+	hostConfig, ok := hostToConfig[hostName]
+	if !ok {
+		return "", fmt.Errorf("unrecognized host: %s", hostName)
+	}
+
+	requiredKeys := hostConfig.RequiredKeys()
+
+	return helpers.StringSliceToBulletedList(requiredKeys), nil
 }
 
 func configToMap(c any) (map[string]string, error) {

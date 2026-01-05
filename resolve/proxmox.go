@@ -80,6 +80,21 @@ func (p *proxmoxConfig) Validate() map[string]string {
 	return keyErrors
 }
 
+func (p *proxmoxConfig) RequiredKeys() []string {
+	return []string{
+		"ssh_public_key_path",
+		"node_cidr_address",
+		"gateway_address",
+		"physical_nic",
+		"admin_password",
+		"ssh_port",
+		"auto_update_reboot_time",
+		"admin_email",
+		"smtp_user",
+		"smtp_password",
+	}
+}
+
 func (p *proxmoxConfig) FillInKeys() error {
 	// ParsePrefix returns the prefix and an error if it's invalid
 	prefix, err := netip.ParsePrefix(p.NodeCIDRAddress)

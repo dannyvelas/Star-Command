@@ -12,13 +12,26 @@ import (
 
 // resolveCmd represents the resolve command
 func newResolveCmd(env env.Env, verbose bool) *cobra.Command {
-	return &cobra.Command{
+	var showRequirements bool
+
+	resolveCmd := &cobra.Command{
 		Use:   "resolve",
 		Short: "Generate a JSON object of configuration values for a given host",
 		Args:  cobra.ExactArgs(1),
 
 		Run: func(cmd *cobra.Command, args []string) {
 			host := args[0]
+			if showRequirements {
+				requiredKeys, err := resolve.GetRequiredKeys(host)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error getting required keys: %s", err.Error())
+					os.Exit(1)
+				}
+
+				fmt.Println(requiredKeys)
+				return
+			}
+
 			config, err := resolve.ResolveConfig(env, verbose, host)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
@@ -34,4 +47,8 @@ func newResolveCmd(env env.Env, verbose bool) *cobra.Command {
 			fmt.Println(string(bytes))
 		},
 	}
+
+	resolveCmd.Flags().BoolVar(&showRequirements, "requirements", false, "Check for missing configuration requirements")
+
+	return resolveCmd
 }
