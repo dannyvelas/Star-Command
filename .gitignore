@@ -1,6 +1,6 @@
 terraform.tfstate*
 .terraform
 *.tfvars
-ansible/vars.yml
 .task
 .env
+.bw_state

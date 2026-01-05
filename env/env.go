@@ -32,7 +32,7 @@ func New() (Env, []string) {
 
 	bitwardenStateFilePath := os.Getenv("BWS_STATE_FILE_PATH")
 	if bitwardenStateFilePath == "" {
-		bitwardenStateFilePath = helpers.AtProjectRoot("bw-state")
+		bitwardenStateFilePath = helpers.AtProjectRoot(".bw_state")
 	}
 
 	if len(missing) > 0 {
