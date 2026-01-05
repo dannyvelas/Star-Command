@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/netip"
 	"os"
+
+	"github.com/dannyvelas/homelab/helpers"
 )
 
 type proxmoxConfig struct {
@@ -81,7 +83,12 @@ func (p *proxmoxConfig) FillInKeys() error {
 		return fmt.Errorf("'%s' is not a valid CIDR: %v", p.NodeCIDRAddress, err)
 	}
 
-	bytes, err := os.ReadFile(p.SSHPublicKeyPath)
+	expandedPublicKeyPath, err := helpers.ExpandPath(p.SSHPublicKeyPath)
+	if err != nil {
+		return fmt.Errorf("error expanding path(%s): %v", p.SSHPublicKeyPath, err)
+	}
+
+	bytes, err := os.ReadFile(expandedPublicKeyPath)
 	if err != nil {
 		return fmt.Errorf("error reading ssh public key file: %v", err)
 	}
