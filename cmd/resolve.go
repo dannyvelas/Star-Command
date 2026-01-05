@@ -28,7 +28,7 @@ func newResolveCmd(env env.Env, verbose bool) *cobra.Command {
 					os.Exit(1)
 				}
 
-				fmt.Println(requiredKeys)
+				fmt.Printf("Required keys:%s", requiredKeys)
 				return
 			}
 

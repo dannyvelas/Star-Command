@@ -17,6 +17,13 @@ tasks:
     cmds:
       - go build -o ./bin/labctl main.go
 
+  setup:proxmox:check:
+    desc: "Check requirements for Proxmox"
+    deps: [build:labctl]
+    cmds:
+      - ./bin/labctl resolve proxmox --requirements
+    run: once
+
   setup:proxmox:
     desc: This task sets up proxmox after booting it for the first time.
     deps: [build:labctl]
