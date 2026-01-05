@@ -5,12 +5,17 @@
 * A computer you can use to ssh into the server.
 * [Terraform](https://developer.hashicorp.com/terraform/install) installed on that computer.
 * [Ansible](https://formulae.brew.sh/formula/ansible) installed on that computer.
+* [Go](https://go.dev/) installed on that computer.
+* A C toolchain on that computer. You can install this on macOS with `xcode-select --install`.
 * A [Tailscale](https://login.tailscale.com/start) account.
 * Some playbooks will send you an email when your server automatically updates. For this, you'll need an SMTP username and password. If you use Gmail, you can't use your regular password. You'll need to get a 16-character code:
   * Go to your Google Account settings.
   * Search for "App Passwords".
-  * Create one called "Ansible Server"
+  * Create one called "Ansible Server".
   * Copy the 16-character code.
+* A Bitwarden account with an organization that uses [Secrets Manager](https://bitwarden.com/help/secrets-manager-quick-start/).
+* Some env variables inside if `.env` (needed to access Bitwarden).
+  * Run: `cp .env.example .env` and enter the missing values.
 
 <details>
 
@@ -23,7 +28,7 @@
     - "root", for your OS and file system. From what I've seen, this takes up around 30% of `hdsize`.
     - "data", for VM disks, which ends up being of size `hdsize - rootsize - swapsize - minfree`.
   - If you have a smaller hard-drive and can't easily add storage, you might want to make these two logical volumes a bit smaller. I made the root logical volume 39.9GiB and the data logical volume 55GiB. This gave me around 135GiB of free space in the `pve` volume group.
-- After, you will be asked for an administrator email and password. Create a password, enter it, and store it in Bitwarden. This will be the "root" password. From here on, we will use the special value `<password>` to represent this password.
+- After, you will be asked for an administrator email and password. Create a password, enter it, and store it in Bitwarden Secrets Manager as `proxmox_root_password`. This will be the "root" password. From here on, we will use the special value `<password>` to represent this password.
 - In setup, on the "Management Network Configuration" page:
   - For management interface, pick the network card that is being used for ethernet.
   - For Hostname (FQDN), put `pve.lan`. The part before the first `.` will become your Proxmox node name. In this case, my node name is `pve`. From here on, we will use the special value `<node-name>` to represent your node name.
@@ -38,61 +43,19 @@
 
 <details>
 
-<summary><h2>Set Ansible variables</h2></summary>
-
-- Pick an admin password for your home server. Save it into Bitwarden as well.
-- Run: `ansible-vault create ./ansible/host_vars/proxmox_server/vault.yml`, using a vault password. Save this vault password in Bitwarden.
-- In the content of that file put:
-  ```
-  vault_admin_password: "<admin password for your home server>"
-  ```
-- Update `./ansible/inventory.ini` so that the `proxmox` host has IP address `1.2.3.4`.
-- Run `ansible-vault create ./ansible/group_vars/all/vault.yml`, and add the following:
-  ```
-  smtp_user: "your-email@example.com"
-  smtp_pass: "your 16-character code if gmail, otherwise regular password"
-  ```
-- Make sure `./ansible/group_vars/all/all.yml` looks something like this:
-  ```
-  ssh_port: 17031
-  ansible_user: admin
-  ansible_port: "{{ ssh_port }}"
-  ```
-
-</details>
-
-<details>
-
 <summary><h2>Set up Proxmox with Ansible</h2></summary>
 
-- If your public key is anything other than `~/.ssh/id_ed25519.pub`, change it in `./ansible/setup-proxmox.yml`.
-- Make sure `./ansible/host_vars/proxmox_server/all.yml` has these variables:
+- Make sure that `./config/all.yml` and `./config/proxmox.yml` and your Bitwarden secrets combined have the variables prescribed by `task setup:proxmox:check`.
+- Run `task setup:proxmox`.
+- That will show you the API token that was created for the Terraform Proxmox user. Save this in Bitwarden.
+- Add the following to your `~/.ssh/config` file, this will be used by the `./ansible/setup-proxmox.yml` playbook:
   ```
-  node_cidr_address: 10.0.0.50/24
-  gateway_address: 10.0.0.1
-  physical_nic: "enx6c1ff7135975" # the name of your ethernet interface
+  Host proxmox
+    Hostname 1.2.3.4
+    User admin
+    IdentityFile /path/to/your/private/.ssh/key
+    Port 17031
   ```
-- Run `ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root --ask-vault-pass`, this will:
-  - Configures apt so that it can install non-enterprise packages 
-  - Install `sudo`.
-  - Create an `admin` user with full `sudo` permissions, that can log-in via SSH with a private key.
-  - Harden SSH access so that root and password logins become not permitted.
-  - Make SSH happen in port `17031` instead of `22`.
-  - Enables auto-updates, notifying you via email every time one happens.
-  - Create a `terraform` user with partial `sudo` permissions and SSH access via your public key: `/path/to/your/public/.ssh/key`.
-  - Create a Proxmox `terraform` user with an API token with limited permissions.
-  - Make sure that Proxmox "local" storage can have items of type "import" and "snippets".
-- After running this playbook:
-  - It will show you the API token that was created for the Terraform Proxmox user. Save this in Bitwarden.
-  - Add the following to your `~/.ssh/config` file, this will be used by the `./ansible/setup-proxmox.yml` playbook:
-    ```
-    Host proxmox
-      Hostname 1.2.3.4
-      User admin
-      IdentityFile /path/to/your/private/.ssh/key
-      Port 17031
-    ```
-  - You should now be able to run this playbook as many times as you want (without the `-u root` argument, as that won't work anymore).
 
 </details>
 
