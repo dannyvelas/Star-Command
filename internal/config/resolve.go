@@ -88,20 +88,23 @@ func readConfigs(hostName string, env env.Env, verbose bool) (config, error) {
 		}
 	}
 
-	bwClient, err := client.NewBitwardenClient(
-		rootConfig.BitwardenAPIURL,
-		rootConfig.BitwardenIdentityURL,
-		env.BitwardenAccessToken,
-		env.BitwardenOrganizationID,
-		env.BitwardenProjectID,
-		env.BitwardenStateFilePath,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error initializing bitwarden client: %v", err)
-	}
+	// if bitwarden env variables are defined, add them to configs
+	if env.BitwardenAccessToken != "" && env.BitwardenOrganizationID != "" && env.BitwardenProjectID != "" {
+		bwClient, err := client.NewBitwardenClient(
+			rootConfig.BitwardenAPIURL,
+			rootConfig.BitwardenIdentityURL,
+			env.BitwardenAccessToken,
+			env.BitwardenOrganizationID,
+			env.BitwardenProjectID,
+			env.BitwardenStateFilePath,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error initializing bitwarden client: %v", err)
+		}
 
-	if err := bwClient.FillStruct(hostConfig); err != nil {
-		return nil, fmt.Errorf("error filling host config struct with bitwarden secrets: %v", err)
+		if err := bwClient.FillStruct(hostConfig); err != nil {
+			return nil, fmt.Errorf("error filling host config struct with bitwarden secrets: %v", err)
+		}
 	}
 
 	return hostConfig, nil

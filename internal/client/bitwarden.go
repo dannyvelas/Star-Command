@@ -20,6 +20,10 @@ func NewBitwardenClient(apiURL, identityURL, accessToken, organizationID, projec
 		return BitwardenClient{}, fmt.Errorf("error initializing bitwarden client: %v", err)
 	}
 
+	if stateFile == "" {
+		stateFile = helpers.AtProjectRoot(".bw_state")
+	}
+
 	if err := bitwardenClient.AccessTokenLogin(accessToken, &stateFile); err != nil {
 		return BitwardenClient{}, fmt.Errorf("error logging in to bitwarden client: %v", err)
 	}
