@@ -30,7 +30,7 @@ func getConfigCmd(env env.Env, verbose bool) *cobra.Command {
 				return
 			}
 
-			config, err := config.Resolve(env, verbose, host)
+			config, err := config.Resolve(host, env, verbose)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)

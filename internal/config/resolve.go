@@ -21,7 +21,7 @@ var hostToConfig = map[string]Config{
 	"proxmox": NewProxmoxConfig(),
 }
 
-func Resolve(env env.Env, verbose bool, hostName string) (map[string]string, error) {
+func Resolve(hostName string, env env.Env, verbose bool) (map[string]string, error) {
 	rootConfig := defaultRootConfig
 
 	hostConfig, ok := hostToConfig[hostName]
