@@ -62,7 +62,7 @@ func DryRun(hostName string, env env.Env, verbose bool) (string, error) {
 }
 
 func readConfigs(hostName string, env env.Env, verbose bool) (config, error) {
-	rootConfig := defaultRootConfig
+	bitwardenConfig := defaultBitwardenConfig
 
 	hostConfig, ok := hostToConfig[hostName]
 	if !ok {
@@ -80,7 +80,7 @@ func readConfigs(hostName string, env env.Env, verbose bool) (config, error) {
 		} else if err != nil {
 			return nil, fmt.Errorf("error reading config file(%s): %v", file, err)
 		}
-		if err := yaml.Unmarshal(data, &rootConfig); err != nil {
+		if err := yaml.Unmarshal(data, &bitwardenConfig); err != nil {
 			return nil, fmt.Errorf("error unmarshalling config file (%s) to root config: %v", file, err)
 		}
 		if err := yaml.Unmarshal(data, hostConfig); err != nil {
@@ -91,8 +91,8 @@ func readConfigs(hostName string, env env.Env, verbose bool) (config, error) {
 	// if bitwarden env variables are defined, add them to configs
 	if env.BitwardenAccessToken != "" && env.BitwardenOrganizationID != "" && env.BitwardenProjectID != "" {
 		bwClient, err := client.NewBitwardenClient(
-			rootConfig.BitwardenAPIURL,
-			rootConfig.BitwardenIdentityURL,
+			bitwardenConfig.BitwardenAPIURL,
+			bitwardenConfig.BitwardenIdentityURL,
 			env.BitwardenAccessToken,
 			env.BitwardenOrganizationID,
 			env.BitwardenProjectID,
