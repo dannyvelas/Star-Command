@@ -26,6 +26,8 @@
     8006/tcp  open  wpl-analytics
     17031/tcp open  unknown
     ```
+- [x] fix the fact that `labctl resolve --help` doesn't tell you about `<host-name>`
+- [x] actually make the "ssh_public_key" variable passed to ansible be the actual public key, not the file path
 - [ ] create a "base" terraform LXC module
 - [ ] create a "base" terraform VM module
 - [ ] add jump-host LXC (re-adding tailscale stuff to README for it)
@@ -42,8 +44,6 @@
 - [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox
 - [ ] make Ansible playbook send terraform API token directly to Bitwarden Secrets Manager (BWS)
 - [ ] figure out a way to make it so that plex data (about watch history, users with access to my plex) is stored somewhere externally so that if I nuke Proxmox, it doesn't get lost.
-- [ ] fix the fact that `labctl resolve --help` doesn't tell you about `<host-name>`
-- [x] actually make the "ssh_public_key" variable passed to ansible be the actual public key, not the file path
 - [ ] make setup:proxmox taskfile task idempotently update the ssh file if needed
 - [ ] migrate all variables to "./configs" dir, effectively deleting all ansible and terraform config files
 - [ ] maybe rename "resolve" package in go

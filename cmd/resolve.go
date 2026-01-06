@@ -15,7 +15,7 @@ func newResolveCmd(env env.Env, verbose bool) *cobra.Command {
 	var showRequirements bool
 
 	resolveCmd := &cobra.Command{
-		Use:   "resolve",
+		Use:   "resolve <host-name>",
 		Short: "Generate a JSON object of configuration values for a given host",
 		Args:  cobra.ExactArgs(1),
 
