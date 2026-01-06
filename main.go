@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/dannyvelas/homelab/cmd"
-	"github.com/dannyvelas/homelab/env"
-	"github.com/dannyvelas/homelab/helpers"
+	"github.com/dannyvelas/homelab/internal/env"
+	"github.com/dannyvelas/homelab/internal/helpers"
 )
 
 func main() {

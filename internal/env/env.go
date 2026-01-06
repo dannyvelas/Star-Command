@@ -3,7 +3,7 @@ package env
 import (
 	"os"
 
-	"github.com/dannyvelas/homelab/helpers"
+	"github.com/dannyvelas/homelab/internal/helpers"
 	"github.com/joho/godotenv"
 )
 

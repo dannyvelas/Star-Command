@@ -3,7 +3,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/dannyvelas/homelab/env"
+	"github.com/dannyvelas/homelab/internal/env"
 	"github.com/spf13/cobra"
 )
 

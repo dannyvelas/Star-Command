@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dannyvelas/homelab/client"
-	"github.com/dannyvelas/homelab/env"
-	"github.com/dannyvelas/homelab/helpers"
+	"github.com/dannyvelas/homelab/internal/client"
+	"github.com/dannyvelas/homelab/internal/env"
+	"github.com/dannyvelas/homelab/internal/helpers"
 	"github.com/goccy/go-yaml"
 )
 

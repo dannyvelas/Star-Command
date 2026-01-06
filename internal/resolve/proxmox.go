@@ -5,7 +5,7 @@ import (
 	"net/netip"
 	"os"
 
-	"github.com/dannyvelas/homelab/helpers"
+	"github.com/dannyvelas/homelab/internal/helpers"
 )
 
 type proxmoxConfig struct {

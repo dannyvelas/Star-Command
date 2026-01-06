@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dannyvelas/homelab/env"
-	"github.com/dannyvelas/homelab/resolve"
+	"github.com/dannyvelas/homelab/internal/env"
+	"github.com/dannyvelas/homelab/internal/resolve"
 	"github.com/spf13/cobra"
 )
 
