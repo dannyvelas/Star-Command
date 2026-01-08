@@ -1,10 +1,6 @@
 package config
 
-import (
-	"fmt"
-)
-
-var _ provider = bitwardenCredProvider{}
+var _ unvalidatedReader = bitwardenCredProvider{}
 
 type bitwardenCredProvider struct {
 	configMap map[string]string
@@ -16,10 +12,6 @@ func newBitwardenCredProvider(configMap map[string]string) bitwardenCredProvider
 	}
 }
 
-func (p bitwardenCredProvider) UnmarshalInto(target any) error {
-	if err := decode(p.configMap, target); err != nil {
-		return fmt.Errorf("error reading bitwarden config into a map: %v", err)
-	}
-
-	return nil
+func (p bitwardenCredProvider) ReadUnvalidated() (map[string]string, error) {
+	return p.configMap, nil
 }

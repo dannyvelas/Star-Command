@@ -14,7 +14,6 @@ var hostToConfig = map[string]config{
 }
 
 var (
-	_ provider          = fullConfig{}
 	_ validatedReader   = fullConfig{}
 	_ unvalidatedReader = fullConfig{}
 )
@@ -65,38 +64,22 @@ func (p fullConfig) ReadUnvalidated() (map[string]string, error) {
 	configMap := make(map[string]string)
 
 	// read files
-	fileProvider := newFileProvider(p.hostName, p.verbose)
-	if err := fileProvider.UnmarshalInto(configMap); err != nil {
+	if err := UnmarshalInto(newFileProvider(p.hostName, p.verbose), configMap); err != nil {
 		return nil, fmt.Errorf("error unmarshalling files to map: %v", err)
 	}
 
 	// read env
-	envProvider := newEnvProvider()
-	if err := envProvider.UnmarshalInto(configMap); err != nil {
+	if err := UnmarshalInto(newEnvProvider(), configMap); err != nil {
 		return nil, fmt.Errorf("error unmarshalling env to map: %v", err)
 	}
 
 	if usingBitwarden {
-		bitwardenSecretProvider := newBitwardenSecretProvider(configMap)
-		if err := bitwardenSecretProvider.UnmarshalInto(configMap); err != nil {
+		if err := UnmarshalInto(newBitwardenSecretProvider(configMap), configMap); err != nil {
 			return nil, fmt.Errorf("error unmarshalling bitwarden secrets to map: %v", err)
 		}
 	}
 
 	return configMap, nil
-}
-
-func (p fullConfig) UnmarshalInto(target any) error {
-	configMap, err := p.ReadUnvalidated()
-	if err != nil {
-		return fmt.Errorf("error reading configs: %v", err)
-	}
-
-	if err := decode(configMap, target); err != nil {
-		return fmt.Errorf("error decoding config map to target: %v", err)
-	}
-
-	return nil
 }
 
 func (p fullConfig) DryRun(hostName string, verbose bool) (string, error) {

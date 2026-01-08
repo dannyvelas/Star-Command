@@ -9,10 +9,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-var (
-	_ provider          = fileProvider{}
-	_ unvalidatedReader = fileProvider{}
-)
+var _ unvalidatedReader = fileProvider{}
 
 type fileProvider struct {
 	hostName string
@@ -24,20 +21,6 @@ func newFileProvider(hostName string, verbose bool) fileProvider {
 		hostName: hostName,
 		verbose:  verbose,
 	}
-}
-
-func (p fileProvider) UnmarshalInto(target any) error {
-	fileMap, err := p.ReadUnvalidated()
-	if err != nil {
-		return fmt.Errorf("error reading file configs: %v", err)
-	}
-
-	// decode files
-	if err := decode(fileMap, target); err != nil {
-		return fmt.Errorf("error decoding file configs into a map: %v", err)
-	}
-
-	return nil
 }
 
 func (p fileProvider) ReadUnvalidated() (map[string]string, error) {

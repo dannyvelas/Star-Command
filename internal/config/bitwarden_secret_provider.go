@@ -6,10 +6,7 @@ import (
 	"github.com/dannyvelas/homelab/internal/client"
 )
 
-var (
-	_ provider          = bitwardenSecretProvider{}
-	_ unvalidatedReader = bitwardenSecretProvider{}
-)
+var _ unvalidatedReader = bitwardenSecretProvider{}
 
 type bitwardenSecretProvider struct {
 	bitwardenCredProvider bitwardenCredProvider
@@ -21,24 +18,9 @@ func newBitwardenSecretProvider(configMap map[string]string) bitwardenSecretProv
 	}
 }
 
-func (p bitwardenSecretProvider) UnmarshalInto(target any) error {
-	// read bitwarden secrets
-	bitwardenSecrets, err := p.ReadUnvalidated()
-	if err != nil {
-		return fmt.Errorf("error reading env: %v", err)
-	}
-
-	// decode bitwarden secrets
-	if err := decode(bitwardenSecrets, target); err != nil {
-		return fmt.Errorf("error decoding bitwarden secrets into a map: %v", err)
-	}
-
-	return nil
-}
-
 func (p bitwardenSecretProvider) ReadUnvalidated() (map[string]string, error) {
 	config := newBitwardenConfig()
-	if err := p.bitwardenCredProvider.UnmarshalInto(&config); err != nil {
+	if err := UnmarshalInto(p.bitwardenCredProvider, &config); err != nil {
 		return nil, fmt.Errorf("error unmarshalling bitwarden creds: %v", err)
 	}
 

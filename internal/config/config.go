@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/dannyvelas/homelab/internal/helpers"
@@ -51,4 +52,29 @@ func validateStruct(v any) (map[string]string, bool, error) {
 
 	results, ok = config.Validate(results, ok)
 	return results, ok, nil
+}
+
+func UnmarshalInto(r unvalidatedReader, target any) error {
+	m, err := r.ReadUnvalidated()
+	if err != nil {
+		return fmt.Errorf("error reading: %v", err)
+	}
+
+	if err := decode(m, target); err != nil {
+		return fmt.Errorf("error converting map into target: %v", err)
+	}
+
+	return nil
+}
+
+func decode(src, dest any) error {
+	bytes, err := json.Marshal(src)
+	if err != nil {
+		return fmt.Errorf("error marshalling map: %v", err)
+	}
+
+	if err := json.Unmarshal(bytes, dest); err != nil {
+		return fmt.Errorf("error unmarshalling map into target: %v", err)
+	}
+	return nil
 }
