@@ -6,29 +6,12 @@ import (
 	"strings"
 )
 
-var (
-	_ provider          = envProvider{}
-	_ unvalidatedReader = envProvider{}
-)
+var _ unvalidatedReader = envProvider{}
 
 type envProvider struct{}
 
 func newEnvProvider() envProvider {
 	return envProvider{}
-}
-
-func (p envProvider) UnmarshalInto(target any) error {
-	// read env
-	envMap, err := p.ReadUnvalidated()
-	if err != nil {
-		return fmt.Errorf("error reading env: %v", err)
-	}
-
-	// decode env
-	if err := decode(envMap, target); err != nil {
-		return fmt.Errorf("error decoding env into a map: %v", err)
-	}
-	return nil
 }
 
 func (p envProvider) ReadUnvalidated() (map[string]string, error) {

@@ -1,9 +1,5 @@
 package config
 
-type provider interface {
-	UnmarshalInto(target any) error
-}
-
 type validatedReader interface {
 	ReadValidated() (map[string]string, error)
 }
