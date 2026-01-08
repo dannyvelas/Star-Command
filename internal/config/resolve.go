@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dannyvelas/homelab/internal/client"
-	"github.com/dannyvelas/homelab/internal/helpers"
 	"github.com/goccy/go-yaml"
 )
 
@@ -26,7 +26,7 @@ func Resolve(hostName string, verbose bool) (map[string]string, error) {
 		return nil, fmt.Errorf("error reading configs: %v", err)
 	}
 
-	validateResult, ok, err := hostConfig.Validate()
+	validateResult, ok, err := validateStruct(hostConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error validating config: %v", err)
 	} else if !ok {
@@ -53,7 +53,7 @@ func DryRun(hostName string, verbose bool) (string, error) {
 		return "", fmt.Errorf("error reading configs: %v", err)
 	}
 
-	validateResult, _, err := hostConfig.Validate()
+	validateResult, _, err := validateStruct(hostConfig)
 	if err != nil {
 		return "", fmt.Errorf("error validating config: %v", err)
 	}
@@ -62,13 +62,66 @@ func DryRun(hostName string, verbose bool) (string, error) {
 }
 
 func readConfigs(hostName string, verbose bool) (config, error) {
-	bitwardenConfig := defaultBitwardenConfig
-
 	hostConfig, ok := hostToConfig[hostName]
 	if !ok {
 		return nil, fmt.Errorf("unrecognized host: %s", hostName)
 	}
 
+	configMap := make(map[string]string)
+	if err := filesUnmarshalInto(hostName, verbose, configMap); err != nil {
+		return nil, fmt.Errorf("error reading file configs: %v", err)
+	}
+
+	if err := envUnmarshalInto(configMap); err != nil {
+		return nil, fmt.Errorf("error reading env into map: %v", err)
+	}
+
+	mapProvider, err := newMapProvider(configMap)
+	if err != nil {
+		return nil, fmt.Errorf("error initializing map provider: %v", err)
+	}
+
+	bitwardenConfig := newBitwardenConfig()
+	if err := mapProvider.UnmarshalInto(&bitwardenConfig); err != nil {
+		return nil, fmt.Errorf("error reading bitwarden config into a map: %v", err)
+	}
+
+	results, ok, err := validateStruct(bitwardenConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error validating bitwarden config: %v", err)
+	} else if !ok {
+		return nil, fmt.Errorf("error: invalid bitwarden configs: %s", fmtTable(results))
+	}
+
+	bwClient, err := client.NewBitwardenClient(
+		bitwardenConfig.APIURL,
+		bitwardenConfig.IdentityURL,
+		bitwardenConfig.AccessToken,
+		bitwardenConfig.OrganizationID,
+		bitwardenConfig.ProjectID,
+		bitwardenConfig.StateFilePath,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error initializing bitwarden client: %v", err)
+	}
+
+	if err := bwClient.UnmarshalInto(configMap); err != nil {
+		return nil, fmt.Errorf("error filling host config struct with bitwarden secrets: %v", err)
+	}
+
+	mapProvider, err = newMapProvider(configMap)
+	if err != nil {
+		return nil, fmt.Errorf("error initializing map provider: %v", err)
+	}
+
+	if err := mapProvider.UnmarshalInto(hostConfig); err != nil {
+		return nil, fmt.Errorf("error unmarshalling all configs into host config: %v", err)
+	}
+
+	return hostConfig, nil
+}
+
+func filesUnmarshalInto(hostName string, verbose bool, target map[string]string) error {
 	hostConfigFile := filepath.Join(configDir, fmt.Sprintf("%s.yml", hostName))
 	for _, file := range []string{fallbackConfigFile, hostConfigFile} {
 		data, err := os.ReadFile(file)
@@ -78,56 +131,39 @@ func readConfigs(hostName string, verbose bool) (config, error) {
 			}
 			continue
 		} else if err != nil {
-			return nil, fmt.Errorf("error reading config file(%s): %v", file, err)
+			return fmt.Errorf("error reading config file(%s): %v", file, err)
 		}
-		if err := yaml.Unmarshal(data, &bitwardenConfig); err != nil {
-			return nil, fmt.Errorf("error unmarshalling config file (%s) to root config: %v", file, err)
-		}
-		if err := yaml.Unmarshal(data, hostConfig); err != nil {
-			return nil, fmt.Errorf("error unmarshalling config file (%s) to host config: %v", file, err)
+		if err := yaml.Unmarshal(data, target); err != nil {
+			return fmt.Errorf("error unmarshalling config file (%s): %v", file, err)
 		}
 	}
-
-	if missingBitwardenFields := getMissingBitwardenFields(); len(missingBitwardenFields) > 0 {
-		fmt.Fprintf(os.Stderr, "warning: some bitwarden ENV variables are missing:%s\nBitwarden secrets will not be loaded.\n", helpers.StringSliceToBulletedList(missingBitwardenFields))
-		return hostConfig, nil
-	}
-
-	bwClient, err := client.NewBitwardenClient(
-		bitwardenConfig.BitwardenAPIURL,
-		bitwardenConfig.BitwardenIdentityURL,
-		"",
-		"",
-		"",
-		"",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error initializing bitwarden client: %v", err)
-	}
-
-	if err := bwClient.FillStruct(hostConfig); err != nil {
-		return nil, fmt.Errorf("error filling host config struct with bitwarden secrets: %v", err)
-	}
-
-	return hostConfig, nil
+	return nil
 }
 
-func getMissingBitwardenFields() []string {
-	missing := make([]string, 0)
+func envUnmarshalInto(target map[string]string) error {
+	environ := os.Environ()
+	for _, entry := range environ {
+		if entry != "" {
+			key, value, err := split(entry)
+			if err != nil {
+				return fmt.Errorf("error splitting: %v", err)
+			}
+			target[key] = value
+		}
+	}
+	return nil
+}
 
-	//if env.BitwardenAccessToken == "" {
-	//	missing = append(missing, "BWS_ACCESS_TOKEN")
-	//}
-
-	//if env.BitwardenProjectID == "" {
-	//	missing = append(missing, "BWS_PROJECT_ID")
-	//}
-
-	//if env.BitwardenOrganizationID == "" {
-	//	missing = append(missing, "BWS_ORGANIZATION_ID")
-	//}
-
-	return missing
+func split(entry string) (string, string, error) {
+	parts := strings.SplitN(entry, "=", 2)
+	switch len(parts) {
+	case 0:
+		return "", "", fmt.Errorf("cannot split empty string")
+	case 1:
+		return parts[0], "", nil
+	default:
+		return parts[0], parts[1], nil
+	}
 }
 
 func configToMap(c any) (map[string]string, error) {

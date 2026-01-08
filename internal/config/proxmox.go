@@ -33,28 +33,7 @@ func newProxmoxConfig() *proxmoxConfig {
 	}
 }
 
-func (p *proxmoxConfig) Validate() (map[string]string, bool, error) {
-	results := make(map[string]string)
-	ok := true
-
-	tagToFieldMap, err := helpers.GetTagToFieldMap(p, "bw", "json")
-	if err != nil {
-		return nil, false, fmt.Errorf("error getting tag to field map: %v", err)
-	}
-
-	for tag, field := range tagToFieldMap {
-		if _, ok := field.Type.Tag.Lookup("required"); !ok {
-			continue
-		}
-
-		if field.Value.IsZero() {
-			results[tag] = statusMissing
-			ok = false
-		} else {
-			results[tag] = statusLoaded
-		}
-	}
-
+func (p *proxmoxConfig) Validate(results map[string]string, ok bool) (map[string]string, bool) {
 	if results["node_cidr_address"] == statusLoaded {
 		if _, err := netip.ParsePrefix(p.NodeCIDRAddress); err != nil {
 			results["node_cidr_address"] = fmt.Sprintf("'%s' is not a valid CIDR: %v\n", p.NodeCIDRAddress, err)
@@ -62,7 +41,7 @@ func (p *proxmoxConfig) Validate() (map[string]string, bool, error) {
 		}
 	}
 
-	return results, ok, nil
+	return results, ok
 }
 
 func (p *proxmoxConfig) FillInKeys() error {
