@@ -35,12 +35,12 @@ func NewBitwardenClient(apiURL, identityURL, accessToken, organizationID, projec
 	}, nil
 }
 
-// FillStruct takes a struct as an argument and fills its fields
+// UnmarshalInto takes a struct as an argument and fills its fields
 // with values found in c.organizationID
-func (c BitwardenClient) FillStruct(v any) error {
+func (c BitwardenClient) UnmarshalInto(v any) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Pointer {
-		return fmt.Errorf("error: expected pointer argument to FillStruct")
+		return fmt.Errorf("error: expected pointer argument to UnmarshalInto")
 	}
 
 	listResponse, err := c.client.Secrets().List(c.organizationID)
