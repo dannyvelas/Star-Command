@@ -18,7 +18,7 @@ tasks:
       - go build -o ./bin/labctl ./cmd/labctl
 
   setup:proxmox:check:
-    desc: "Check requirements for Proxmox"
+    desc: "Print report of found/missing proxmox variables"
     deps: [build:labctl]
     cmds:
       - ./bin/labctl get config proxmox --dry-run
@@ -37,3 +37,5 @@ tasks:
         else
           ansible-playbook -i ansible/inventory.ini ansible/setup-proxmox.yml -u root --ask-vault-pass -e "$CONF_JSON"
         fi
+
+      - ./bin/labctl set ssh proxmox
