@@ -3,9 +3,9 @@ package config
 type bitwardenConfig struct {
 	APIURL         string `json:"bitwarden_api_url"`
 	IdentityURL    string `json:"bitwarden_identity_url"`
-	AccessToken    string `json:"bitwarden_access_token"`
-	OrganizationID string `json:"bitwarden_organization_id"`
-	ProjectID      string `json:"bitwarden_project_id"`
+	AccessToken    string `json:"bitwarden_access_token" required:"true"`
+	OrganizationID string `json:"bitwarden_organization_id" required:"true"`
+	ProjectID      string `json:"bitwarden_project_id" required:"true"`
 	StateFilePath  string `json:"bitwarden_state_file_path"`
 }
 

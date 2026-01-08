@@ -40,7 +40,7 @@ func (p fileReader) ReadUnvalidated() (map[string]string, error) {
 		} else if err != nil {
 			return nil, fmt.Errorf("error reading config file(%s): %v", file, err)
 		}
-		if err := yaml.Unmarshal(data, m); err != nil {
+		if err := yaml.Unmarshal(data, &m); err != nil {
 			return nil, fmt.Errorf("error unmarshalling config file (%s): %v", file, err)
 		}
 	}

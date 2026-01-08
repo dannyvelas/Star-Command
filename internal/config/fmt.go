@@ -2,13 +2,17 @@ package config
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"strings"
 	"text/template"
 )
 
-// fmtTable takes a map and returns a formatted string table.
-func fmtTable(data map[string]string) string {
-	// 1. Calculate the maximum length of the keys
+var errInvalidFields = errors.New("")
+
+// newErrInvalidFields takes a map and returns a formatted error
+func newErrInvalidFields(data map[string]string) error {
+	// calculate the maximum length of the keys
 	maxKeyLen := 3 // Minimum width to fit the "KEY" header
 	for k := range data {
 		if len(k) > maxKeyLen {
@@ -16,15 +20,14 @@ func fmtTable(data map[string]string) string {
 		}
 	}
 
-	// 2. Create a data structure to pass both the map and the width
+	// create a data structure to pass both the map and the width
 	type tableContext struct {
 		Data  map[string]string
 		Width int
 		Line  string
 	}
 
-	// Create a horizontal line based on the dynamic width
-	// (maxKeyLen + 3 for padding/borders + "STATUS" length)
+	// create a horizontal line based on the dynamic width
 	line := strings.Repeat("-", maxKeyLen+20)
 
 	ctx := tableContext{
@@ -33,7 +36,7 @@ func fmtTable(data map[string]string) string {
 		Line:  line,
 	}
 
-	// 3. Update the template to use the dynamic Width
+	// make template use the dynamic Width
 	// We use printf with a dynamic precision: %-*s
 	// The '*' tells printf to get the width from the next argument.
 	const tableTmpl = `{{ .Line }}
@@ -56,5 +59,5 @@ func fmtTable(data map[string]string) string {
 		panic(err)
 	}
 
-	return buf.String()
+	return fmt.Errorf("%w%s", errInvalidFields, buf.String())
 }
