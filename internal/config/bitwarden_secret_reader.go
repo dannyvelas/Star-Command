@@ -28,7 +28,7 @@ func (p bitwardenSecretReader) ReadUnvalidated() (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error validating bitwarden config: %v", err)
 	} else if !ok {
-		return nil, fmt.Errorf("error: invalid bitwarden configs: %s", fmtTable(results))
+		return nil, newErrInvalidFields(results)
 	}
 
 	bitwardenClient, err := client.NewBitwardenClient(

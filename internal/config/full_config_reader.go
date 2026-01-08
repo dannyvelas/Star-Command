@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -35,7 +36,7 @@ func (p fullConfigReader) ReadValidated() (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error validating config: %v", err)
 	} else if !ok {
-		return nil, fmt.Errorf("error: invalid configs: %s", fmtTable(validateResult))
+		return nil, newErrInvalidFields(validateResult)
 	}
 
 	if fillableConfig, ok := hostConfig.(fillableConfig); ok {
@@ -59,17 +60,19 @@ func (p fullConfigReader) ReadUnvalidated() (map[string]string, error) {
 	configMap := make(map[string]string)
 
 	// read files
-	if err := UnmarshalInto(newFileReader(p.hostName, p.verbose), configMap); err != nil {
+	if err := UnmarshalInto(newFileReader(p.hostName, p.verbose), &configMap); err != nil {
 		return nil, fmt.Errorf("error unmarshalling files to map: %v", err)
 	}
 
 	// read env
-	if err := UnmarshalInto(newEnvReader(), configMap); err != nil {
+	if err := UnmarshalInto(newEnvReader(), &configMap); err != nil {
 		return nil, fmt.Errorf("error unmarshalling env to map: %v", err)
 	}
 
 	if usingBitwarden {
-		if err := UnmarshalInto(newBitwardenSecretReader(configMap), configMap); err != nil {
+		if err := UnmarshalInto(newBitwardenSecretReader(configMap), &configMap); errors.Is(err, errInvalidFields) {
+			return nil, err
+		} else if err != nil {
 			return nil, fmt.Errorf("error unmarshalling bitwarden secrets to map: %v", err)
 		}
 	}
@@ -79,7 +82,9 @@ func (p fullConfigReader) ReadUnvalidated() (map[string]string, error) {
 
 func (p fullConfigReader) DryRun() (string, error) {
 	hostConfig := hostToConfig[p.hostName]
-	if err := UnmarshalInto(p, hostConfig); err != nil {
+	if err := UnmarshalInto(p, hostConfig); errors.Is(err, errInvalidFields) {
+		return err.Error(), nil
+	} else if err != nil {
 		return "", fmt.Errorf("error reading host config into struct: %v", err)
 	}
 
@@ -88,5 +93,5 @@ func (p fullConfigReader) DryRun() (string, error) {
 		return "", fmt.Errorf("error validating config: %v", err)
 	}
 
-	return fmtTable(validateResult), nil
+	return newErrInvalidFields(validateResult).Error(), nil
 }

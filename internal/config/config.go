@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/dannyvelas/homelab/internal/helpers"
@@ -56,7 +57,9 @@ func validateConfig(v any) (map[string]string, bool, error) {
 
 func UnmarshalInto(r unvalidatedReader, target any) error {
 	m, err := r.ReadUnvalidated()
-	if err != nil {
+	if errors.Is(err, errInvalidFields) {
+		return err
+	} else if err != nil {
 		return fmt.Errorf("error reading: %v", err)
 	}
 
