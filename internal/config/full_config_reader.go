@@ -26,14 +26,9 @@ func NewFullConfig(hostName string, verbose bool) fullConfig {
 }
 
 func (p fullConfig) ReadValidated() (map[string]string, error) {
-	configMap, err := p.ReadUnvalidated()
-	if err != nil {
-		return nil, fmt.Errorf("error reading configs: %v", err)
-	}
-
 	hostConfig := hostToConfig[p.hostName]
-	if err := decode(configMap, hostConfig); err != nil {
-		return nil, fmt.Errorf("error transforming map to host config: %v", err)
+	if err := UnmarshalInto(p, hostConfig); err != nil {
+		return nil, fmt.Errorf("error reading host config into struct: %v", err)
 	}
 
 	validateResult, ok, err := validateConfig(hostConfig)
@@ -47,6 +42,11 @@ func (p fullConfig) ReadValidated() (map[string]string, error) {
 		if err := fillableConfig.FillInKeys(); err != nil {
 			return nil, fmt.Errorf("error filling in fields: %v", err)
 		}
+	}
+
+	configMap := make(map[string]string)
+	if err := decode(hostConfig, configMap); err != nil {
+		return nil, fmt.Errorf("error transforming host config into config map: %v", err)
 	}
 
 	return configMap, nil
@@ -77,10 +77,10 @@ func (p fullConfig) ReadUnvalidated() (map[string]string, error) {
 	return configMap, nil
 }
 
-func (p fullConfig) DryRun(hostName string, verbose bool) (string, error) {
-	hostConfig, err := p.ReadUnvalidated()
-	if err != nil {
-		return "", fmt.Errorf("error reading configs: %v", err)
+func (p fullConfig) DryRun() (string, error) {
+	hostConfig := hostToConfig[p.hostName]
+	if err := UnmarshalInto(p, hostConfig); err != nil {
+		return "", fmt.Errorf("error reading host config into struct: %v", err)
 	}
 
 	validateResult, _, err := validateConfig(hostConfig)
