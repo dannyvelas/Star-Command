@@ -46,7 +46,7 @@ func getConfigCmd(env env.Env, verbose bool) *cobra.Command {
 		},
 	}
 
-	getConfigCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show found/missing keys without generating JSON")
+	getConfigCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Print report of found/missing keys for <host-name>")
 
 	return getConfigCmd
 }
