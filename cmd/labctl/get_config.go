@@ -21,7 +21,7 @@ func getConfigCmd(verbose bool) *cobra.Command {
 			fullConfig := config.NewFullConfig(host, verbose)
 
 			if dryRun {
-				validation, err := fullConfig.DryRun(host, verbose)
+				validation, err := fullConfig.DryRun()
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 					os.Exit(1)
