@@ -56,6 +56,7 @@
 - [ ] rename the name that the receivers of `*reader` structs use to refer to "self". right now it's "p" but that kinda doesn't make sense
 - [ ] remove "unvalidated" from everything. we can just call it readResult or something
 - [ ] probably make `ErrInvalidFields` not public anymore
+- [ ] use a different tag name than "bw". people won't necessarily use bitwarden. use something like "config" instead.
 
 ## terraform-provider-proxmox repo
 - [x] make PR to correct the steps necessary to run `make example`
