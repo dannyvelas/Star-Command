@@ -14,16 +14,14 @@ var hostToConfig = map[string]config{
 var _ unvalidatedReader = (*fullConfigReader)(nil)
 
 type fullConfigReader struct {
-	hostName      string
-	verbose       bool
-	diagnosticMap map[string]string
+	hostName string
+	verbose  bool
 }
 
 func NewFullConfig(hostName string, verbose bool) *fullConfigReader {
 	return &fullConfigReader{
-		hostName:      hostName,
-		verbose:       verbose,
-		diagnosticMap: nil,
+		hostName: hostName,
+		verbose:  verbose,
 	}
 }
 
