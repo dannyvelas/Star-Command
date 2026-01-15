@@ -167,8 +167,7 @@ func TestConfigMux_Error(t *testing.T) {
 			)
 
 			target := testConfig{}
-			_, err := Unmarshal(r, &target)
-			if !errors.Is(err, tc.expectedError) {
+			if _, err := Unmarshal(r, &target); !errors.Is(err, tc.expectedError) {
 				t.Errorf("expected error to be %v, got %v", tc.expectedError, err)
 			}
 		})
