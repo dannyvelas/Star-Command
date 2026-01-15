@@ -8,22 +8,22 @@ import (
 )
 
 const (
-	statusMissing = "missing"
-	statusLoaded  = "loaded"
+	StatusMissing = "missing"
+	StatusLoaded  = "loaded"
 )
 
-type config interface {
+type validatable interface {
 	// Validate receives a diagnostic map where each element corresponds to a key in the config
 	// the second return value will be false if at least one key was invalid. otherwise, it will be true
 	Validate(map[string]string) bool
 }
 
-type fillableConfig interface {
+type fillable interface {
 	// FillInKeys takes the keys that are required and uses them to fill out remaining config fields
 	FillInKeys() error
 }
 
-func validateConfig(v any) (map[string]string, error) {
+func validateStruct(v any) (map[string]string, error) {
 	diagnosticMap := make(map[string]string)
 	valid := true
 
@@ -38,14 +38,14 @@ func validateConfig(v any) (map[string]string, error) {
 		}
 
 		if field.Value.IsZero() {
-			diagnosticMap[tag] = statusMissing
+			diagnosticMap[tag] = StatusMissing
 			valid = false
 		} else {
-			diagnosticMap[tag] = statusLoaded
+			diagnosticMap[tag] = StatusLoaded
 		}
 	}
 
-	if config, ok := v.(config); ok {
+	if config, ok := v.(validatable); ok {
 		valid = valid && config.Validate(diagnosticMap)
 	}
 
@@ -56,7 +56,38 @@ func validateConfig(v any) (map[string]string, error) {
 	return diagnosticMap, nil
 }
 
-func UnmarshalInto(r Reader, target any) (map[string]string, error) {
+func UnmarshalIntoStruct(r Reader, target any) (map[string]string, error) {
+	readResult, err := r.read()
+	if err != nil && !errors.Is(err, ErrInvalidFields) {
+		return nil, fmt.Errorf("error reading: %v", err)
+	} // if errors.Is(err, ErrInvalidFields) we want to continue because we can want to show a report of all missing diagnostics
+
+	if err := helpers.FromMap(readResult.getConfigMap(), target); err != nil {
+		return nil, fmt.Errorf("error converting map into target: %v", err)
+	}
+
+	readDiagnosticMap := getDiagnosticMap(readResult)
+
+	targetDiagnosticMap, err := validateStruct(target)
+	if err != nil && !errors.Is(err, ErrInvalidFields) {
+		return nil, fmt.Errorf("error unmarhsalling into config: %v", err)
+	}
+
+	mergedDiagnostics := helpers.MergeMaps(readDiagnosticMap, targetDiagnosticMap)
+	if errors.Is(err, ErrInvalidFields) {
+		return nil, fmt.Errorf("invalid or missing fields:\n%s", diagnosticMapToTable(mergedDiagnostics))
+	}
+
+	if fillableTarget, ok := target.(fillable); ok {
+		if err := fillableTarget.FillInKeys(); err != nil {
+			return nil, fmt.Errorf("error filling in fields: %v", err)
+		}
+	}
+
+	return mergedDiagnostics, err
+}
+
+func unmarshalIntoMap(r Reader, target *map[string]string) (map[string]string, error) {
 	readResult, err := r.read()
 	if err != nil && !errors.Is(err, ErrInvalidFields) {
 		return nil, fmt.Errorf("error reading: %v", err)

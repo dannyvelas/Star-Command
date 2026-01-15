@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/dannyvelas/homelab/internal/config"
+	"github.com/dannyvelas/homelab/internal/hosts"
 	"github.com/spf13/cobra"
 )
 
@@ -21,17 +22,18 @@ func getConfigCmd(verbose bool) *cobra.Command {
 			fullConfigReader := config.NewFullConfigReader(hostName, verbose)
 
 			if dryRun {
-				validation, err := fullConfigReader.DryRun()
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-					os.Exit(1)
-				}
+				//validation, err := fullConfigReader.DryRun()
+				//if err != nil {
+				//	fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+				//	os.Exit(1)
+				//}
 
-				fmt.Printf("Config Requirements for %s:\n%s", hostName, validation)
+				// fmt.Printf("Config Requirements for %s:\n%s", hostName, validation)
 				return
 			}
 
-			c, err := fullConfigReader.Read()
+			proxmoxConfig := hosts.NewProxmox()
+			c, err := config.UnmarshalIntoStruct(fullConfigReader, proxmoxConfig)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
