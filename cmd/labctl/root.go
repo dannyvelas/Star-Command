@@ -21,8 +21,6 @@ func execute() {
 }
 
 func initialize() {
-	var verbose bool
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
-	rootCmd.AddCommand(getCmd(verbose))
+	rootCmd.AddCommand(getCmd())
 	rootCmd.AddCommand(setCmd())
 }

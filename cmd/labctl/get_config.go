@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func getConfigCmd(verbose bool) *cobra.Command {
+func getConfigCmd() *cobra.Command {
 	var dryRun bool
 
 	getConfigCmd := &cobra.Command{
