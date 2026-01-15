@@ -46,7 +46,7 @@
 - [ ] figure out a way to make it so that plex data (about watch history, users with access to my plex) is stored somewhere externally so that if I nuke Proxmox, it doesn't get lost.
 - [ ] make setup:proxmox taskfile task idempotently update the ssh file if needed
 - [ ] migrate all variables to "./configs" dir, effectively deleting all ansible and terraform config files
-- [ ] test if you can actually store c.client.Secrets() in a variable in client/bitwarden.go
+- [x] test if you can actually store c.client.Secrets() in a variable in client/bitwarden.go
 - [x] maybe rename "resolve" package in go
 - [x] make it so that every provider doesn't have to call decode
 - [ ] make it so that reading from bitwarden is optional. now it is required.
