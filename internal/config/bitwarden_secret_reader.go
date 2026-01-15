@@ -22,15 +22,11 @@ func newBitwardenSecretReader(configMap map[string]string) *bitwardenSecretReade
 func (r *bitwardenSecretReader) read() (readResult, error) {
 	config := newBitwardenConfig()
 
-	if _, err := UnmarshalInto(r.mapReader, &config); err != nil {
-		return nil, fmt.Errorf("error unmarshalling bitwarden creds: %v", err)
-	}
-
-	diagnosticMap, err := validateConfig(config)
+	diagnosticMap, err := UnmarshalIntoStruct(r.mapReader, &config)
 	if errors.Is(err, ErrInvalidFields) {
 		return diagnosticReadResult{configMap: nil, diagnosticMap: diagnosticMap}, ErrInvalidFields
 	} else if err != nil {
-		return nil, fmt.Errorf("error validating bitwarden config: %v", err)
+		return nil, fmt.Errorf("error unmarshalling bitwarden creds: %v", err)
 	}
 
 	bitwardenClient, err := client.NewBitwardenClient(
