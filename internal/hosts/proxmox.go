@@ -1,16 +1,15 @@
-package config
+package hosts
 
 import (
 	"fmt"
 	"net/netip"
 	"os"
 
+	"github.com/dannyvelas/homelab/internal/config"
 	"github.com/dannyvelas/homelab/internal/helpers"
 )
 
-var _ config = (*proxmoxConfig)(nil)
-
-type proxmoxConfig struct {
+type proxmox struct {
 	// Required
 	SSHPublicKeyPath     string `json:"ssh_public_key_path" required:"true"`
 	NodeCIDRAddress      string `json:"node_cidr_address" required:"true"`
@@ -27,17 +26,17 @@ type proxmoxConfig struct {
 	SSHPublicKey string `json:"ssh_public_key"`
 }
 
-// NewProxmoxConfig returns a pointer to a ProxmoxConfig with some defaults
-func newProxmoxConfig() *proxmoxConfig {
-	return &proxmoxConfig{
+// NewProxmox returns a pointer to a Proxmox struct with some defaults
+func NewProxmox() *proxmox {
+	return &proxmox{
 		SSHPort:              "22",
 		AutoUpdateRebootTime: "05:00",
 	}
 }
 
-func (c *proxmoxConfig) Validate(diagnosticMap map[string]string) bool {
+func (c *proxmox) Validate(diagnosticMap map[string]string) bool {
 	ok := true
-	if diagnosticMap["node_cidr_address"] == statusLoaded {
+	if diagnosticMap["node_cidr_address"] == config.StatusLoaded {
 		if _, err := netip.ParsePrefix(c.NodeCIDRAddress); err != nil {
 			diagnosticMap["node_cidr_address"] = fmt.Sprintf("'%s' is not a valid CIDR: %v\n", c.NodeCIDRAddress, err)
 			ok = false
@@ -47,7 +46,7 @@ func (c *proxmoxConfig) Validate(diagnosticMap map[string]string) bool {
 	return ok
 }
 
-func (c *proxmoxConfig) FillInKeys() error {
+func (c *proxmox) FillInKeys() error {
 	// ParsePrefix returns the prefix and an error if it's invalid
 	prefix, err := netip.ParsePrefix(c.NodeCIDRAddress)
 	if err != nil {
