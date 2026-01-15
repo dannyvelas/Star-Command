@@ -161,7 +161,9 @@ func TestConfigMux_Error(t *testing.T) {
 				false,
 				WithReader(NewFileReader(tc.hostName, false, WithFileSystem(tc.fs))),
 				WithReader(NewEnvReader(WithEnviron(tc.env))),
-				WithReader(NewBitwardenSecretReader(map[string]string{})),
+				WithLazyReader(func(configMap map[string]string) Reader {
+					return NewBitwardenSecretReader(configMap)
+				}),
 			)
 
 			target := testConfig{}
