@@ -23,12 +23,18 @@ type fileReader struct {
 	verbose    bool
 }
 
-func NewFileReader(fileSystem fs.FS, hostName string, verbose bool) fileReader {
-	return fileReader{
-		fileSystem: fileSystem,
+func NewFileReader(hostName string, verbose bool, opts ...func(*fileReader)) fileReader {
+	fileReader := fileReader{
+		fileSystem: os.DirFS("."),
 		hostName:   hostName,
 		verbose:    verbose,
 	}
+
+	for _, opt := range opts {
+		opt(&fileReader)
+	}
+
+	return fileReader
 }
 
 func (r fileReader) read() (readResult, error) {
@@ -51,4 +57,10 @@ func (r fileReader) read() (readResult, error) {
 		maps.Copy(m, tempMap)
 	}
 	return simpleReadResult{configMap: m}, nil
+}
+
+func WithFileSystem(fileSystem fs.FS) func(*fileReader) {
+	return func(fileReader *fileReader) {
+		fileReader.fileSystem = fileSystem
+	}
 }

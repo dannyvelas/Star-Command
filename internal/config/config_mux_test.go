@@ -103,8 +103,8 @@ func TestConfigMux_Success(t *testing.T) {
 			r := NewConfigMux(
 				tc.hostName,
 				false,
-				WithReader(NewFileReader(tc.fs, tc.hostName, false)),
-				WithReader(NewEnvReader(tc.env)),
+				WithReader(NewFileReader(tc.hostName, false, WithFileSystem(tc.fs))),
+				WithReader(NewEnvReader(WithEnviron(tc.env))),
 				WithLazyReader(func(configMap map[string]string) Reader {
 					return NewBitwardenSecretReader(configMap)
 				}),
@@ -159,8 +159,8 @@ func TestConfigMux_Error(t *testing.T) {
 			r := NewConfigMux(
 				tc.hostName,
 				false,
-				WithReader(NewEnvReader(tc.env)),
-				WithReader(NewFileReader(tc.fs, tc.hostName, false)),
+				WithReader(NewFileReader(tc.hostName, false, WithFileSystem(tc.fs))),
+				WithReader(NewEnvReader(WithEnviron(tc.env))),
 				WithReader(NewBitwardenSecretReader(map[string]string{})),
 			)
 

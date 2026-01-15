@@ -2,18 +2,32 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
 var _ Reader = envReader{}
 
 type envReader struct {
-	envAsMap map[string]string
+	environ []string
 }
 
-func NewEnvReader(environ []string) envReader {
-	envAsMap := make(map[string]string, len(environ))
-	for _, entry := range environ {
+func NewEnvReader(opts ...func(*envReader)) envReader {
+	r := envReader{}
+	for _, opt := range opts {
+		opt(&r)
+	}
+
+	if r.environ == nil {
+		r.environ = os.Environ()
+	}
+
+	return r
+}
+
+func (r envReader) read() (readResult, error) {
+	envAsMap := make(map[string]string, len(r.environ))
+	for _, entry := range r.environ {
 		if entry == "" {
 			continue
 		}
@@ -21,14 +35,7 @@ func NewEnvReader(environ []string) envReader {
 		key, value, _ := split(entry)
 		envAsMap[key] = value
 	}
-
-	return envReader{
-		envAsMap: envAsMap,
-	}
-}
-
-func (r envReader) read() (readResult, error) {
-	return simpleReadResult{configMap: r.envAsMap}, nil
+	return simpleReadResult{configMap: envAsMap}, nil
 }
 
 func split(entry string) (string, string, error) {
@@ -40,5 +47,11 @@ func split(entry string) (string, string, error) {
 		return parts[0], "", nil
 	default:
 		return parts[0], parts[1], nil
+	}
+}
+
+func WithEnviron(environ []string) func(*envReader) {
+	return func(r *envReader) {
+		r.environ = environ
 	}
 }
