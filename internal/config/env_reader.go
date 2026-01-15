@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var _ Reader = envReader{}
+var _ reader = envReader{}
 
 type envReader struct {
 	envAsMap map[string]string
