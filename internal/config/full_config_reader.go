@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var _ Reader = (*fullConfigReader)(nil)
+var _ reader = (*fullConfigReader)(nil)
 
 type fullConfigReader struct {
 	fileSystem fs.FS

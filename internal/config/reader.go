@@ -1,6 +1,6 @@
 package config
 
-type Reader interface {
+type reader interface {
 	read() (readResult, error)
 }
 
