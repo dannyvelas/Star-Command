@@ -29,13 +29,15 @@ func NewBitwardenClient(apiURL, identityURL, accessToken, organizationID, stateF
 
 func (c BitwardenClient) ReadSecrets() (map[string]string, error) {
 	m := make(map[string]string)
-	listResponse, err := c.client.Secrets().List(c.organizationID)
+
+	secrets := c.client.Secrets()
+	listResponse, err := secrets.List(c.organizationID)
 	if err != nil {
 		return nil, fmt.Errorf("error listing secrets: %v", err)
 	}
 
 	for _, secret := range listResponse.Data {
-		secretData, err := c.client.Secrets().Get(secret.ID)
+		secretData, err := secrets.Get(secret.ID)
 		if err != nil {
 			return nil, fmt.Errorf("error getting secret: %v", err)
 		}
