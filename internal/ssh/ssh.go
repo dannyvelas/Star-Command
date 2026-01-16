@@ -75,10 +75,10 @@ func openHomeSSHFile() (*os.File, error) {
 func buildHostBlock(host *host.SSHHost) []byte {
 	const hostTmpl = `
 Host {{ .Alias }}
-    HostName {{ .HostName }}
-    User {{ .User }}
-    IdentityFile {{ .IdentityFile }}
-		Port {{ .Port }}
+  HostName {{ .HostName }}
+  User {{ .User }}
+  IdentityFile {{ .PublicKeyPath }}
+  Port {{ .Port }}
 `
 
 	tmpl, err := template.New("sshConfig").Parse(hostTmpl)

@@ -47,6 +47,8 @@ func setSSHCmd() *cobra.Command {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
 			}
+
+			fmt.Println("SSH config updated successfully!")
 		},
 	}
 
