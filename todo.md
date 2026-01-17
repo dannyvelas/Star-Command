@@ -44,8 +44,9 @@
 - [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox
 - [ ] make Ansible playbook send terraform API token directly to Bitwarden Secrets Manager (BWS)
 - [ ] figure out a way to make it so that plex data (about watch history, users with access to my plex) is stored somewhere externally so that if I nuke Proxmox, it doesn't get lost.
-- [ ] make setup:proxmox taskfile task idempotently update the ssh file if needed
+- [x] make setup:proxmox taskfile task idempotently update the ssh file if needed
 - [ ] migrate all variables to "./configs" dir, effectively deleting all ansible and terraform config files
+- [ ] add support for other host-aliases other than proxmox. right now `labctl get config` and `labctl check reqs` pretty much will only work for proxmox because it's hardcoded
 - [x] test if you can actually store c.client.Secrets() in a variable in client/bitwarden.go
 - [x] maybe rename "resolve" package in go
 - [x] make it so that every provider doesn't have to call decode

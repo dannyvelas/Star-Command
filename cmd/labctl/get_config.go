@@ -26,7 +26,6 @@ func getConfigCmd() *cobra.Command {
 				conflux.WithBitwardenSecretReader(),
 			)
 
-			// TODO: change this to be dynamic
 			proxmoxConfig := models.NewProxmox()
 			diagnostics, err := conflux.Unmarshal(configMux, proxmoxConfig)
 			if errors.Is(err, conflux.ErrInvalidFields) {
