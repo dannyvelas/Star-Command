@@ -74,7 +74,7 @@
     * and then `UnmarshalInto()` would basically return a `(any, error)` and in the two places where `UnmarshalInto()` is called and the second map is expected, the caller, we would check if `any` implements `getSecondMap()`, and if it does, it would use it for the diagnostics.
 
 
-## gemini question
+## prompt
 I have a question:
 
 I have a bunch of structs that implement this interface:
@@ -130,7 +130,7 @@ the solution i'm going with:
   * now, `fullConfigReader.DryRun()` needs to get the diagnostic map from with the diagnostic map so it can merge the diagnostic map of the missing credentials to the `diagnosticMap` that gets created in a subsequent call to `validateConfig`
 
 
-  ## gemini question no.2
+  ## prompt no.2
 
 I have a bunch of structs that implement this interface:
 ```
