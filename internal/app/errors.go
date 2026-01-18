@@ -7,6 +7,7 @@ import (
 )
 
 var (
-	ErrInvalidArgs   = errors.New("invalid arguments")
-	ErrInvalidFields = conflux.ErrInvalidFields
+	ErrInvalidArgs       = errors.New("invalid arguments")
+	ErrInvalidFields     = conflux.ErrInvalidFields
+	ErrHostAlreadyExists = errors.New("host already exists in ssh config file")
 )
