@@ -8,7 +8,7 @@ func setCmd() *cobra.Command {
 		Short: "Create a resource",
 	}
 
-	setCmd.AddCommand(setSSHCmd())
+	setCmd.AddCommand(setFileCmd())
 
 	return setCmd
 }
