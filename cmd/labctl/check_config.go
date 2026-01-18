@@ -1,14 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"maps"
 	"os"
 
 	"github.com/dannyvelas/conflux"
-	"github.com/dannyvelas/homelab/internal/helpers"
-	"github.com/dannyvelas/homelab/internal/models"
+	"github.com/dannyvelas/homelab/internal/app"
 	"github.com/spf13/cobra"
 )
 
@@ -23,35 +20,13 @@ func checkConfigCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			hostAlias := args[0]
 
-			configMux := conflux.NewConfigMux(
-				conflux.WithYAMLFileReader(helpers.FallbackFile, conflux.WithPath(helpers.GetConfigPath(hostAlias))),
-				conflux.WithEnvReader(),
-				conflux.WithBitwardenSecretReader(),
-			)
-
-			configStructs, err := models.AliasToStruct(hostAlias, targets)
+			diagnostics, err := app.CheckConfig(hostAlias, targets)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+				fmt.Fprintf(os.Stderr, "internal error: %s", err.Error())
 				os.Exit(1)
 			}
 
-			allDiagnostics := make(map[string]string)
-			for _, configStruct := range configStructs {
-				diagnostics, err := conflux.Unmarshal(configMux, configStruct)
-				if errors.Is(err, conflux.ErrInvalidFields) {
-					maps.Copy(allDiagnostics, diagnostics)
-					continue
-				} else if err != nil {
-					fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-					os.Exit(1)
-				}
-			}
-			if len(allDiagnostics) > 0 {
-				fmt.Fprintf(os.Stderr, "%v for %s:\n%s\n", conflux.ErrInvalidFields, hostAlias, conflux.DiagnosticsToTable(allDiagnostics))
-				return
-			}
-
-			fmt.Printf("Configs for %s:\n%s\n", hostAlias, conflux.DiagnosticsToTable(allDiagnostics))
+			fmt.Printf("Configs for %s:\n%s\n", hostAlias, conflux.DiagnosticsToTable(diagnostics))
 		},
 	}
 
