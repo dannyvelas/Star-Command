@@ -6,24 +6,25 @@ import (
 	"maps"
 
 	"github.com/dannyvelas/conflux"
+	"github.com/dannyvelas/homelab/internal/handlers"
 	"github.com/dannyvelas/homelab/internal/helpers"
 	"github.com/dannyvelas/homelab/internal/models"
 	"github.com/go-viper/mapstructure/v2"
 )
-
-type TargetStruct struct {
-	Target string
-	Struct any
-}
 
 type WritableFile interface {
 	SetFile() error
 }
 
 type App struct {
-	hostAlias     string
-	configMux     *conflux.ConfigMux
-	targetStructs []TargetStruct
+	hostAlias string
+	targets   []string
+	configMux *conflux.ConfigMux
+	handler   handlers.Handler
+}
+
+var handlerMap = map[string]handlers.Handler{
+	"proxmox": handlers.NewProxmoxHandler(),
 }
 
 func New(hostAlias string, targets []string) (App, error) {
@@ -33,22 +34,28 @@ func New(hostAlias string, targets []string) (App, error) {
 		conflux.WithBitwardenSecretReader(),
 	)
 
-	targetStructs, err := aliasAndTargetsToStructs(hostAlias, targets)
-	if err != nil {
-		return App{}, fmt.Errorf("error: %w: no supported combination for hostAlias(%s) and targets(%v)", ErrInvalidArgs, hostAlias, targets)
+	handler, ok := handlerMap[hostAlias]
+	if !ok {
+		return App{}, fmt.Errorf("error: %w: unsupported host(%s)", ErrInvalidArgs, hostAlias)
 	}
 
 	return App{
-		hostAlias:     hostAlias,
-		configMux:     configMux,
-		targetStructs: targetStructs,
+		hostAlias: hostAlias,
+		targets:   targets,
+		configMux: configMux,
+		handler:   handler,
 	}, nil
 }
 
 func (a App) GetConfig() (map[string]string, map[string]string, error) {
 	allConfigs, allDiagnostics := make(map[string]string), make(map[string]string)
-	for _, targetStruct := range a.targetStructs {
-		diagnostics, err := conflux.Unmarshal(a.configMux, targetStruct.Struct)
+	for _, target := range a.targets {
+		targetStruct, err := a.handler.TargetToStruct(target)
+		if err != nil {
+			return nil, nil, fmt.Errorf("error: %w: unexpected alias(%s) and target(%s) combination", ErrInvalidArgs, a.hostAlias, target)
+		}
+
+		diagnostics, err := conflux.Unmarshal(a.configMux, targetStruct)
 		if errors.Is(err, conflux.ErrInvalidFields) {
 			maps.Copy(allDiagnostics, diagnostics)
 			continue
@@ -62,7 +69,7 @@ func (a App) GetConfig() (map[string]string, map[string]string, error) {
 			return nil, nil, fmt.Errorf("internal error creating new decoder: %v", err)
 		}
 
-		if err := decoder.Decode(targetStruct.Struct); err != nil {
+		if err := decoder.Decode(targetStruct); err != nil {
 			return nil, nil, fmt.Errorf("internal error merging config struct to map: %v", err)
 		}
 	}
@@ -72,11 +79,17 @@ func (a App) GetConfig() (map[string]string, map[string]string, error) {
 
 func (a App) CheckConfig() (map[string]string, error) {
 	allDiagnostics := make(map[string]string)
-	for _, targetStruct := range a.targetStructs {
-		diagnostics, err := conflux.Unmarshal(a.configMux, targetStruct.Struct)
+	for _, target := range a.targets {
+		targetStruct, err := a.handler.TargetToStruct(target)
+		if err != nil {
+			return nil, fmt.Errorf("error: %w: unexpected alias(%s) and target(%s) combination", ErrInvalidArgs, a.hostAlias, target)
+		}
+
+		diagnostics, err := conflux.Unmarshal(a.configMux, targetStruct)
 		if err != nil {
 			return nil, fmt.Errorf("internal error unmarshalling: %v", err)
 		}
+
 		maps.Copy(allDiagnostics, diagnostics)
 	}
 
@@ -85,9 +98,14 @@ func (a App) CheckConfig() (map[string]string, error) {
 
 func (a App) SetFile() ([]string, error) {
 	writableFiles, nonWritableTargets := make([]WritableFile, 0), make([]string, 0)
-	for _, configStruct := range a.targetStructs {
-		if writableFile, ok := configStruct.Struct.(WritableFile); !ok {
-			nonWritableTargets = append(nonWritableTargets, configStruct.Target)
+	for _, target := range a.targets {
+		targetStruct, err := a.handler.TargetToStruct(target)
+		if err != nil {
+			return nil, fmt.Errorf("error: %w: unexpected alias(%s) and target(%s) combination", ErrInvalidArgs, a.hostAlias, target)
+		}
+
+		if writableFile, ok := targetStruct.(WritableFile); !ok {
+			nonWritableTargets = append(nonWritableTargets, target)
 		} else {
 			writableFiles = append(writableFiles, writableFile)
 		}
@@ -108,18 +126,4 @@ func (a App) SetFile() ([]string, error) {
 	}
 
 	return diagnostics, nil
-}
-
-func aliasAndTargetsToStructs(alias string, targets []string) ([]TargetStruct, error) {
-	result := make([]TargetStruct, 0, len(targets))
-	for _, target := range targets {
-		if alias == "proxmox" && target == "ansible" {
-			result = append(result, TargetStruct{target, models.NewAnsibleProxmoxConfig()})
-		} else if target == "ssh" {
-			result = append(result, TargetStruct{target, models.NewSSHHost(alias)})
-		} else {
-			return nil, fmt.Errorf("unexpected alias(%s) and target(%s) combination", alias, target)
-		}
-	}
-	return result, nil
 }
