@@ -1,3 +1,5 @@
+## finished
+
 - [x] learn about what stuff won't destruct nicely on my server with `terraform destroy` and i would have to manually destruct
   - as of right now, everything would destruct nicely. the only thing not supported natively by bpg/proxmox is cloud-init configurations to mount `media_mount` to `/mnt/media` and enable `qemu-guest-agent`. But that's okay. When we run `terraform destroy` that will wipe the VM entirely so it doesn't matter.
 - [x] switch to make terraform authenticate via token not via root
@@ -28,22 +30,6 @@
     ```
 - [x] fix the fact that `labctl resolve --help` doesn't tell you about `<host-name>`
 - [x] actually make the "ssh_public_key" variable passed to ansible be the actual public key, not the file path
-- [ ] create a "base" terraform LXC module
-- [ ] create a "base" terraform VM module
-- [ ] add jump-host LXC (re-adding tailscale stuff to README for it)
-- [ ] add jump-host LXC to readme
-- [ ] see if there are any changes that need to be made to jumpLXC for firewall
-- [ ] figure out how to share variables
-  - vm_id = 100 is both in `terraform/plex_lxc/main.tf` and `ansible/inventory.ini`
-  - `proxmox_node_name` is both in terraform variables and `./ansible/group_vars/all/all.yml`
-  - port 17031 is both in `./ansible/group_vars/all/all.yml` and `terraform/global/firewall.tf` and `terraform/plex_lxc/main.tf`.
-- [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
-- [ ] move configure apt stuff from ansible to terraform
-- [ ] it seems like sometimes "terraform destroy" on the "global" terraform project doesn't actually clean the `/etc/pve/firewall/cluster.fw` settings. check if this is consistent and why this is happening. also, fix it
-- [ ] see how we can convert the README to a program
-- [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox
-- [ ] make Ansible playbook send terraform API token directly to Bitwarden Secrets Manager (BWS)
-- [ ] figure out a way to make it so that plex data (about watch history, users with access to my plex) is stored somewhere externally so that if I nuke Proxmox, it doesn't get lost.
 - [x] make setup:proxmox taskfile task idempotently update the ssh file if needed
 - [x] test if you can actually store c.client.Secrets() in a variable in client/bitwarden.go
 - [x] maybe rename "resolve" package in go
@@ -78,9 +64,29 @@
 - [x] add support for other host-aliases other than proxmox. right now `labctl get config` and `labctl check reqs` pretty much will only work for proxmox because it's hardcoded
 - [x] see if there's a way to reduce duplication: in `models.AliasToStruct` you are listing all the aliases you support. you are again listing those same aliasas in the cobra configs of `getConfig` and `checkConfig`, in the `ValidArgs` field.
 - [x] add test for app.go
+
+## infra todos
+- [ ] migrate all variables to "./configs" dir, effectively deleting all ansible and terraform config files
+- [ ] create a "base" terraform LXC module
+- [ ] create a "base" terraform VM module
+- [ ] add jump-host LXC (re-adding tailscale stuff to README for it)
+- [ ] add jump-host LXC to readme
+- [ ] see if there are any changes that need to be made to jumpLXC for firewall
+- [ ] figure out how to share variables
+  - vm_id = 100 is both in `terraform/plex_lxc/main.tf` and `ansible/inventory.ini`
+  - `proxmox_node_name` is both in terraform variables and `./ansible/group_vars/all/all.yml`
+  - port 17031 is both in `./ansible/group_vars/all/all.yml` and `terraform/global/firewall.tf` and `terraform/plex_lxc/main.tf`.
+- [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
+- [ ] move configure apt stuff from ansible to terraform
+- [ ] it seems like sometimes "terraform destroy" on the "global" terraform project doesn't actually clean the `/etc/pve/firewall/cluster.fw` settings. check if this is consistent and why this is happening. also, fix it
+- [ ] see how we can convert the README to a program
+- [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox
+- [ ] make Ansible playbook send terraform API token directly to Bitwarden Secrets Manager (BWS)
+- [ ] figure out a way to make it so that plex data (about watch history, users with access to my plex) is stored somewhere externally so that if I nuke Proxmox, it doesn't get lost.
+
+## coding todos
 - [ ] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
 - [ ] (CONFLUX) maybe make bitwarden secrets read things piecemeal, instead of just dumping everything into a map
-- [ ] migrate all variables to "./configs" dir, effectively deleting all ansible and terraform config files
 
 ## terraform-provider-proxmox repo
 - [x] make PR to correct the steps necessary to run `make example`
