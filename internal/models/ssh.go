@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/netip"
 	"os"
-	"path/filepath"
 	"text/template"
 
 	"github.com/kevinburke/ssh_config"
@@ -19,12 +18,31 @@ type SSHHost struct {
 	PublicKeyPath   string `json:"ssh_public_key_path" required:"true"`
 	Port            string `json:"ssh_port" required:"true"`
 	NodeCIDRAddress string `json:"node_cidr_address" required:"true"`
+
+	path string
 }
 
-func NewSSHHost(hostAlias string) *SSHHost {
-	return &SSHHost{
+func NewSSHHost(hostAlias string, opts ...func(*SSHHost)) (*SSHHost, error) {
+	sshHost := &SSHHost{
 		Alias: hostAlias,
 	}
+
+	for _, opt := range opts {
+		opt(sshHost)
+	}
+
+	if sshHost.path != "" {
+		return sshHost, nil
+	}
+
+	// if path was not passed in, default to user home
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("error getting user home dir: %v", err)
+	}
+	sshHost.path = userHome
+
+	return sshHost, nil
 }
 
 func (s *SSHHost) Name() string {
@@ -47,7 +65,7 @@ func (s *SSHHost) FillInKeys() error {
 }
 
 func (s *SSHHost) ContentAlreadyExists(fs afero.Fs) (bool, error) {
-	f, err := openHomeSSHFile(fs)
+	f, err := fs.OpenFile(s.path, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {
 		return false, fmt.Errorf("error opening ssh config file: %v", err)
 	}
@@ -70,7 +88,7 @@ func (s *SSHHost) ContentAlreadyExists(fs afero.Fs) (bool, error) {
 }
 
 func (s *SSHHost) SetFile(fs afero.Fs) error {
-	f, err := openHomeSSHFile(fs)
+	f, err := fs.OpenFile(s.path, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {
 		return fmt.Errorf("error opening ssh config file: %v", err)
 	}
@@ -83,21 +101,6 @@ func (s *SSHHost) SetFile(fs afero.Fs) error {
 
 	_, err = f.Write(hostBlock)
 	return err
-}
-
-func openHomeSSHFile(fs afero.Fs) (afero.File, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("error: could not find home directory: %v", err)
-	}
-	path := filepath.Join(home, ".ssh", "config")
-
-	f, err := fs.OpenFile(path, os.O_RDWR|os.O_CREATE, 0o600)
-	if err != nil {
-		return nil, fmt.Errorf("error opening ssh config: %v", err)
-	}
-
-	return f, nil
 }
 
 func (s *SSHHost) buildHostBlock() []byte {
@@ -120,4 +123,10 @@ Host {{ .Alias }}
 	}
 
 	return buf.Bytes()
+}
+
+func WithPath(path string) func(*SSHHost) {
+	return func(sshHost *SSHHost) {
+		sshHost.path = path
+	}
 }
