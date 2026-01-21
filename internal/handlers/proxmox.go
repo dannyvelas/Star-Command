@@ -8,23 +8,27 @@ import (
 	"github.com/dannyvelas/conflux"
 	"github.com/dannyvelas/homelab/internal/models"
 	"github.com/go-viper/mapstructure/v2"
+	"github.com/spf13/afero"
 )
 
 type ProxmoxHandler struct {
 	configMux *conflux.ConfigMux
+	fs        afero.Fs
+
 	hostAlias string
 	targets   []string
 }
 
-func NewProxmoxHandler(configMux *conflux.ConfigMux, targets []string) ProxmoxHandler {
-	return ProxmoxHandler{
+func NewProxmoxHandler(configMux *conflux.ConfigMux, targets []string) *ProxmoxHandler {
+	return &ProxmoxHandler{
 		configMux: configMux,
+		fs:        afero.NewOsFs(),
 		hostAlias: "proxmox",
 		targets:   targets,
 	}
 }
 
-func (h ProxmoxHandler) GetConfig() (map[string]string, map[string]string, error) {
+func (h *ProxmoxHandler) GetConfig() (map[string]string, map[string]string, error) {
 	allConfigs, allDiagnostics := make(map[string]string), make(map[string]string)
 	for _, target := range h.targets {
 		targetStruct, err := h.targetToStruct(target)
@@ -54,7 +58,7 @@ func (h ProxmoxHandler) GetConfig() (map[string]string, map[string]string, error
 	return allConfigs, allDiagnostics, nil
 }
 
-func (h ProxmoxHandler) CheckConfig() (map[string]string, error) {
+func (h *ProxmoxHandler) CheckConfig() (map[string]string, error) {
 	allDiagnostics := make(map[string]string)
 	for _, target := range h.targets {
 		targetStruct, err := h.targetToStruct(target)
@@ -73,7 +77,7 @@ func (h ProxmoxHandler) CheckConfig() (map[string]string, error) {
 	return allDiagnostics, nil
 }
 
-func (h ProxmoxHandler) SetFile() ([]string, error) {
+func (h *ProxmoxHandler) SetFile() ([]string, error) {
 	writableFiles, nonWritableTargets := make([]WritableFile, 0), make([]string, 0)
 	for _, target := range h.targets {
 		targetStruct, err := h.targetToStruct(target)
@@ -95,7 +99,7 @@ func (h ProxmoxHandler) SetFile() ([]string, error) {
 	diagnostics := make([]string, 0)
 	for _, writableFile := range writableFiles {
 		var errAlreadyExists *models.ErrAlreadyExists
-		if err := writableFile.SetFile(); errors.As(err, &errAlreadyExists) {
+		if err := writableFile.SetFile(h.fs); errors.As(err, &errAlreadyExists) {
 			diagnostics = append(diagnostics, fmt.Sprintf("skipping write to %s because %s already exists in that file", errAlreadyExists.Name, errAlreadyExists.Resource))
 		} else if err != nil {
 			return nil, fmt.Errorf("error writing to file: %v", err)
@@ -105,7 +109,11 @@ func (h ProxmoxHandler) SetFile() ([]string, error) {
 	return diagnostics, nil
 }
 
-func (h ProxmoxHandler) targetToStruct(target string) (any, error) {
+func (h *ProxmoxHandler) useFS(fs afero.Fs) {
+	h.fs = fs
+}
+
+func (h *ProxmoxHandler) targetToStruct(target string) (any, error) {
 	switch target {
 	case "ansible":
 		return models.NewAnsibleProxmoxConfig(), nil

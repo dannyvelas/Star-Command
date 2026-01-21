@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/kevinburke/ssh_config"
+	"github.com/spf13/afero"
 )
 
 type SSHHost struct {
@@ -37,8 +38,8 @@ func (s *SSHHost) FillInKeys() error {
 	return nil
 }
 
-func (s *SSHHost) SetFile() error {
-	f, err := openHomeSSHFile()
+func (s *SSHHost) SetFile(fs afero.Fs) error {
+	f, err := openHomeSSHFile(fs)
 	if err != nil {
 		return fmt.Errorf("error opening ssh config file: %v", err)
 	}
@@ -63,19 +64,18 @@ func (s *SSHHost) SetFile() error {
 		return fmt.Errorf("error seeking to end of ssh config: %v", err)
 	}
 
-	f.Write(hostBlock)
-
-	return nil
+	_, err = f.Write(hostBlock)
+	return err
 }
 
-func openHomeSSHFile() (*os.File, error) {
+func openHomeSSHFile(fs afero.Fs) (afero.File, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return nil, fmt.Errorf("error: could not find home directory: %v", err)
 	}
 	path := filepath.Join(home, ".ssh", "config")
 
-	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0o600)
+	f, err := fs.OpenFile(path, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {
 		return nil, fmt.Errorf("error opening ssh config: %v", err)
 	}
