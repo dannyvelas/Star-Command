@@ -7,6 +7,7 @@ import (
 
 	"github.com/dannyvelas/conflux"
 	"github.com/google/go-cmp/cmp"
+	"github.com/spf13/afero"
 )
 
 const testYAML = `admin_email: "admin@example.com"
@@ -185,6 +186,42 @@ func TestCheckConfig(t *testing.T) {
 
 			if diff := cmp.Diff(tc.expectedDiagnostics, gotDiagnostics); diff != "" {
 				t.Errorf("diagnostics mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestSetFile_Ok(t *testing.T) {
+	cases := []struct {
+		name      string
+		hostAlias string
+		targets   []string
+	}{
+		{
+			name:      "ansible as target for set file",
+			hostAlias: "proxmox",
+			targets:   []string{"ssh"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			mockFS := fstest.MapFS{"config/all.yml": {Data: []byte(testYAML)}}
+
+			// create dummy FS for aero
+			appFS := afero.NewMemMapFs()
+			appFS.MkdirAll("/home/tester/.ssh", 0o755)
+			afero.WriteFile(appFS, "/Users/dannyvelasquez", []byte("Host existing\n"), 0o644)
+
+			configMux := conflux.NewConfigMux(conflux.WithYAMLFileReader("config/all.yml", conflux.WithFileSystem(mockFS)))
+
+			handler, err := New(configMux, tc.hostAlias, tc.targets, WithFS(appFS))
+			if err != nil {
+				t.Fatalf("unexpected error initializing app: %v", err)
+			}
+
+			if _, err := handler.SetFile(); err != nil {
+				t.Fatalf("unexpected error setting file: %v", err)
 			}
 		})
 	}
