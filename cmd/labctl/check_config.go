@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/dannyvelas/conflux"
-	"github.com/dannyvelas/homelab/internal/app"
+	"github.com/dannyvelas/homelab/internal/handlers"
 	"github.com/dannyvelas/homelab/internal/helpers"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +15,7 @@ func checkConfigCmd() *cobra.Command {
 
 	checkConfigCmd := &cobra.Command{
 		Use:       "config <host-alias>",
-		ValidArgs: app.GetSupportedHostAliases(),
+		ValidArgs: handlers.GetSupportedHostAliases(),
 		Short:     "Print a diagnostic report of all the configs that were found/missing for a given resource",
 		Args:      cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -26,19 +26,19 @@ func checkConfigCmd() *cobra.Command {
 				conflux.WithBitwardenSecretReader(),
 			)
 
-			a, err := app.New(configMux, hostAlias, targets)
+			handler, err := handlers.New(configMux, hostAlias, targets)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
 			}
 
-			diagnostics, err := a.CheckConfig()
+			diagnostics, err := handler.CheckConfig()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
 			}
 
-			fmt.Printf("Configs for %s:\n%s\n", hostAlias, app.DiagnosticsToTable(diagnostics))
+			fmt.Printf("Configs for %s:\n%s\n", hostAlias, handlers.DiagnosticsToTable(diagnostics))
 		},
 	}
 

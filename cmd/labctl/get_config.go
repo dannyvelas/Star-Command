@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/dannyvelas/conflux"
-	"github.com/dannyvelas/homelab/internal/app"
+	"github.com/dannyvelas/homelab/internal/handlers"
 	"github.com/dannyvelas/homelab/internal/helpers"
 	"github.com/spf13/cobra"
 )
@@ -16,7 +16,7 @@ func getConfigCmd() *cobra.Command {
 
 	getConfigCmd := &cobra.Command{
 		Use:       "config <host-alias>",
-		ValidArgs: app.GetSupportedHostAliases(),
+		ValidArgs: handlers.GetSupportedHostAliases(),
 		Short:     "Generate a JSON object of configuration values for a given host",
 		Args:      cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -27,18 +27,18 @@ func getConfigCmd() *cobra.Command {
 				conflux.WithBitwardenSecretReader(),
 			)
 
-			a, err := app.New(configMux, hostAlias, targets)
+			handler, err := handlers.New(configMux, hostAlias, targets)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
 			}
 
-			configs, diagnostics, err := a.GetConfig()
+			configs, diagnostics, err := handler.GetConfig()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
 			} else if len(diagnostics) > 0 {
-				fmt.Fprintf(os.Stderr, "invalid or missing configs for %s:\n%s\n", hostAlias, app.DiagnosticsToTable(diagnostics))
+				fmt.Fprintf(os.Stderr, "invalid or missing configs for %s:\n%s\n", hostAlias, handlers.DiagnosticsToTable(diagnostics))
 				return
 			}
 

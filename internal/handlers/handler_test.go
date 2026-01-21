@@ -1,4 +1,4 @@
-package app
+package handlers
 
 import (
 	"errors"
@@ -87,12 +87,12 @@ func TestGetConfig(t *testing.T) {
 
 			configMux := conflux.NewConfigMux(conflux.WithYAMLFileReader("config/all.yml", conflux.WithFileSystem(mockFS)))
 
-			a, err := New(configMux, tc.hostAlias, tc.targets)
+			handler, err := New(configMux, tc.hostAlias, tc.targets)
 			if err != nil {
 				t.Fatalf("unexpected error initializing app: %v", err)
 			}
 
-			gotConfig, _, err := a.GetConfig()
+			gotConfig, _, err := handler.GetConfig()
 			if err != nil {
 				t.Fatalf("unexpected error getting config: %v", err)
 			}
@@ -173,12 +173,12 @@ func TestCheckConfig(t *testing.T) {
 
 			configMux := conflux.NewConfigMux(conflux.WithYAMLFileReader("config/all.yml", conflux.WithFileSystem(mockFS)))
 
-			a, err := New(configMux, tc.hostAlias, tc.targets)
+			handler, err := New(configMux, tc.hostAlias, tc.targets)
 			if err != nil {
 				t.Fatalf("unexpected error initializing app: %v", err)
 			}
 
-			gotDiagnostics, err := a.CheckConfig()
+			gotDiagnostics, err := handler.CheckConfig()
 			if err != nil {
 				t.Fatalf("unexpected error getting config: %v", err)
 			}
@@ -211,14 +211,14 @@ func TestSetFile_Error(t *testing.T) {
 
 			configMux := conflux.NewConfigMux(conflux.WithYAMLFileReader("config/all.yml", conflux.WithFileSystem(mockFS)))
 
-			a, err := New(configMux, tc.hostAlias, tc.targets)
+			handler, err := New(configMux, tc.hostAlias, tc.targets)
 			if err != nil {
 				t.Fatalf("unexpected error initializing app: %v", err)
 			}
 
-			_, err = a.SetFile()
+			_, err = handler.SetFile()
 			if !errors.Is(err, tc.expectedError) {
-				t.Fatalf("expected error, got %v", err)
+				t.Fatalf("expected error(%v), got(%v)", tc.expectedError, err)
 			}
 		})
 	}

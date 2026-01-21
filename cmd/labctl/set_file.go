@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/dannyvelas/conflux"
-	"github.com/dannyvelas/homelab/internal/app"
+	"github.com/dannyvelas/homelab/internal/handlers"
 	"github.com/dannyvelas/homelab/internal/helpers"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +15,7 @@ func setFileCmd() *cobra.Command {
 
 	setFileCmd := &cobra.Command{
 		Use:       "file <host-alias>",
-		ValidArgs: app.GetSupportedHostAliases(),
+		ValidArgs: handlers.GetSupportedHostAliases(),
 		Short:     "Update the `~/.ssh/config` file to connect to a given host",
 		Args:      cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -26,13 +26,13 @@ func setFileCmd() *cobra.Command {
 				conflux.WithBitwardenSecretReader(),
 			)
 
-			a, err := app.New(configMux, hostAlias, targets)
+			handler, err := handlers.New(configMux, hostAlias, targets)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
 			}
 
-			diagnostics, err := a.SetFile()
+			diagnostics, err := handler.SetFile()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				os.Exit(1)
