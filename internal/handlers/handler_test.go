@@ -211,11 +211,11 @@ func TestSetFile_Ok(t *testing.T) {
 			// create dummy FS for aero
 			appFS := afero.NewMemMapFs()
 			appFS.MkdirAll("/home/tester/.ssh", 0o755)
-			afero.WriteFile(appFS, "/Users/dannyvelasquez", []byte("Host existing\n"), 0o644)
+			afero.WriteFile(appFS, "/home/tester/.ssh/config", []byte("Host existing\n"), 0o644)
 
 			configMux := conflux.NewConfigMux(conflux.WithYAMLFileReader("config/all.yml", conflux.WithFileSystem(mockFS)))
 
-			handler, err := New(configMux, tc.hostAlias, tc.targets, WithFS(appFS))
+			handler, err := New(configMux, tc.hostAlias, tc.targets, WithFS(appFS), WithHomeDir("/home"))
 			if err != nil {
 				t.Fatalf("unexpected error initializing app: %v", err)
 			}

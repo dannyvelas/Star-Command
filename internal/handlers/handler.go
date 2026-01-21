@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"maps"
+	"os"
 	"slices"
 
 	"github.com/dannyvelas/conflux"
@@ -15,14 +16,16 @@ type Handler interface {
 	SetFile() ([]string, error)
 
 	useFS(afero.Fs)
+	useHomeDir(string)
+	getHomeDir() string
 	targetToStruct(target string) (any, error)
 }
 
 type WritableFile interface {
 	Name() string
 	Resource() string
-	ContentAlreadyExists(fs afero.Fs) (bool, error)
-	SetFile(fs afero.Fs) error
+	ContentAlreadyExists(fs afero.Fs, homeDir string) (bool, error)
+	SetFile(fs afero.Fs, homeDir string) error
 }
 
 type HandlerConstructor func(configMux *conflux.ConfigMux, targets []string) Handler
@@ -44,6 +47,16 @@ func New(configMux *conflux.ConfigMux, hostAlias string, targets []string, opts 
 		opt(handler)
 	}
 
+	if handler.getHomeDir() != "" {
+		return handler, nil
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("error getting user home directory: %v", err)
+	}
+	handler.useHomeDir(homeDir)
+
 	return handler, nil
 }
 
@@ -54,5 +67,11 @@ func GetSupportedHostAliases() []string {
 func WithFS(fs afero.Fs) func(Handler) {
 	return func(handler Handler) {
 		handler.useFS(fs)
+	}
+}
+
+func WithHomeDir(homeDir string) func(Handler) {
+	return func(handler Handler) {
+		handler.useHomeDir(homeDir)
 	}
 }

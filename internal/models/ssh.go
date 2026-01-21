@@ -19,31 +19,10 @@ type SSHHost struct {
 	PublicKeyPath   string `json:"ssh_public_key_path" required:"true"`
 	Port            string `json:"ssh_port" required:"true"`
 	NodeCIDRAddress string `json:"node_cidr_address" required:"true"`
-
-	homeDir string
 }
 
-func NewSSHHost(hostAlias string, opts ...func(*SSHHost)) (*SSHHost, error) {
-	sshHost := &SSHHost{
-		Alias: hostAlias,
-	}
-
-	for _, opt := range opts {
-		opt(sshHost)
-	}
-
-	if sshHost.homeDir != "" {
-		return sshHost, nil
-	}
-
-	// if homeDir was not passed in, default to user home
-	userHome, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("error getting user home dir: %v", err)
-	}
-	sshHost.homeDir = userHome
-
-	return sshHost, nil
+func NewSSHHost(hostAlias string) *SSHHost {
+	return &SSHHost{Alias: hostAlias}
 }
 
 func (s *SSHHost) Name() string {
@@ -65,8 +44,8 @@ func (s *SSHHost) FillInKeys() error {
 	return nil
 }
 
-func (s *SSHHost) ContentAlreadyExists(fs afero.Fs) (bool, error) {
-	sshFile := filepath.Join(s.homeDir, ".ssh", "config")
+func (s *SSHHost) ContentAlreadyExists(fs afero.Fs, homeDir string) (bool, error) {
+	sshFile := filepath.Join(homeDir, ".ssh", "config")
 
 	f, err := fs.OpenFile(sshFile, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {
@@ -90,8 +69,8 @@ func (s *SSHHost) ContentAlreadyExists(fs afero.Fs) (bool, error) {
 	return false, nil
 }
 
-func (s *SSHHost) SetFile(fs afero.Fs) error {
-	sshFile := filepath.Join(s.homeDir, ".ssh", "config")
+func (s *SSHHost) SetFile(fs afero.Fs, homeDir string) error {
+	sshFile := filepath.Join(homeDir, ".ssh", "config")
 
 	f, err := fs.OpenFile(sshFile, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {
@@ -128,10 +107,4 @@ Host {{ .Alias }}
 	}
 
 	return buf.Bytes()
-}
-
-func WithHomeDir(homeDir string) func(*SSHHost) {
-	return func(sshHost *SSHHost) {
-		sshHost.homeDir = homeDir
-	}
 }

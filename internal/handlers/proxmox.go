@@ -14,6 +14,7 @@ import (
 type ProxmoxHandler struct {
 	configMux *conflux.ConfigMux
 	fs        afero.Fs
+	homeDir   string
 
 	hostAlias string
 	targets   []string
@@ -98,7 +99,7 @@ func (h *ProxmoxHandler) SetFile() ([]string, error) {
 
 	diagnostics := make([]string, 0)
 	for _, writableFile := range writableFiles {
-		alreadyExists, err := writableFile.ContentAlreadyExists(h.fs)
+		alreadyExists, err := writableFile.ContentAlreadyExists(h.fs, h.homeDir)
 		if err != nil {
 			return nil, fmt.Errorf("error checking if %s already exists in %s file: %v", writableFile.Resource(), writableFile.Name(), err)
 		}
@@ -108,7 +109,7 @@ func (h *ProxmoxHandler) SetFile() ([]string, error) {
 			continue
 		}
 
-		if err := writableFile.SetFile(h.fs); err != nil {
+		if err := writableFile.SetFile(h.fs, h.homeDir); err != nil {
 			return nil, fmt.Errorf("error writing to %s file: %v", writableFile.Name(), err)
 		}
 	}
@@ -118,6 +119,14 @@ func (h *ProxmoxHandler) SetFile() ([]string, error) {
 
 func (h *ProxmoxHandler) useFS(fs afero.Fs) {
 	h.fs = fs
+}
+
+func (h *ProxmoxHandler) useHomeDir(homeDir string) {
+	h.homeDir = homeDir
+}
+
+func (h *ProxmoxHandler) getHomeDir() string {
+	return h.homeDir
 }
 
 func (h *ProxmoxHandler) targetToStruct(target string) (any, error) {
