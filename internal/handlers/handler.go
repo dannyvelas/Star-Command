@@ -19,6 +19,9 @@ type Handler interface {
 }
 
 type WritableFile interface {
+	Name() string
+	Resource() string
+	ContentAlreadyExists(fs afero.Fs) (bool, error)
 	SetFile(fs afero.Fs) error
 }
 

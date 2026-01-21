@@ -98,11 +98,18 @@ func (h *ProxmoxHandler) SetFile() ([]string, error) {
 
 	diagnostics := make([]string, 0)
 	for _, writableFile := range writableFiles {
-		var errAlreadyExists *models.ErrAlreadyExists
-		if err := writableFile.SetFile(h.fs); errors.As(err, &errAlreadyExists) {
-			diagnostics = append(diagnostics, fmt.Sprintf("skipping write to %s because %s already exists in that file", errAlreadyExists.Name, errAlreadyExists.Resource))
-		} else if err != nil {
-			return nil, fmt.Errorf("error writing to file: %v", err)
+		alreadyExists, err := writableFile.ContentAlreadyExists(h.fs)
+		if err != nil {
+			return nil, fmt.Errorf("error checking if %s already exists in %s file: %v", writableFile.Resource(), writableFile.Name(), err)
+		}
+
+		if alreadyExists {
+			diagnostics = append(diagnostics, fmt.Sprintf("skipping write to %s because %s already exists in that file", writableFile.Name(), writableFile.Resource()))
+			continue
+		}
+
+		if err := writableFile.SetFile(h.fs); err != nil {
+			return nil, fmt.Errorf("error writing to %s file: %v", writableFile.Name(), err)
 		}
 	}
 
