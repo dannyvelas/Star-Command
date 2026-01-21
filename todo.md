@@ -77,8 +77,7 @@
 - [x] make `check config proxmox` accept a flag that looks like this: `--for <target>` where target could be a `ansible` or `ssh`. you can also supply multiple targets like this: `--for ansible --for ssh` or like this: `--for ansible,ssh`. If no flag is passed, `ansible` is assumed.
 - [x] add support for other host-aliases other than proxmox. right now `labctl get config` and `labctl check reqs` pretty much will only work for proxmox because it's hardcoded
 - [x] see if there's a way to reduce duplication: in `models.AliasToStruct` you are listing all the aliases you support. you are again listing those same aliasas in the cobra configs of `getConfig` and `checkConfig`, in the `ValidArgs` field.
-- [ ] add test for app.go
-- [ ] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
+- [x] add test for app.go
 - [ ] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
 - [ ] (CONFLUX) maybe make bitwarden secrets read things piecemeal, instead of just dumping everything into a map
 - [ ] migrate all variables to "./configs" dir, effectively deleting all ansible and terraform config files
