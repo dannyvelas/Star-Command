@@ -1,12 +1,6 @@
 github.com/bitwarden/sdk-go v1.0.2 h1:krk5et4sfksLDDcrYHcs8f3jL/TGcQ1EShw4CG21JSI=
 github.com/bitwarden/sdk-go v1.0.2/go.mod h1:RuYh+gqffp3h8wNUVWz1bvp2Pho10AFz+WIlI26iWY4=
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
-github.com/dannyvelas/conflux v0.2.0 h1:1BoJTM8OaOTeMDs98QuDDmfzIj4+4WB2q/MvSQJ8lEQ=
-github.com/dannyvelas/conflux v0.2.0/go.mod h1:19zg4Dxnabuy84FS4bV0GQOhXnUa2Ja7PlsQsQd/nG0=
-github.com/dannyvelas/conflux v0.4.0 h1:BnSMTvhgEy/p8b1jqmr5Z0wEjAOEq5Slhe1EnibzI0k=
-github.com/dannyvelas/conflux v0.4.0/go.mod h1:19zg4Dxnabuy84FS4bV0GQOhXnUa2Ja7PlsQsQd/nG0=
-github.com/dannyvelas/conflux v0.5.0 h1:O/xrBLKBAFj9CZ8ru7WY+K5pOmRxDjfRHd9bH5rr7Do=
-github.com/dannyvelas/conflux v0.5.0/go.mod h1:19zg4Dxnabuy84FS4bV0GQOhXnUa2Ja7PlsQsQd/nG0=
 github.com/dannyvelas/conflux v0.6.0 h1:thwD5eXrmRso/DP61Rqy9/r77Yeq+dkV1BxfYaDpxR0=
 github.com/dannyvelas/conflux v0.6.0/go.mod h1:19zg4Dxnabuy84FS4bV0GQOhXnUa2Ja7PlsQsQd/nG0=
 github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPEgAXnvj1Ro=
