@@ -88,3 +88,20 @@ Goals:
 | check       | plex         | terraform ansible-inventory:add ansible-playbook:run ssh:add |
 | check       | wireguard-vm | terraform ansible-inventory:add ansible-playbook:run ssh:add |
 | check       | &lt;host&gt; | ansible-inventory:add ansible-playbook:run ssh:add           |
+
+## labctl grammar v6
+
+| Sub-command | sub-sub-command | action | host         | Description                                              |
+|-------------|-----------------|--------|--------------|----------------------------------------------------------|
+| ansible     | inventory       | add    | &lt;host&gt; | default logic to add a host to an ansible inventory file |
+| ansible     | playbook        | run    | &lt;host&gt; | run default ansible playbook for host &lt;host&gt;       |
+| ansible     | playbook        | run    | proxmox      | run specialized ansible playbook for proxmox             |
+| ansible     | playbook        | run    | plex         | run specialized ansible playbook for plex                |
+| ansible     | playbook        | run    | wireguard-vm | run specialized ansible playbook for wireguard-vm        |
+
+| Sub-command       | Action | Host-Alias   | Description                                              |
+|-------------------|--------|--------------|----------------------------------------------------------|
+| ssh               | add    | &lt;host&gt; | default logic to add a host to home ssh config file      |
+| terraform         | apply  | proxmox      | apply specialized terraform project for proxmox          |
+| terraform         | apply  | plex         | apply specialized terraform project for plex             |
+| terraform         | apply  | wireguard-vm | apply specialized terraform project for wireguard-vm     |
