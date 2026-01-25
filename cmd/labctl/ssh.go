@@ -2,13 +2,13 @@ package main
 
 import "github.com/spf13/cobra"
 
-func setCmd() *cobra.Command {
-	setCmd := &cobra.Command{
-		Use:   "set",
+func sshCmd() *cobra.Command {
+	sshCmd := &cobra.Command{
+		Use:   "ssh",
 		Short: "Create a resource",
 	}
 
-	setCmd.AddCommand(setFileCmd())
+	sshCmd.AddCommand(sshAddCmd())
 
-	return setCmd
+	return sshCmd
 }
