@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func getConfigCmd() *cobra.Command {
+func ansibleRunCmd() *cobra.Command {
 	var targets []string
 
-	getConfigCmd := &cobra.Command{
+	ansibleRunCmd := &cobra.Command{
 		Use:       "config <host-alias>",
 		ValidArgs: handlers.GetSupportedHostAliases(),
 		Short:     "Generate a JSON object of configuration values for a given host",
@@ -52,7 +52,7 @@ func getConfigCmd() *cobra.Command {
 		},
 	}
 
-	getConfigCmd.Flags().StringSliceVar(&targets, "for", []string{"ansible"}, "Get config for specific integration (e.g. ansible, ssh)")
+	ansibleRunCmd.Flags().StringSliceVar(&targets, "for", []string{"ansible"}, "Get config for specific integration (e.g. ansible, ssh)")
 
-	return getConfigCmd
+	return ansibleRunCmd
 }

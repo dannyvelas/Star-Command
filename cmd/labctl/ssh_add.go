@@ -10,11 +10,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func setFileCmd() *cobra.Command {
+func sshAddCmd() *cobra.Command {
 	var targets []string
 
-	setFileCmd := &cobra.Command{
-		Use:       "file <host-alias>",
+	sshAddCmd := &cobra.Command{
+		Use:       "add <host-alias>",
 		ValidArgs: handlers.GetSupportedHostAliases(),
 		Short:     "Update the `~/.ssh/config` file to connect to a given host",
 		Args:      cobra.ExactArgs(1),
@@ -46,7 +46,7 @@ func setFileCmd() *cobra.Command {
 		},
 	}
 
-	setFileCmd.Flags().StringSliceVar(&targets, "for", []string{"ssh"}, "Write or append to the corresponding file")
+	sshAddCmd.Flags().StringSliceVar(&targets, "for", []string{"ssh"}, "Write or append to the corresponding file")
 
-	return setFileCmd
+	return sshAddCmd
 }

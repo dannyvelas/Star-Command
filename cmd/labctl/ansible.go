@@ -4,13 +4,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func getCmd() *cobra.Command {
-	getCmd := &cobra.Command{
-		Use:   "get",
+func ansibleCmd() *cobra.Command {
+	ansibleCmd := &cobra.Command{
+		Use:   "ansible",
 		Short: "Display information for a resource",
 	}
 
-	getCmd.AddCommand(getConfigCmd())
+	ansibleCmd.AddCommand(ansibleRunCmd())
 
-	return getCmd
+	return ansibleCmd
 }

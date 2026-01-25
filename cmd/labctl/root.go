@@ -21,7 +21,7 @@ func execute() {
 }
 
 func initialize() {
-	rootCmd.AddCommand(getCmd())
-	rootCmd.AddCommand(setCmd())
+	rootCmd.AddCommand(ansibleCmd())
+	rootCmd.AddCommand(sshCmd())
 	rootCmd.AddCommand(checkCmd())
 }
