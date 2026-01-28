@@ -78,8 +78,8 @@ const (
 
 func toTargets(args []string) ([]app.Target, error) {
 	for _, arg := range args {
-		scanner := newScanner(arg)
-		_ = scanner.scan()
+		scanner := newScanner()
+		_ = scanner.scan(arg)
 
 		// parser := newParser(tokens)
 		// parser.parseTargets()
@@ -88,29 +88,26 @@ func toTargets(args []string) ([]app.Target, error) {
 }
 
 type scanner struct {
-	source string
 	tokens []token
 }
 
-func newScanner(source string) *scanner {
-	return &scanner{
-		source: source,
-	}
+func newScanner() *scanner {
+	return &scanner{}
 }
 
-func (s *scanner) scan() []token {
+func (s *scanner) scan(source string) []token {
 	start, current := 0, 0
-	for !s.isAtEnd(current) {
+	for !s.isAtEnd(source, current) {
 		start = current
-		s.scanToken(start, current)
+		s.scanToken(source, start, current)
 	}
 
 	s.tokens = append(s.tokens, eof)
 	return s.tokens
 }
 
-func (s *scanner) scanToken(start, current int) {
-	newCurrent, c := s.advance(current)
+func (s *scanner) scanToken(source string, start, current int) {
+	newCurrent, c := s.advance(source, current)
 
 	if c == ':' {
 		s.tokens = append(s.tokens, colon)
@@ -118,19 +115,19 @@ func (s *scanner) scanToken(start, current int) {
 	}
 
 	if s.isLower(c) {
-		s.identifier(start, newCurrent)
+		s.identifier(source, start, newCurrent)
 		return
 	}
 
 	fmt.Println("Unexpected character.")
 }
 
-func (s *scanner) identifier(start, current int) {
-	for s.isLower(s.peek(current)) {
-		s.advance(current)
+func (s *scanner) identifier(source string, start, current int) {
+	for s.isLower(s.peek(source, current)) {
+		s.advance(source, current)
 	}
 
-	lexeme := s.source[start:current]
+	lexeme := source[start:current]
 	tok, ok := m[lexeme]
 	if !ok {
 		fmt.Printf("unrecognized token")
@@ -144,20 +141,20 @@ func (s *scanner) isLower(b byte) bool {
 	return b >= 'a' && b <= 'z'
 }
 
-func (s *scanner) advance(current int) (int, byte) {
-	return current + 1, s.source[current]
+func (s *scanner) advance(source string, current int) (int, byte) {
+	return current + 1, source[current]
 }
 
-func (s *scanner) peek(current int) byte {
-	if s.isAtEnd(current) {
+func (s *scanner) peek(source string, current int) byte {
+	if s.isAtEnd(source, current) {
 		return 0
 	}
 
-	return s.source[current]
+	return source[current]
 }
 
-func (s *scanner) isAtEnd(current int) bool {
-	return current >= len(s.source)
+func (s *scanner) isAtEnd(source string, current int) bool {
+	return current >= len(source)
 }
 
 //type parser struct {
