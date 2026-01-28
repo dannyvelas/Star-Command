@@ -113,15 +113,10 @@ func scanToken(source string, start, current int) (token, int, error) {
 		return colon, newCurrent, nil
 	}
 
-	if isLower(c) {
-		return identifier(source, start, newCurrent)
+	if !isLower(c) {
+		return invalid, newCurrent, fmt.Errorf("invalid token")
 	}
 
-	return invalid, newCurrent, fmt.Errorf("invalid token")
-}
-
-func identifier(source string, start, current int) (token, int, error) {
-	newCurrent := current
 	for isLower(source[newCurrent]) {
 		newCurrent += 1
 	}
