@@ -115,7 +115,7 @@ Goals:
 
 ```
 command = resource action host
-        | CHECK host check-arguments
+        | CHECK host targets
 
 resource = ANSIBLE ansible-subcommand
          | single-resource
@@ -129,8 +129,11 @@ action = ADD
 
 host = STRING
 
-check-arguments = ANSIBLE ":" ansible-subcommand ":" action
-                | single-resource ":" action
+targets = target
+        | target targets
+
+target = ANSIBLE ":" ansible-subcommand ":" action
+       | single-resource ":" action
 
 ansible-subcommand = INVENTORY
                    | PLAYBOOK
