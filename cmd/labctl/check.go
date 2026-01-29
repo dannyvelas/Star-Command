@@ -36,7 +36,7 @@ func checkCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			fmt.Printf("Configs needed:\n%s\n", hostAlias, app.DiagnosticsToTable(diagnostics))
+			fmt.Printf("Configs needed for host(%s):\n%s\n", hostAlias, app.DiagnosticsToTable(diagnostics))
 		},
 	}
 
@@ -60,8 +60,7 @@ var m = map[string]token{
 type token int
 
 const (
-	invalid token = iota
-	identifier
+	nilToken token = iota
 
 	terraform
 	ssh
@@ -75,8 +74,6 @@ const (
 	run
 	apply
 
-	colon
-
 	eof
 )
 
@@ -85,40 +82,44 @@ func toTargets(args []string) ([]app.Target, error) {
 		tokens, errors := scan(arg)
 		fmt.Println(tokens)
 		fmt.Println(errors)
-		// parser := newParser(tokens)
-		// parser.parseTargets()
+		target, err := parseTarget(tokens)
+		fmt.Println(target, err)
 	}
 	return nil, errors.New("unimplemented")
 }
 
 func scan(source string) ([]token, []error) {
-	errors := make([]error, 0)
+	errs := make([]error, 0)
 	tokens := make([]token, 0)
 	start, current := 0, 0
 	for current < len(source) {
 		start = current
-		token, newCurrent, err := scanToken(source, start, current)
-		if err != nil {
-			errors = append(errors, err)
-		} else {
-			tokens = append(tokens, token)
-		}
+		newCurrent, token, err := scanToken(source, start, current)
 		current = newCurrent
+		if errors.Is(err, errSkip) {
+			continue
+		} else if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		tokens = append(tokens, token)
 	}
 
 	tokens = append(tokens, eof)
-	return tokens, errors
+	return tokens, errs
 }
 
-func scanToken(source string, start, current int) (token, int, error) {
+var errSkip = fmt.Errorf("skip token")
+
+func scanToken(source string, start, current int) (int, token, error) {
 	newCurrent, c := current+1, source[current]
 
 	if c == ':' {
-		return colon, newCurrent, nil
+		return newCurrent, nilToken, errSkip
 	}
 
 	if !isLower(c) {
-		return invalid, newCurrent, fmt.Errorf("invalid token")
+		return newCurrent, nilToken, fmt.Errorf("invalid token")
 	}
 
 	for newCurrent < len(source) && isLower(source[newCurrent]) {
@@ -128,78 +129,72 @@ func scanToken(source string, start, current int) (token, int, error) {
 	lexeme := source[start:newCurrent]
 	tok, ok := m[lexeme]
 	if !ok {
-		return identifier, newCurrent, nil
+		return newCurrent, nilToken, fmt.Errorf("invalid token")
 	}
 
-	return tok, newCurrent, nil
+	return newCurrent, tok, nil
 }
 
 func isLower(b byte) bool {
 	return b >= 'a' && b <= 'z'
 }
 
-//type parser struct {
-//	tokens  []token
-//	current int
-//}
-//
-//func newParser(tokens []token) *parser {
-//	return &parser{
-//		tokens:  tokens,
-//		current: 0,
-//	}
-//}
+func parseTarget(tokens []token) (app.Target, error) {
+	newCurrent, resource, err := parseResource(0, tokens)
+	if err != nil {
+		return app.Target{}, fmt.Errorf("error parsing resource: %v", err)
+	}
+	action, err := parseAction(newCurrent, tokens)
+	if err != nil {
+		return app.Target{}, fmt.Errorf("error parsing action: %v", err)
+	}
 
-//func (p *parser) parseTargets() []app.Target {
-//	targets := make([]app.Target, 0)
-//	for !p.isAtEnd() {
-//		targets = append(targets, p.parseTarget())
-//	}
-//	return targets
-//}
+	return app.Target{Resource: resource, Action: action}, nil
+}
 
-//func (p *parser) parseTarget() app.Target {
-//	if p.match(ansible) {
-//	}
-//
-//	return p.singleResource()
-//}
-//
-//func (p *parser) singleResource() {
-//}
+func parseResource(current int, tokens []token) (int, app.Resource, error) {
+	if tokens[current] == ansible {
+		newCurrent := advance(current, tokens)
+		if tokens[newCurrent] == playbook {
+			return advance(newCurrent, tokens), app.AnsiblePlaybookResource, nil
+		} else if tokens[newCurrent] == inventory {
+			return advance(newCurrent, tokens), app.AnsibleInventoryResource, nil
+		} else {
+			return advance(newCurrent, tokens), "", fmt.Errorf("invalid resource")
+		}
+	} else if tokens[current] == ssh {
+		return advance(current, tokens), app.SSHResource, nil
+	} else if tokens[current] == terraform {
+		return advance(current, tokens), app.TerraformResource, nil
+	} else {
+		return current, "", fmt.Errorf("invalid resource")
+	}
+}
 
-//func (p *parser) match(tokens ...token) bool {
-//	for _, token := range tokens {
-//		if p.check(token) {
-//			p.advance()
-//			return true
+func parseAction(current int, tokens []token) (app.Action, error) {
+	switch tokens[current] {
+	if tokens[current] == run {
+		return app.RunAction, nil
+	} else if tokens[current] == add {
+		return app.AddAction, nil
+	} else if tokens[current] == apply {
+		return app.ApplyAction, nil
+	} else {
+		return "", fmt.Errorf("invalid resource")
+	}
+	}
+}
+
+//	func match(current int, tokens []token, token token) (int, bool) {
+//		if tokens[current] == token {
+//			newCurrent := advance(current, tokens)
+//			return newCurrent, true
 //		}
+//		return current, false
 //	}
-//	return false
-//}
-
-//func (p *parser) check(token token) bool {
-//	if p.isAtEnd() {
-//		return false
-//	}
-//	return p.peek().token == token
-//}
-//
-//func (p *parser) advance() token {
-//	if !p.isAtEnd() {
-//		p.current += 1
-//	}
-//	return previous()
-//}
-//
-//func (p *parser) isAtEnd() bool {
-//	return p.peek().token == EOF
-//}
-//
-//func (p *parser) peek() token {
-//	return p.tokens[p.current]
-//}
-//
-//func (p *parser) previous() token {
-//	return p.tokens[p.current-1]
-//}
+func advance(current int, tokens []token) int {
+	if tokens[current] == eof {
+		return current
+	}
+	return current + 1
+}

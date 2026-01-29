@@ -115,13 +115,11 @@ Goals:
 
 ```
 command = resource action host
-        | CHECK host targets
+        | CHECK host target
 
 resource = ANSIBLE ansible-subcommand
-         | single-resource
-
-single-resource = SSH
-                | TERRAFORM
+         | SSH
+         | TERRAFORM
 
 action = ADD
        | RUN
@@ -129,11 +127,7 @@ action = ADD
 
 host = STRING
 
-targets = target
-        | target targets
-
-target = ANSIBLE ":" ansible-subcommand ":" action
-       | single-resource ":" action
+target = resource action
 
 ansible-subcommand = INVENTORY
                    | PLAYBOOK
