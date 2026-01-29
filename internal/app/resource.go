@@ -5,8 +5,10 @@ import "fmt"
 type Resource string
 
 const (
-	AnsiblePlaybookResource Resource = "ansiblePlaybook"
-	SSHResource             Resource = "ssh"
+	AnsiblePlaybookResource  Resource = "ansiblePlaybook"
+	AnsibleInventoryResource Resource = "ansibleInventory"
+	TerraformResource        Resource = "terraformResource"
+	SSHResource              Resource = "ssh"
 )
 
 func StringToResource(s string) (Resource, error) {
