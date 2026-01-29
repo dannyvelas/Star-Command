@@ -31,12 +31,14 @@ func (h AnsibleProxmoxHandler) Execute(config any, hostAlias string) (map[string
 		return nil, fmt.Errorf("internal type error converting config to ansible proxmox config. found: %T", config)
 	}
 
-	execCommand, err := h.getCommand(ansibleProxmoxConfig)
+	cmd, err := h.getCommand(ansibleProxmoxConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error determining if to use root for ansible playbook: %v", err)
 	}
 
-	if err := execCommand.Run(); err != nil {
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("error running ansible proxmox command: %v", err)
 	}
 
