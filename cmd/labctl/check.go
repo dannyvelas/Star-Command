@@ -79,34 +79,33 @@ const (
 
 func toTargets(args []string) ([]app.Target, error) {
 	for _, arg := range args {
-		tokens, errors := scan(arg)
-		fmt.Println(tokens)
-		fmt.Println(errors)
-		target, err := parseTarget(tokens)
+		tokens := scan(arg)
+		target, err := parse(tokens)
 		fmt.Println(target, err)
 	}
 	return nil, errors.New("unimplemented")
 }
 
-func scan(source string) ([]token, []error) {
-	errs := make([]error, 0)
-	tokens := make([]token, 0)
-	start, current := 0, 0
-	for current < len(source) {
-		start = current
-		newCurrent, token, err := scanToken(source, start, current)
-		current = newCurrent
-		if errors.Is(err, errSkip) {
-			continue
-		} else if err != nil {
-			errs = append(errs, err)
-			continue
+func scan(source string) chan token {
+	tokens := make(chan token)
+	go func() {
+		start, current := 0, 0
+		for current < len(source) {
+			start = current
+			newCurrent, token, err := scanToken(source, start, current)
+			current = newCurrent
+			if errors.Is(err, errSkip) {
+				continue
+			} else if err != nil {
+				fmt.Printf("error: %v\n", err)
+				continue
+			}
+			tokens <- token
 		}
-		tokens = append(tokens, token)
-	}
 
-	tokens = append(tokens, eof)
-	return tokens, errs
+		tokens <- eof
+	}()
+	return tokens
 }
 
 var errSkip = fmt.Errorf("skip token")
@@ -139,12 +138,12 @@ func isLower(b byte) bool {
 	return b >= 'a' && b <= 'z'
 }
 
-func parseTarget(tokens []token) (app.Target, error) {
-	newCurrent, resource, err := parseResource(0, tokens)
+func parse(tokens chan token) (app.Target, error) {
+	resource, err := parseResource(tokens)
 	if err != nil {
 		return app.Target{}, fmt.Errorf("error parsing resource: %v", err)
 	}
-	action, err := parseAction(newCurrent, tokens)
+	action, err := parseAction(tokens)
 	if err != nil {
 		return app.Target{}, fmt.Errorf("error parsing action: %v", err)
 	}
@@ -152,29 +151,28 @@ func parseTarget(tokens []token) (app.Target, error) {
 	return app.Target{Resource: resource, Action: action}, nil
 }
 
-func parseResource(current int, tokens []token) (int, app.Resource, error) {
-	switch tokens[current] {
+func parseResource(tokens chan token) (app.Resource, error) {
+	switch <-tokens {
 	case ansible:
-		newCurrent := advance(current, tokens)
-		switch tokens[newCurrent] {
+		switch <-tokens {
 		case playbook:
-			return advance(newCurrent, tokens), app.AnsiblePlaybookResource, nil
+			return app.AnsiblePlaybookResource, nil
 		case inventory:
-			return advance(newCurrent, tokens), app.AnsibleInventoryResource, nil
+			return app.AnsibleInventoryResource, nil
 		default:
-			return advance(newCurrent, tokens), "", fmt.Errorf("invalid resource")
+			return "", fmt.Errorf("invalid resource")
 		}
 	case ssh:
-		return advance(current, tokens), app.SSHResource, nil
+		return app.SSHResource, nil
 	case terraform:
-		return advance(current, tokens), app.TerraformResource, nil
+		return app.TerraformResource, nil
 	default:
-		return current, "", fmt.Errorf("invalid resource")
+		return "", fmt.Errorf("invalid resource")
 	}
 }
 
-func parseAction(current int, tokens []token) (app.Action, error) {
-	switch tokens[current] {
+func parseAction(tokens chan token) (app.Action, error) {
+	switch <-tokens {
 	case run:
 		return app.RunAction, nil
 	case add:
@@ -184,11 +182,4 @@ func parseAction(current int, tokens []token) (app.Action, error) {
 	default:
 		return "", fmt.Errorf("invalid resource")
 	}
-}
-
-func advance(current int, tokens []token) int {
-	if tokens[current] == eof {
-		return current
-	}
-	return current + 1
 }
