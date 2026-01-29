@@ -80,7 +80,7 @@ func (h AnsibleProxmoxHandler) checkSSH(config *ansibleProxmoxConfig) error {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // StrictHostKeyChecking=no
 	}
 
-	addr := fmt.Sprintf("%s:%d", config.NodeIP, config.SSHPort)
+	addr := fmt.Sprintf("%s:%s", config.NodeIP, config.SSHPort)
 	client, err := ssh.Dial("tcp", addr, sshClientConfig)
 	if err != nil {
 		return fmt.Errorf("%w: %v", errConnectingSSH, err)
