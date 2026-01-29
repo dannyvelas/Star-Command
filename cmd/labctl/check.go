@@ -153,45 +153,39 @@ func parseTarget(tokens []token) (app.Target, error) {
 }
 
 func parseResource(current int, tokens []token) (int, app.Resource, error) {
-	if tokens[current] == ansible {
+	switch tokens[current] {
+	case ansible:
 		newCurrent := advance(current, tokens)
-		if tokens[newCurrent] == playbook {
+		switch tokens[newCurrent] {
+		case playbook:
 			return advance(newCurrent, tokens), app.AnsiblePlaybookResource, nil
-		} else if tokens[newCurrent] == inventory {
+		case inventory:
 			return advance(newCurrent, tokens), app.AnsibleInventoryResource, nil
-		} else {
+		default:
 			return advance(newCurrent, tokens), "", fmt.Errorf("invalid resource")
 		}
-	} else if tokens[current] == ssh {
+	case ssh:
 		return advance(current, tokens), app.SSHResource, nil
-	} else if tokens[current] == terraform {
+	case terraform:
 		return advance(current, tokens), app.TerraformResource, nil
-	} else {
+	default:
 		return current, "", fmt.Errorf("invalid resource")
 	}
 }
 
 func parseAction(current int, tokens []token) (app.Action, error) {
 	switch tokens[current] {
-	if tokens[current] == run {
+	case run:
 		return app.RunAction, nil
-	} else if tokens[current] == add {
+	case add:
 		return app.AddAction, nil
-	} else if tokens[current] == apply {
+	case apply:
 		return app.ApplyAction, nil
-	} else {
+	default:
 		return "", fmt.Errorf("invalid resource")
-	}
 	}
 }
 
-//	func match(current int, tokens []token, token token) (int, bool) {
-//		if tokens[current] == token {
-//			newCurrent := advance(current, tokens)
-//			return newCurrent, true
-//		}
-//		return current, false
-//	}
 func advance(current int, tokens []token) int {
 	if tokens[current] == eof {
 		return current
