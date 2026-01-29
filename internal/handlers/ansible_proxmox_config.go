@@ -11,10 +11,12 @@ import (
 
 type ansibleProxmoxConfig struct {
 	// Required
+	SSHPrivateKeyPath    string `json:"ssh_priavate_key_path" required:"true"`
 	SSHPublicKeyPath     string `json:"ssh_public_key_path" required:"true"`
 	NodeCIDRAddress      string `json:"node_cidr_address" required:"true"`
 	GatewayAddress       string `json:"gateway_address" required:"true"`
 	PhysicalNIC          string `json:"physical_nic" required:"true"`
+	SSHUser              string `json:"ssh_user" required:"true"`
 	SSHPort              string `json:"ssh_port" required:"true"`
 	AutoUpdateRebootTime string `json:"auto_update_reboot_time" required:"true"`
 	AdminEmail           string `json:"admin_email" required:"true"`
@@ -54,10 +56,17 @@ func (c *ansibleProxmoxConfig) FillInKeys() error {
 	}
 	c.NodeIP = prefix.Addr().String()
 
+	expandedPrivateKeyPath, err := helpers.ExpandPath(c.SSHPrivateKeyPath)
+	if err != nil {
+		return fmt.Errorf("error expanding path(%s): %v", c.SSHPrivateKeyPath, err)
+	}
+	c.SSHPrivateKeyPath = expandedPrivateKeyPath
+
 	expandedPublicKeyPath, err := helpers.ExpandPath(c.SSHPublicKeyPath)
 	if err != nil {
 		return fmt.Errorf("error expanding path(%s): %v", c.SSHPublicKeyPath, err)
 	}
+	c.SSHPublicKeyPath = expandedPublicKeyPath
 
 	bytes, err := os.ReadFile(expandedPublicKeyPath)
 	if err != nil {
