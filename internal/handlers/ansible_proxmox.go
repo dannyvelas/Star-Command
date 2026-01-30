@@ -126,6 +126,7 @@ func (h AnsibleProxmoxHandler) addTerraformTokenToBitwarden(config *ansibleProxm
 	}
 
 	if ok && token != existingSecret.Value {
+		// without this, bwClient will create an additional secret with the same key
 		if err := bwClient.DeleteSecret(existingSecret.ID); err != nil {
 			return fmt.Errorf("error deleting previously-existing secret with a different value: %v", err)
 		}
