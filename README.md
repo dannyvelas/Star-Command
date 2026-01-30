@@ -42,7 +42,6 @@
   - Run `cp .env.example .env` and fill out those values to authenticate to Bitwarden.
   - Add your configs in any combination of: `./config/all.yml`, `./config/proxmox.yml`, the environment (or `.env`), and a Bitwarden secrets vault.
 - Run `task setup:proxmox`.
-- That will show you the API token that was created for the Terraform Proxmox user. Save this in Bitwarden.
 
 </details>
 
