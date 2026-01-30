@@ -126,21 +126,6 @@
       failed_when: role_assign_result.rc != 0
       changed_when: false
 
-    - name: Create Terraform API token
-      command: pveum user token add terraform@pve provider --privsep=0
-      register: token_output
-      failed_when: token_output.rc != 0 and 'Token already exists' not in token_output.stderr
-      changed_when: token_output.rc == 0
-
-    - name: Display Terraform API token
-      debug:
-        msg: |
-          ===============================
-          SAVE THIS TERRAFORM API TOKEN:
-          {{ token_output.stdout }}
-          ===============================
-      when: token_output.rc == 0
-
     ### Proxmox storage
     - name: Read current Proxmox storage config
       command: 'grep -A2 "dir: local" /etc/pve/storage.cfg'
