@@ -49,7 +49,7 @@ func (h AnsibleProxmoxHandler) Execute(config any, hostAlias string) (map[string
 		return nil, fmt.Errorf("error creating token for terraform user: %v", err)
 	}
 
-	if err := h.addSecretToBitwarden(ansibleProxmoxConfig, "proxmox_terraform_user_api_token", token); err != nil {
+	if err := h.addTerraformTokenToBitwarden(ansibleProxmoxConfig, token); err != nil {
 		return nil, fmt.Errorf("error adding secret to bitwarden: %v", err)
 	}
 
@@ -99,7 +99,7 @@ func (h AnsibleProxmoxHandler) createTokenForTerraformUser(config *ansibleProxmo
 	return stdout.String(), nil
 }
 
-func (h AnsibleProxmoxHandler) addSecretToBitwarden(config *ansibleProxmoxConfig, key, value string) error {
+func (h AnsibleProxmoxHandler) addTerraformTokenToBitwarden(config *ansibleProxmoxConfig, token string) error {
 	bwClient, err := client.NewBitwardenClient(
 		config.BitwardenAPIURL,
 		config.BitwardenIdentityURL,
@@ -112,7 +112,7 @@ func (h AnsibleProxmoxHandler) addSecretToBitwarden(config *ansibleProxmoxConfig
 		return fmt.Errorf("error initializing bitwarden client: %v", err)
 	}
 
-	if err := bwClient.CreateSecret(key, value); err != nil {
+	if err := bwClient.CreateSecret(config.BitwardenTerraformTokenKey, token); err != nil {
 		return fmt.Errorf("error creating bitwarden secret: %v", err)
 	}
 

@@ -25,12 +25,13 @@ type ansibleProxmoxConfig struct {
 	SMTPPassword         string `json:"smtp_password" required:"true"`
 
 	// fields needed to upload secrets to bitwarden
-	BitwardenAPIURL         string `json:"bitwarden_api_url" required:"true"`
-	BitwardenIdentityURL    string `json:"bitwarden_identity_url" required:"true"`
-	BitwardenAccessToken    string `json:"bitwarden_access_token" required:"true"`
-	BitwardenProjectID      string `json:"bitwarden_project_id" required:"true"`
-	BitwardenOrganizationID string `json:"bitwarden_organization_id" required:"true"`
-	BitwardenStateFilePath  string `json:"bitwarden_state_file_path" required:"true"`
+	BitwardenAPIURL            string `json:"bitwarden_api_url" required:"true"`
+	BitwardenIdentityURL       string `json:"bitwarden_identity_url" required:"true"`
+	BitwardenAccessToken       string `json:"bitwarden_access_token" required:"true"`
+	BitwardenProjectID         string `json:"bitwarden_project_id" required:"true"`
+	BitwardenOrganizationID    string `json:"bitwarden_organization_id" required:"true"`
+	BitwardenStateFilePath     string `json:"bitwarden_state_file_path" required:"true"`
+	BitwardenTerraformTokenKey string `json:"bitwarden_terraform_token_key" required:"true"`
 
 	// Injected
 	NodeIP       string `json:"node_ip"`
