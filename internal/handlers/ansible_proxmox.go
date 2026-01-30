@@ -37,19 +37,19 @@ func (h AnsibleProxmoxHandler) Execute(config any, hostAlias string) (map[string
 		return nil, fmt.Errorf("internal type error converting config to ansible proxmox config. found: %T", config)
 	}
 
-	if err := h.runAnsiblePlaybook(ansibleProxmoxConfig); err != nil {
-		return nil, fmt.Errorf("error running ansible playbook: %v", err)
-	}
+	//	if err := h.runAnsiblePlaybook(ansibleProxmoxConfig); err != nil {
+	//		return nil, fmt.Errorf("error running ansible playbook: %v", err)
+	//	}
+	//
+	//	token, err := h.createTokenForTerraformUser(ansibleProxmoxConfig)
+	//	if errors.Is(err, errAlreadyExists) {
+	//		// if already exists, no need to proceed
+	//		return nil, nil
+	//	} else if err != nil {
+	//		return nil, fmt.Errorf("error creating token for terraform user: %v", err)
+	//	}
 
-	token, err := h.createTokenForTerraformUser(ansibleProxmoxConfig)
-	if errors.Is(err, errAlreadyExists) {
-		// if already exists, no need to proceed
-		return nil, nil
-	} else if err != nil {
-		return nil, fmt.Errorf("error creating token for terraform user: %v", err)
-	}
-
-	if err := h.addTerraformTokenToBitwarden(ansibleProxmoxConfig, token); errors.Is(err, errAlreadyExists) {
+	if err := h.addTerraformTokenToBitwarden(ansibleProxmoxConfig, "newvalue"); errors.Is(err, errAlreadyExists) {
 		// this is okay
 		return nil, nil
 	} else if err != nil {
@@ -120,8 +120,15 @@ func (h AnsibleProxmoxHandler) addTerraformTokenToBitwarden(config *ansibleProxm
 		return fmt.Errorf("error reading bitwarden secrets: %v", err)
 	}
 
-	if _, ok := secrets[config.BitwardenTerraformTokenKey]; ok {
+	existingSecret, ok := secrets[config.BitwardenTerraformTokenKey]
+	if ok && token == existingSecret.Value {
 		return errAlreadyExists
+	}
+
+	if ok && token != existingSecret.Value {
+		if err := bwClient.DeleteSecret(existingSecret.Value); err != nil {
+			return fmt.Errorf("error deleting previously-existing secret with a different value: %v", err)
+		}
 	}
 
 	if err := bwClient.CreateSecret(config.BitwardenTerraformTokenKey, token); err != nil {

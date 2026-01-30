@@ -43,11 +43,12 @@ type ansibleProxmoxConfig struct {
 // NewAnsibleProxmoxConfig returns a pointer to a Proxmox struct with some defaults
 func newAnsibleProxmoxConfig() *ansibleProxmoxConfig {
 	return &ansibleProxmoxConfig{
-		SSHPort:                "22",
-		AutoUpdateRebootTime:   "05:00",
-		BitwardenAPIURL:        "https://api.bitwarden.com",
-		BitwardenIdentityURL:   "https://identity.bitwarden.com",
-		BitwardenStateFilePath: ".bw_state",
+		SSHPort:                    "22",
+		AutoUpdateRebootTime:       "05:00",
+		BitwardenAPIURL:            "https://api.bitwarden.com",
+		BitwardenIdentityURL:       "https://identity.bitwarden.com",
+		BitwardenStateFilePath:     ".bw_state",
+		BitwardenTerraformTokenKey: "proxmox_terraform_user_api_token",
 	}
 }
 

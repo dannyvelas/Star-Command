@@ -29,8 +29,8 @@ func NewBitwardenClient(apiURL, identityURL, accessToken, organizationID, projec
 	}, nil
 }
 
-func (c BitwardenClient) ReadSecrets() (map[string]string, error) {
-	m := make(map[string]string)
+func (c BitwardenClient) ReadSecrets() (map[string]*sdk.SecretResponse, error) {
+	m := make(map[string]*sdk.SecretResponse)
 
 	secrets := c.client.Secrets()
 	listResponse, err := secrets.List(c.organizationID)
@@ -44,7 +44,7 @@ func (c BitwardenClient) ReadSecrets() (map[string]string, error) {
 			return nil, fmt.Errorf("error getting secret: %v", err)
 		}
 
-		m[secret.Key] = secretData.Value
+		m[secret.Key] = secretData
 	}
 
 	return m, nil
@@ -52,5 +52,10 @@ func (c BitwardenClient) ReadSecrets() (map[string]string, error) {
 
 func (c BitwardenClient) CreateSecret(key, value string) error {
 	_, err := c.client.Secrets().Create(key, value, "", c.organizationID, []string{c.projectID})
+	return err
+}
+
+func (c BitwardenClient) DeleteSecret(id string) error {
+	_, err := c.client.Secrets().Delete([]string{id})
 	return err
 }
