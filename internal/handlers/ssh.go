@@ -36,14 +36,14 @@ func (h SSHHandler) Execute(config any, hostAlias string) (map[string]string, er
 
 	sshConfig, ok := config.(*sshConfig)
 	if !ok {
-		return nil, fmt.Errorf("internal type error converting config to ssh config. found: %T", config)
+		return diagnostics, fmt.Errorf("internal type error converting config to ssh config. found: %T", config)
 	}
 
 	sshFilePath := filepath.Join(h.homeDir, ".ssh", "config")
 
 	alreadyExists, err := h.contentAlreadyExists(sshFilePath, hostAlias)
 	if err != nil {
-		return nil, fmt.Errorf("error checking if %s already exists in %s file: %v", hostAlias, sshFilePath, err)
+		return diagnostics, fmt.Errorf("error checking if %s already exists in %s file: %v", hostAlias, sshFilePath, err)
 	}
 
 	if alreadyExists {
@@ -52,7 +52,7 @@ func (h SSHHandler) Execute(config any, hostAlias string) (map[string]string, er
 	}
 
 	if err := h.writeFile(sshConfig, sshFilePath); err != nil {
-		return nil, fmt.Errorf("error writing to %s file: %v", sshFilePath, err)
+		return diagnostics, fmt.Errorf("error writing to %s file: %v", sshFilePath, err)
 	}
 
 	return diagnostics, nil
