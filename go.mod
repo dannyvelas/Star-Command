@@ -15,6 +15,11 @@ require (
 require (
 	github.com/bitwarden/sdk-go v1.0.2 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/hashicorp/go-version v1.8.0 // indirect
+	github.com/hashicorp/hc-install v0.9.2 // indirect
+	github.com/hashicorp/terraform-exec v0.24.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	golang.org/x/sys v0.40.0 // indirect
