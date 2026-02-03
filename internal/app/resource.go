@@ -3,8 +3,8 @@ package app
 type resource string
 
 const (
-	ansiblePlaybookResource  resource = "ansiblePlaybook"
-	ansibleInventoryResource resource = "ansibleInventory"
-	terraformResource        resource = "terraformResource"
+	ansiblePlaybookResource  resource = "ansible playbook"
+	ansibleInventoryResource resource = "ansible inventory"
+	terraformResource        resource = "terraform"
 	sshResource              resource = "ssh"
 )
