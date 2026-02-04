@@ -31,3 +31,4 @@ tasks:
     cmds:
       - ./bin/labctl ansible playbook run proxmox
       - ./bin/labctl ssh add proxmox
+      - ./bin/labctl terraform apply proxmox
