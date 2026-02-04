@@ -14,8 +14,7 @@ import (
 	"github.com/hashicorp/hc-install/releases"
 	"github.com/hashicorp/hc-install/src"
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/gohcl"
-	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/zclconf/go-cty/cty"
@@ -70,85 +69,54 @@ func (h TerraformProxmoxHandler) Execute(ctx context.Context, config any, hostAl
 }
 
 func (h TerraformProxmoxHandler) upsertTerraformVersion(desiredVersion string) error {
-	currentTerraformVersion, err := h.getTerraformVersion()
-	if err != nil && !errors.Is(err, errNotFound) {
-		return fmt.Errorf("error getting terraform version: %v", err)
-	}
-
-	// if found same version, no need to update
-	if err == nil && currentTerraformVersion == desiredVersion {
-		return errAlreadyExists
-	}
-
-	// if found different version, or if did not find terraform version, set new version
-	if err := h.setTerraformVersion(desiredVersion); err != nil {
-		return fmt.Errorf("error setting terraform version: %v", err)
-	}
-
-	return nil
-}
-
-func (h TerraformProxmoxHandler) getTerraformVersion() (string, error) {
-	parser := hclparse.NewParser()
-
-	file, diags := parser.ParseHCLFile(h.terraformFilePath)
-	if diags.HasErrors() {
-		return "", fmt.Errorf("error parsing HCL file: %v", diags)
-	}
-
-	schema := &hcl.BodySchema{Blocks: []hcl.BlockHeaderSchema{{Type: "terraform"}}}
-	content, _, diags := file.Body.PartialContent(schema)
-	if diags.HasErrors() {
-		return "", fmt.Errorf("error getting partial content from hcl file %s: %v", h.terraformFilePath, diags)
-	}
-
-	for _, block := range content.Blocks {
-		if block.Type != "terraform" {
-			continue
-		}
-
-		var tf terraformBlock
-		decodeDiags := gohcl.DecodeBody(block.Body, nil, &tf)
-		if decodeDiags.HasErrors() {
-			return "", fmt.Errorf("error decoding terraform block: %v", decodeDiags)
-		}
-
-		if tf.RequiredVersion == "" {
-			continue
-		}
-
-		return tf.RequiredVersion, nil
-	}
-
-	return "", fmt.Errorf("terraform block %w", errNotFound)
-}
-
-func (h TerraformProxmoxHandler) setTerraformVersion(desiredVersion string) error {
 	src, err := os.ReadFile(h.terraformFilePath)
 	if err != nil {
 		return fmt.Errorf("error reading terraform file at %s: %v", h.terraformFilePath, err)
 	}
 
-	f, diags := hclwrite.ParseConfig(src, h.terraformFilePath, hcl.InitialPos)
+	newFileByes, err := transformTerraformVersion(src, h.terraformFilePath, desiredVersion)
+	if err != nil && !errors.Is(err, errAlreadyExists) {
+		return fmt.Errorf("error transforming terraform file to have new version: %v", err)
+	}
+
+	if errors.Is(err, errAlreadyExists) {
+		return errAlreadyExists
+	}
+
+	if err := os.WriteFile(h.terraformFilePath, newFileByes, 0o644); err != nil {
+		return fmt.Errorf("error writing file: %v", err)
+	}
+
+	return nil
+}
+
+func transformTerraformVersion(src []byte, filePath string, version string) ([]byte, error) {
+	f, diags := hclwrite.ParseConfig(src, filePath, hcl.Pos{Line: 1, Column: 1})
 	if diags.HasErrors() {
-		return fmt.Errorf("error parsing HCL: %v", diags)
+		return nil, fmt.Errorf("failed to parse HCL: %s", diags)
 	}
 
 	rootBody := f.Body()
-
 	tfBlock := rootBody.FirstMatchingBlock("terraform", nil)
+
 	if tfBlock == nil {
 		tfBlock = rootBody.AppendNewBlock("terraform", nil)
 	}
 
 	tfBody := tfBlock.Body()
-	tfBody.SetAttributeValue("required_version", cty.StringVal(desiredVersion))
-
-	if err := os.WriteFile(h.terraformFilePath, f.Bytes(), 0o644); err != nil {
-		return fmt.Errorf("error writing file: %v", err)
+	attr := tfBody.GetAttribute("required_version")
+	if attr != nil {
+		tokens := attr.Expr().BuildTokens(nil)
+		for _, t := range tokens {
+			if t.Type == hclsyntax.TokenQuotedLit && string(t.Bytes) == version {
+				return nil, errAlreadyExists
+			}
+		}
 	}
 
-	return nil
+	tfBody.SetAttributeValue("required_version", cty.StringVal(version))
+
+	return f.Bytes(), nil
 }
 
 func (h TerraformProxmoxHandler) locateTerraform(ctx context.Context, desiredVersion string) (string, error) {
