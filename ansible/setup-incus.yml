@@ -1,6 +1,6 @@
 ---
 - name: Bootstrap Incus Server
-  hosts: proxmox # reusing the 'proxmox' group alias for the physical server for now, user can rename in inventory later
+  hosts: incus
   become: true
   vars:
     incus_storage_driver: dir # or zfs/btrfs based on user pref. safe default is dir.
@@ -11,7 +11,7 @@
     - ssh_harden
     - automated_updates
     - postfix_relay
-  
+
   tasks:
     - name: Install Incus (and dependencies)
       ansible.builtin.apt:
