@@ -2,7 +2,7 @@ terraform {
   required_providers {
     incus = {
       source  = "lxc/incus"
-      version = ">= 0.1.0"
+      version = ">= 1.0.0"
     }
   }
 }
@@ -15,7 +15,7 @@ provider "incus" {
 
 resource "incus_profile" "wireguard" {
   name = "wireguard"
-  
+
   # Expose UDP 51820 for VPN Handshake
   device {
     name = "vpn_handshake"
@@ -43,11 +43,11 @@ resource "incus_instance" "wireguard_vm" {
   image     = "images:ubuntu/24.04"
   type      = "virtual-machine"
   ephemeral = false
-  
+
   profiles = ["basic", "management", incus_profile.wireguard.name]
 
   config = {
-    "limits.cpu" = "2"
+    "limits.cpu"    = "2"
     "limits.memory" = "4GiB"
     # Ensure guest agent channel is available
     "user.user-data" = <<-EOT
@@ -66,7 +66,7 @@ resource "incus_instance" "wireguard_vm" {
     name = "eth0"
     type = "nic"
     properties = {
-      network      = "incusbr0"
+      network        = "incusbr0"
       "ipv4.address" = var.ip
     }
   }

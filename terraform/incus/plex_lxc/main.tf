@@ -2,7 +2,7 @@ terraform {
   required_providers {
     incus = {
       source  = "lxc/incus"
-      version = ">= 0.1.0"
+      version = ">= 1.0.0"
     }
   }
 }
@@ -15,7 +15,7 @@ provider "incus" {
 
 resource "incus_profile" "plex" {
   name = "plex"
-  
+
   # Expose port 32400 via proxy device (Host Port -> Container Port)
   device {
     name = "plex_web"
@@ -32,7 +32,7 @@ resource "incus_instance" "plex_lxc" {
   image     = "images:ubuntu/24.04"
   type      = "container"
   ephemeral = false
-  
+
   profiles = ["basic", "management", incus_profile.plex.name]
 
   # Override eth0 from 'basic' profile to add static IP
@@ -40,7 +40,7 @@ resource "incus_instance" "plex_lxc" {
     name = "eth0"
     type = "nic"
     properties = {
-      network      = "incusbr0"
+      network        = "incusbr0"
       "ipv4.address" = var.ip
     }
   }
@@ -64,7 +64,7 @@ resource "incus_instance" "plex_lxc" {
       path   = "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server"
     }
   }
-  
+
   # Ensure Cloud Init SSH key is present (inherited from management, 
   # but we define ssh_public_key_path variable to facilitate if we need customization)
 }
