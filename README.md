@@ -46,9 +46,9 @@
 - **Bootstrap Incus & Harden**:
   This sets up Incus, initializes storage/network, hardens SSH (Port 17031), and sets up auto-updates.
   ```bash
-  ansible-playbook -i ansible/inventory.ini ansible/incus-deploy.yml --ask-become-pass --ask-vault-pass
+  ansible-playbook -i ansible/inventory.ini ansible/setup-incus.yml --ask-become-pass --ask-vault-pass
   ```
-  *(Note: Ensure your `inventory.ini` has the correct IP for the `proxmox` host entry)*
+  *(Note: Ensure your `inventory.ini` has the correct IP for the `incus` host entry)*
 
 </details>
 
