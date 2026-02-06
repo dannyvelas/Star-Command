@@ -102,7 +102,6 @@
   ```bash
   ansible-playbook -i ansible/inventory.ini ansible/setup-plex-lxc.yml --ask-vault-pass
   ```
-  *(Note: We skip `bootstrap-plex-lxc.yml` as Incus handles the SSH setup natively)*
 
 </details>
 
