@@ -78,6 +78,8 @@
 - [ ] is there a way to mid-playbook switch from "root" to "admin" after ssh_harden runs? if so, do it
   - ehhh it's kind of a pain. better to just split it into two playbooks.
   - so this new to-do item is to switch ssh-hardening to be its own playbook instead of its own role. and, you'll just have to execute both playbooks for the first time
+- [ ] migrate README to new labctl
+- [ ] migrate taskfile to new labctl
 - [ ] migrate labctl to use terraform for incus plex LXC instead of proxmox
 - [ ] migrate labctl to use ansible for incus instead of proxmox
 - [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
@@ -89,15 +91,6 @@
 ## infra maybe
 - [ ] create a "base" terraform LXC module
 - [ ] create a "base" terraform VM module
-
-## infra not doing
-- [ ] remove all ansible firewall logic. make it all terraform (need to use latest version of `bpg/terraform-provider-proxmox` after new release happens)
-- [ ] add jump-host LXC (re-adding tailscale stuff to README for it)
-- [ ] add jump-host LXC to readme
-- [ ] see if there are any changes that need to be made to jumpLXC for firewall
-- [ ] move configure apt stuff from ansible to terraform
-- [ ] it seems like sometimes "terraform destroy" on the "global" terraform project doesn't actually clean the `/etc/pve/firewall/cluster.fw` settings. check if this is consistent and why this is happening. also, fix it
-- [ ] figure out a way to make it so that plex data (about watch history, users with access to my plex) is stored somewhere externally so that if I nuke Proxmox, it doesn't get lost.
 
 ## coding todos
 - [x] make `handler.SetFile` more testable
