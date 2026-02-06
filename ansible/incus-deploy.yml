@@ -1,0 +1,58 @@
+---
+- name: Bootstrap Incus Server
+  hosts: proxmox # reusing the 'proxmox' group alias for the physical server for now, user can rename in inventory later
+  become: true
+  vars:
+    incus_storage_driver: dir # or zfs/btrfs based on user pref. safe default is dir.
+    incus_storage_pool_name: default
+    ssh_public_key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+
+  roles:
+    - ssh_harden
+    - automated_updates
+    - postfix_relay
+  
+  tasks:
+    - name: Install Incus (and dependencies)
+      ansible.builtin.apt:
+        name:
+          - incus
+          - incus-tools
+        state: present
+        update_cache: yes
+
+    - name: Ensure 'incus-admin' group exists
+      ansible.builtin.group:
+        name: incus-admin
+        state: present
+
+    - name: Add admin user to incus-admin group
+      ansible.builtin.user:
+        name: "{{ ansible_user | default(lookup('env', 'USER')) }}"
+        groups: incus-admin
+        append: yes
+
+    - name: Ensure Incus service is started and enabled
+      ansible.builtin.service:
+        name: incus
+        state: started
+        enabled: yes
+
+    - name: Initialize Incus Storage Pool (default)
+      lxc.incus.incus_storage_pool:
+        name: "{{ incus_storage_pool_name }}"
+        driver: "{{ incus_storage_driver }}"
+        config:
+          source: /var/lib/incus/storage-pools/default
+        state: present
+      # If this fails because the collection isn't installed yet, the user needs to run `ansible-galaxy install -r requirements.yml`
+
+    - name: Initialize Incus Network (incusbr0)
+      lxc.incus.incus_network:
+        name: incusbr0
+        type: bridge
+        config:
+          "ipv4.address": "10.0.0.1/24"
+          "ipv4.nat": "true"
+          "ipv6.address": "none"
+        state: present
