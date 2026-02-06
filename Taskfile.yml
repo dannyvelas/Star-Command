@@ -25,9 +25,10 @@ tasks:
     run: once
 
   setup:proxmox:
-    desc: This task sets up proxmox after booting it for the first time.
+    desc: >
+      This task configures proxmox after booting it for the first time.
+      It also creates some firewall rules and security groups.
     deps: [build:labctl]
-
     cmds:
       - ./bin/labctl ansible playbook run proxmox
       - ./bin/labctl ssh add proxmox
@@ -41,7 +42,7 @@ tasks:
     run: once
 
   setup:plex:
-    desc: This task sets up plex after booting it for the first time.
+    desc: This task provisions and configures a plex LXC
     deps: [build:labctl]
 
     cmds:
