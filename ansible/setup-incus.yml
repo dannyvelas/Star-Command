@@ -77,10 +77,10 @@
         interface: incusbr0
         comment: "Allow container traffic to host (DNS/DHCP)"
 
-    - name: Block Plex from accessing LAN (Egress Filtering)
+    - name: Block Incus Subnet from accessing LAN (Egress Filtering)
       community.general.ufw:
         rule: deny
         route: yes
-        from_ip: "10.0.100.85"
+        from_ip: "10.0.100.0/24"
         to_ip: "10.0.0.0/24"
-        comment: "Block Plex -> LAN"
+        comment: "Block Incus -> LAN"
