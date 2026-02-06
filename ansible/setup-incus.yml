@@ -6,11 +6,17 @@
     incus_storage_driver: dir # or zfs/btrfs based on user pref. safe default is dir.
     incus_storage_pool_name: default
     ssh_public_key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+    
+    # Tailscale Configuration
+    tailscale_auth_key: "{{ tailscale_key }}"
+    tailscale_args: "--advertise-routes=10.0.0.0/24"
+    tailscale_ssh_enabled: true
 
   roles:
     - ssh_harden
     - automated_updates
     - postfix_relay
+    - role: artis3n.tailscale.tailscale
     - ufw
 
   tasks:

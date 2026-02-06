@@ -27,6 +27,16 @@ resource "incus_profile" "plex" {
       connect = "tcp:127.0.0.1:32400"
     }
   }
+
+  # Expose port 17031 via proxy device (Host Port -> Container Port 22)
+  device {
+    name = "plex_ssh"
+    type = "proxy"
+    properties = {
+      listen  = "tcp:0.0.0.0:17031"
+      connect = "tcp:127.0.0.1:22"
+    }
+  }
 }
 
 resource "incus_instance" "plex_lxc" {

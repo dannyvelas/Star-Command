@@ -1,2 +1,3 @@
 collections:
   - name: lxc.incus
+  - name: artis3n.tailscale
