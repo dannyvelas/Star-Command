@@ -92,7 +92,7 @@
 - Create `terraform.tfvars`:
   ```hcl
   incus_remote = "my-homelab"
-  ip           = "10.0.0.85"
+  ip           = "10.0.100.85"
   # Optional: ssh_public_key_path = "~/.ssh/id_ed25519.pub"
   ```
 - Run `terraform apply`.
@@ -114,7 +114,7 @@
 - Create `terraform.tfvars`:
   ```hcl
   incus_remote = "my-homelab"
-  ip           = "10.0.0.84"
+  ip           = "10.0.100.84"
   # ssh_public_key_path = "..."
   ```
 - Run `terraform apply`.
