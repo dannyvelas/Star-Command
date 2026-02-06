@@ -75,13 +75,11 @@
 ## infra todos
 - [x] make sure incus server host has firewall rules like it did before with terraform
 - [x] make sure plex has firewall rules like it did with terraform
+- [x] migrate README to new labctl
+- [x] migrate taskfile to new labctl
 - [ ] is there a way to mid-playbook switch from "root" to "admin" after ssh_harden runs? if so, do it
   - ehhh it's kind of a pain. better to just split it into two playbooks.
   - so this new to-do item is to switch ssh-hardening to be its own playbook instead of its own role. and, you'll just have to execute both playbooks for the first time
-- [ ] migrate README to new labctl
-- [ ] migrate taskfile to new labctl
-- [ ] migrate labctl to use terraform for incus plex LXC instead of proxmox
-- [ ] migrate labctl to use ansible for incus instead of proxmox
 - [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
 
 ## infra next
@@ -97,6 +95,9 @@
 - [x] make it so that my home directory doesn't have to be hardcoded in the tests for `SetFile`
 - [x] make it so that ansible configs are read from a file
 - [x] add context.Background() which is initialized at main and passed into Execute
+- [ ] migrate labctl to use terraform for incus plex LXC instead of proxmox
+- [ ] migrate labctl to use ansible for incus instead of proxmox
+- [ ] make it so that if labctl detects that "terraform init" needs to be run, it will run it
 - [ ] maybe switch "ansibleProxmox" to be called "proxmoxAnsible", and also for terraformProxmox so that its consistent with bitwarden secret "proxmox_terraform_user_api_token"
 - [ ] use `runE` in cobra
 - [ ] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
