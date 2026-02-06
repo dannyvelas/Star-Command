@@ -6,6 +6,7 @@
 * [Terraform](https://developer.hashicorp.com/terraform/install) installed.
 * [Ansible](https://formulae.brew.sh/formula/ansible) installed.
 * [Go](https://go.dev/) installed.
+* [Task](https://taskfile.dev/) installed.
 * A C toolchain on that computer. You can install this on macOS with `xcode-select --install`.
 * A [Tailscale](https://login.tailscale.com/start) account.
 * A Bitwarden account with an organization that uses [Secrets Manager](https://bitwarden.com/help/secrets-manager-quick-start/).
