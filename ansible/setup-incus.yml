@@ -13,11 +13,8 @@
     tailscale_ssh_enabled: true
 
   roles:
-    - ssh_harden
-    - automated_updates
     - postfix_relay
     - artis3n.tailscale.tailscale
-    - ufw
 
   tasks:
     - name: Install Incus (and dependencies)

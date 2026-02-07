@@ -32,11 +32,17 @@ tasks:
     cmds:
       - ./bin/labctl ansible galaxy install requirements
       - ./bin/labctl ansible inventory add incus
+
+      # run ansible-playbook bootstrap-server.yml --limit incus -u root
+      # run ansible-playbook setup-incus.yml
       - ./bin/labctl ansible playbook run incus
+
       - ./bin/labctl ssh add incus
       - incus remote add my-homelab
       - incus remote switch my-homelab
-      - incus list # verify
+
+      # verify
+      - incus list
 
   setup:plex:check:
     desc: "Print report of found/missing plex variables"
@@ -52,4 +58,7 @@ tasks:
     cmds:
       - ./bin/labctl terraform apply plex
       - ./bin/labctl ssh add plex
+
+      # run ansible-playbook bootstrap-server.yml --limit plex_lxc -u root
+      # run ansible-playbook setup-plex-lxc.yml
       - ./bin/labctl ansible playbook run plex

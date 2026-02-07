@@ -1,0 +1,9 @@
+---
+- name: Bootstrap Server (Root Tasks)
+  hosts: all
+  become: true
+  
+  roles:
+    - ufw
+    - ssh_harden
+    - automated_updates
