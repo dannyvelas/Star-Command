@@ -77,10 +77,11 @@
 - [x] make sure plex has firewall rules like it did with terraform
 - [x] migrate README to new labctl
 - [x] migrate taskfile to new labctl
-- [ ] is there a way to mid-playbook switch from "root" to "admin" after ssh_harden runs? if so, do it
+- [x] is there a way to mid-playbook switch from "root" to "admin" after ssh_harden runs? if so, do it
   - ehhh it's kind of a pain. better to just split it into two playbooks.
   - so this new to-do item is to switch ssh-hardening to be its own playbook instead of its own role. and, you'll just have to execute both playbooks for the first time
 - [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
+- [ ] figure out how the remote_server task is going to receive a command-line argument
 
 ## infra next
 - [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox

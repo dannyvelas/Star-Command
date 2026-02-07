@@ -13,11 +13,12 @@
 * Bitwarden credentials (specified iin `.env.example`) defined in the environment (or `.env`).
 
 ## Deployment Reference
-| Component    | Command                 | Action performed                                                    |
-|--------------|-------------------------|---------------------------------------------------------------------|
-| Incus Server | task setup:incus        | Bootstraps host (Ansible) & creates global profiles (Terraform).    |
-| Plex         | task setup:plex         | Deploys container (Terraform) & configures mounts/service (Ansible) |
-| WireGuard    | task setup:wireguard_vm | Deploys VM (Terraform) & exposes UDP+SSH ports.                     |
+| Component     | Command                  | Action performed                                                    |
+|---------------|--------------------------|---------------------------------------------------------------------|
+| Incus Server  | task setup:incus         | Bootstraps host (Ansible) & creates global profiles (Terraform).    |
+| Plex          | task setup:plex          | Deploys container (Terraform) & configures mounts/service (Ansible) |
+| WireGuard     | task setup:wireguard_vm  | Deploys VM (Terraform) & exposes UDP+SSH ports.                     |
+| Remote server | task setup:remote_server | Configures a newly-rented service with hardened security (Ansible)  |
 
 ## Configs
 * Each playbook requires a unique set of configs.
