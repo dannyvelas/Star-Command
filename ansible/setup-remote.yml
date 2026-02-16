@@ -1,5 +1,5 @@
 ---
-- name: Prepare server by hardening SSH and automating updates
+- name: Ansible tasks to set up a remote VPS
   hosts: remote_vps
   become: true
 

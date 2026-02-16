@@ -80,6 +80,9 @@
 - [x] is there a way to mid-playbook switch from "root" to "admin" after ssh_harden runs? if so, do it
   - ehhh it's kind of a pain. better to just split it into two playbooks.
   - so this new to-do item is to switch ssh-hardening to be its own playbook instead of its own role. and, you'll just have to execute both playbooks for the first time
+- [ ] change plex to be a docker image inside of a container
+- [ ] make sure plex VM is mounted as read only
+- [ ] put plex on its own VLAN - would you even be able to?
 - [ ] fix ssh-restart logic in ssh-harden. it seems to always restart ssh.service even if an LXC uses ssh.socket instead
 - [ ] figure out how the remote_server task is going to receive a command-line argument
 

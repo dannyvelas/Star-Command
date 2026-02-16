@@ -26,7 +26,7 @@ tasks:
 
   setup:incus:
     desc: >
-      This task configures proxmox after booting it for the first time.
+      This task configures incus after booting it for the first time.
       It also creates some firewall rules and security groups.
     deps: [build:labctl]
     cmds:
@@ -75,7 +75,7 @@ tasks:
     deps: [build:labctl]
 
     cmds:
-      # adds to [remote_vps] gropu
+      # adds to [remote_vps] group
       - ./bin/labctl ansible inventory add $host
 
       # run ansible-playbook bootstrap-server.yml --limit $host -u root
