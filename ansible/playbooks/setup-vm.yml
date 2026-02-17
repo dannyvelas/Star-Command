@@ -1,9 +1,10 @@
 ---
-- name: Bootstrap Server (Root Tasks)
-  hosts: all
+- name: Setup VM
+  hosts: vms
   become: true
 
   roles:
     - ufw
     - ssh_harden
     - automated_updates
+    - vm_guest

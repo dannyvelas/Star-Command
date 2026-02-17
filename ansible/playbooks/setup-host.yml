@@ -1,12 +1,11 @@
 ---
-- name: Setup Host with email notifications, incus, VPN, and reverse proxy
+- name: Setup Host with additional hardening, email notifications, incus, VPN, and reverse proxy
   hosts: incus
   become: true
-  vars:
-    incus_storage_driver: dir # or zfs/btrfs based on user pref. safe default is dir.
-    incus_storage_pool_name: default
-    ssh_public_key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
 
   roles:
+    - host_harden
     - postfix_relay
     - incus
+    - wireguard
+    - proxy

@@ -1,0 +1,24 @@
+---
+# Dynamic DNS client deployment.
+# Keeps a DDNS hostname updated with the host's public IP.
+# Used by WireGuard (VPN endpoint) and Traefik (app subdomains).
+
+- name: Install ddclient
+  ansible.builtin.apt:
+    name: ddclient
+    state: present
+
+- name: Template ddclient configuration
+  ansible.builtin.template:
+    src: ddclient.conf.j2
+    dest: /etc/ddclient.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart ddclient
+
+- name: Enable and start ddclient service
+  ansible.builtin.systemd:
+    name: ddclient
+    enabled: true
+    state: started

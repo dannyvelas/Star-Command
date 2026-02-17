@@ -18,85 +18,73 @@ tasks:
       - go build -o ./bin/labctl ./cmd/labctl
 
   setup:
-    desc: Set up hosts (all hosts, or one with HOST=<name>)
-    deps: [build:labctl]
-    vars:
-      HOSTS:
-        sh: "{{if .HOST}}echo {{.HOST}}{{else}}./bin/labctl config hosts{{end}}"
-    cmds:
-      - for: { var: HOSTS }
-        task: setup:host
-        vars:
-          HOST: "{{.ITEM}}"
-      - task: setup:connect
-      - incus list
-
-  setup:host:
     internal: true
     deps: [build:labctl]
     cmds:
-      - ./bin/labctl ansible inventory add {{.HOST}}
-      - ./bin/labctl ansible playbook run bootstrap-server.yml --limit {{.HOST}} -u root
-      - ./bin/labctl ansible playbook run setup-incus.yml --limit {{.HOST}}
-      - ./bin/labctl ssh add {{.HOST}}
-
-  setup:connect:
-    internal: true
-    status:
-      - incus remote list -f csv | grep -q my-homelab
-    cmds:
-      - incus remote add my-homelab
-      - incus remote switch my-homelab
+      # for host in hosts {
+      #   ./bin/labctl ansible inventory add {{.HOST}} # creates inventory file with host and also the VMs of this host. if an inventory file already exists, it will override it
+      #   ./bin/labctl ansible playbook run bootstrap-server.yml --limit {{.HOST}} -u root
+      #   ./bin/labctl ansible playbook run setup-host.yml --limit {{.HOST}}
+      #   ./bin/labctl ssh add {{.HOST}}
+      #   ./bin/labctl terrafom apply VM # creates one or more VMs (depending on what is in config) each VM will get an IP which is defined in config
+      #   ./bin/labctl ansible playbook run bootstrap-server.yml --limit vms -u root
+      #   for vm in host.vms {
+      #     ./bin/labctl ssh add vm
+      #   }
+      #   if existing incus cluster {
+      #     ./bin/labctl incus cluster join {{.HOST}}
+      #   } else {
+      #     incus remote add my-homelab
+      #     incus remote switch my-homelab
+      #   }
+      # }
+      # incus list
+      - ./bin/labctl setup {{if .HOST}}--host {{.HOST}}{{end}}
 
   setup:check:
     desc: Validate config for setup (all hosts, or one with HOST=<name>)
     cmds:
-      - ./bin/labctl check ansible:inventory:add ansible:playbook:run ssh:add {{if .HOST}}--host {{.HOST}}{{end}}
+      - ./bin/labctl setup --check {{if .HOST}}--host {{.HOST}}{{end}}
 
   setup:plex:check:
     desc: "Print report of found/missing plex variables"
     deps: [build:labctl]
     cmds:
-      - ./bin/labctl check plex terraform:apply ssh:add ansible:playbook:run
+      - ./bin/labctl service deploy plex --check
     run: once
 
-  setup:plex:
+  deploy:plex:
     desc: This task provisions and configures a plex LXC
     deps: [build:labctl]
     cmds:
-      - ./bin/labctl terraform apply plex
-      - ./bin/labctl ssh add plex
+      - ./bin/labctl service deploy plex
 
-      # run ansible-playbook bootstrap-server.yml --limit plex_lxc -u root
-      # run ansible-playbook setup-plex-lxc.yml
-      - ./bin/labctl ansible playbook run plex
+  # setup:remote_server:check:
+  #   desc: "Print report of found/missing variables for setup:remote_server command"
+  #   deps: [build:labctl]
+  #   vars:
+  #     HOST: "{{.HOST}}"
+  #   preconditions:
+  #     - sh: 'test -n "{{.HOST}}"'
+  #       msg: "Error: 'HOST' variable is required. Run with 'task setup:remote_server:check HOST=your_host'"
+  #   cmds:
+  #     - ./bin/labctl check {{.HOST}} ansible:inventory:add ansible:playbook:run ssh:add
+  #   run: once
 
-  setup:remote_server:check:
-    desc: "Print report of found/missing variables for setup:remote_server command"
-    deps: [build:labctl]
-    vars:
-      HOST: "{{.HOST}}"
-    preconditions:
-      - sh: 'test -n "{{.HOST}}"'
-        msg: "Error: 'HOST' variable is required. Run with 'task setup:remote_server:check HOST=your_host'"
-    cmds:
-      - ./bin/labctl check {{.HOST}} ansible:inventory:add ansible:playbook:run ssh:add
-    run: once
+  # setup:remote_server:
+  #   desc: "Configures a remote server. Usage: task setup:remote_server HOST=my-server"
+  #   deps: [build:labctl]
+  #   vars:
+  #     HOST: "{{.HOST}}"
+  #   preconditions:
+  #     - sh: 'test -n "{{.HOST}}"'
+  #       msg: "Error: 'HOST' variable is required. Run with 'task setup:remote_server HOST=your_host'"
+  #   cmds:
+  #     # adds to [remote_vps] group
+  #     - ./bin/labctl ansible inventory add {{.HOST}}
 
-  setup:remote_server:
-    desc: "Configures a remote server. Usage: task setup:remote_server HOST=my-server"
-    deps: [build:labctl]
-    vars:
-      HOST: "{{.HOST}}"
-    preconditions:
-      - sh: 'test -n "{{.HOST}}"'
-        msg: "Error: 'HOST' variable is required. Run with 'task setup:remote_server HOST=your_host'"
-    cmds:
-      # adds to [remote_vps] group
-      - ./bin/labctl ansible inventory add {{.HOST}}
+  #     # run ansible-playbook bootstrap-server.yml --limit $host -u root
+  #     # run ansible-playbook setup-remote.yml
+  #     - ./bin/labctl ansible playbook run {{.HOST}}
 
-      # run ansible-playbook bootstrap-server.yml --limit $host -u root
-      # run ansible-playbook setup-remote.yml
-      - ./bin/labctl ansible playbook run {{.HOST}}
-
-      - ./bin/labctl ssh add {{.HOST}}
+  #     - ./bin/labctl ssh add {{.HOST}}
