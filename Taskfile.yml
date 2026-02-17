@@ -17,32 +17,41 @@ tasks:
     cmds:
       - go build -o ./bin/labctl ./cmd/labctl
 
-  setup:incus:check:
-    desc: "Print report of found/missing incus variables"
+  setup:
+    desc: Set up hosts (all hosts, or one with HOST=<name>)
+    deps: [build:labctl]
+    vars:
+      HOSTS:
+        sh: "{{if .HOST}}echo {{.HOST}}{{else}}./bin/labctl config hosts{{end}}"
+    cmds:
+      - for: { var: HOSTS }
+        task: setup:host
+        vars:
+          HOST: "{{.ITEM}}"
+      - task: setup:connect
+      - incus list
+
+  setup:host:
+    internal: true
     deps: [build:labctl]
     cmds:
-      - ./bin/labctl check incus ansible:inventory:add ansible:playbook:run ssh:add
-    run: once
+      - ./bin/labctl ansible inventory add {{.HOST}}
+      - ./bin/labctl ansible playbook run bootstrap-server.yml --limit {{.HOST}} -u root
+      - ./bin/labctl ansible playbook run setup-incus.yml --limit {{.HOST}}
+      - ./bin/labctl ssh add {{.HOST}}
 
-  setup:incus:
-    desc: >
-      This task configures incus after booting it for the first time.
-      It also creates some firewall rules and security groups.
-    deps: [build:labctl]
+  setup:connect:
+    internal: true
+    status:
+      - incus remote list -f csv | grep -q my-homelab
     cmds:
-      - ./bin/labctl ansible galaxy install requirements
-      - ./bin/labctl ansible inventory add incus
-
-      # run ansible-playbook bootstrap-server.yml --limit incus -u root
-      # run ansible-playbook setup-incus.yml
-      - ./bin/labctl ansible playbook run incus
-
-      - ./bin/labctl ssh add incus
       - incus remote add my-homelab
       - incus remote switch my-homelab
 
-      # verify
-      - incus list
+  setup:check:
+    desc: Validate config for setup (all hosts, or one with HOST=<name>)
+    cmds:
+      - ./bin/labctl check ansible:inventory:add ansible:playbook:run ssh:add {{if .HOST}}--host {{.HOST}}{{end}}
 
   setup:plex:check:
     desc: "Print report of found/missing plex variables"

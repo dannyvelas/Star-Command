@@ -80,6 +80,9 @@
 - [x] is there a way to mid-playbook switch from "root" to "admin" after ssh_harden runs? if so, do it
   - ehhh it's kind of a pain. better to just split it into two playbooks.
   - so this new to-do item is to switch ssh-hardening to be its own playbook instead of its own role. and, you'll just have to execute both playbooks for the first time
+- [ ] make it so that the UX allows for two commands: bootstrap everything on a fresh fleet of debian servers that i just got up and running. add a server to my fleet.
+- [ ] maybe stop making hosts "special". e.g. maybe get rid of the fact that "ansible inventory add incus" and "ansible inventory run incus" have a special behavior that doesn't exist for "ansible inventory add random-name-here".
+- [ ] should we make the :check tasks be prerequisits to the regular tasks?
 - [ ] change plex to be a docker image inside of a container
 - [ ] make sure plex VM is mounted as read only
 - [ ] put plex on its own VLAN - would you even be able to?
