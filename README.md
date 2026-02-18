@@ -216,7 +216,7 @@ When you add or migrate servers:
 |--------------|-----------------------|----------------------------------------------|
 | CLI          | Go                    | Single binary, no runtime dependencies       |
 | Provisioning | Ansible               | Agentless, SSH-based, idempotent             |
-| VM lifecycle | Terraform + libvirt   | Declarative, reproducible                    |
+| VM lifecycle | Terraform + incus     | Declarative, reproducible                    |
 | Scheduling   | k3s                   | Lightweight Kubernetes, rolling updates, auto-restart |
 | Networking   | OVN                   | Overlay networking, encrypted east-west traffic |
 | Firewall     | UFW                   | Simple, readable firewall rules              |
