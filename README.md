@@ -1,6 +1,6 @@
 # Homelab infra and playbooks
 
-Infrastructure as Code for a homelab environment. A single Go CLI (`labctl`) reads one config file (`homelab.yml`) and orchestrates Terraform and Ansible to provision one or more servers, deploy a WireGuard VPN, configure OVN networking, and schedule containerized workloads via k3s. Engineers deploy any dockerized service by writing a simple manifest — no application-specific code in the platform itself.
+Infrastructure as Code for a homelab environment. A single Go CLI (`labctl`) reads one config file (`homelab.yml`) and orchestrates Terraform and Ansible to provision one or more servers, deploy a WireGuard VPN, configure OVN networking, and schedule containerized workloads via k3s. Deploy any dockerized service by writing a simple manifest.
 
 ## Architecture
 
@@ -115,32 +115,16 @@ labctl setup                     # setup all hosts specified in your config
 labctl setup --host <your-host>  # setup only one host. If a cluster already exists, join this host to that cluster. Otherwise, initialize a new cluster
 ```
 
-### Deploy VPN
+After provisioning, each host has a hardened OS, a VPN endpoint (if designated), a workload VM running Traefik as a reverse proxy, and is joined to the k3s cluster.
 
-Install WireGuard on the designated host (specified in the configuration) for secure remote access:
-
-```bash
-labctl vpn deploy
-```
-
-Generate client configs for your team:
+### Generate VPN client configs
 
 ```bash
-labctl vpn generate client "laptop"
-labctl vpn generate client "phone"
+iac generate vpn-client --name "danny-laptop"
+iac generate vpn-client --name "danny-phone"
 ```
 
 Client configs are saved to `.generated/vpn-clients/`. Import them into the WireGuard app on each device, then delete the `.conf` files from your workstation — they contain the client's private key and preshared key. The `.generated/` directory is gitignored and the files are created with `0600` permissions, but they should be treated as sensitive and not kept around longer than needed.
-
-### Deploy reverse proxy
-
-Deploy reverse proxy to all hosts:
-
-```bash
-labctl proxy deploy
-```
-
-Traefik routes all traffic through port 443, routing to services by subdomain.
 
 ### Set up local DNS
 
