@@ -129,8 +129,8 @@ iac setup --host <your-host>  # setup only one host. If a cluster already exists
 ### Generate VPN client configs
 
 ```bash
-iac generate vpn-client --name "alice-laptop"
-iac generate vpn-client --name "alice-phone"
+iac generate vpn-client alice-laptop
+iac generate vpn-client alice-phone
 ```
 
 Client configs are saved to `.generated/vpn-clients/`. Import them into the WireGuard app on each device, then delete the `.conf` files from your workstation — they contain the client's private key and preshared key. The `.generated/` directory is gitignored and the files are created with `0600` permissions, but they should be treated as sensitive and not kept around longer than needed.
@@ -175,18 +175,18 @@ iac <command> [options]
 
 Commands:
   setup                Setup a physical host (hardening, hypervisor, VPN, Reverse Proxy, VM, OVN, k3s)
-  generate vpn-client  Generate a WireGuard client config
+  generate vpn-client <name>  Generate a WireGuard client config
   status               Show cluster status (hosts, services, VPN, k3s)
   teardown             Tear down all VMs
   version              Print version
 
 Low-level commands:
-  ansible inventory --host <host>         Generate the Ansible inventory file for a host and its VMs
-  ansible bootstrap-server --host <host>  Run the bootstrap-server playbook against a single host
-  ansible setup-host --host <host>        Run the setup-host playbook against a single host
-  ansible setup-vm --host <host>          Run the setup-vm playbook against a host's VMs
-  ssh add --host <host>                   Add a host and its VMs to ~/.ssh/config
-  terraform apply                         Apply the Terraform project
+  ansible inventory <host>                  Generate the Ansible inventory file for a host and its VMs
+  ansible playbook bootstrap-server <host>  Run the bootstrap-server playbook against a single host
+  ansible playbook setup-host <host>        Run the setup-host playbook against a single host
+  ansible playbook setup-vm <host>          Run the setup-vm playbook against a host's VMs
+  ssh add <host>                            Add a host and its VMs to ~/.ssh/config
+  terraform apply                           Apply the Terraform project
 ```
 
 `iac` wraps these low-level commands because they require config resolution — secret fetching, inventory generation, and var merging — that would otherwise need to be done manually.
