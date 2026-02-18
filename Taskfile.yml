@@ -46,19 +46,6 @@ tasks:
     cmds:
       - ./bin/labctl setup --check {{if .HOST}}--host {{.HOST}}{{end}}
 
-  setup:plex:check:
-    desc: "Print report of found/missing plex variables"
-    deps: [build:labctl]
-    cmds:
-      - ./bin/labctl service deploy plex --check
-    run: once
-
-  deploy:plex:
-    desc: This task provisions and configures a plex LXC
-    deps: [build:labctl]
-    cmds:
-      - ./bin/labctl service deploy plex
-
   # setup:remote_server:check:
   #   desc: "Print report of found/missing variables for setup:remote_server command"
   #   deps: [build:labctl]
