@@ -81,6 +81,16 @@ Internal short URLs for quick access to services and dashboards:
 
 Forward UDP port **51820** and TCP port **443** on your home gateway/router to the server that will act as the WireGuard endpoint and ingress point.
 
+### Remote access (optional)
+
+If you want to access services from outside your home LAN without VPN, set up a DDNS hostname before provisioning:
+
+1. Create an account with a DDNS provider (e.g., DuckDNS, No-IP)
+2. Register a hostname (e.g., `home.example.com`)
+3. Note your login credentials — you'll add them to `config/`
+
+During provisioning, the system automatically installs ddclient to keep the hostname pointed at your public IP. If you skip this step, everything still works on your home LAN and over VPN.
+
 ## Setup
 
 ### 1. Clone and build
@@ -199,12 +209,6 @@ When you add or migrate servers:
 3. k3s automatically joins the new node to the cluster
 4. OVN extends the overlay network to the new host
 5. Deploy services with `kubectl` — no changes to manifests needed, k3s schedules across the cluster
-
-## Next steps
-
-### Remote access via DDNS
-
-To access services from outside your home LAN (without VPN), set up a dynamic DNS hostname (e.g., DuckDNS, No-IP) that points `home.example.com` at your public IP. The DDNS Ansible role (`hardening-host`) can automate this with ddclient — enable it by setting `ddns_enabled: true` in your host vars. With DDNS configured, the same subdomains (`plex.home.example.com`, etc.) work from anywhere.
 
 ## Tech stack
 
