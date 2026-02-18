@@ -1,6 +1,6 @@
 # Homelab infra and playbooks
 
-Infrastructure as Code for a homelab environment. A single Go CLI (`labctl`) reads one config file (`homelab.yml`) and orchestrates Terraform and Ansible to provision one or more servers, deploy a WireGuard VPN, configure OVN networking, and schedule containerized workloads via k3s. Deploy any dockerized service by writing a simple manifest.
+Infrastructure as Code for a homelab environment. A single Go CLI (`labctl`) reads your configurations and orchestrates Terraform and Ansible to provision one or more servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster. Engineers then deploy any dockerized service with `kubectl` — no application-specific code in the platform itself.
 
 ## Architecture
 
@@ -87,7 +87,7 @@ Forward UDP port **51820** and TCP port **443** on your home gateway/router to t
 
 ```bash
 git clone <repo-url>
-cd homelab-vibe
+cd homelab
 make
 ```
 
@@ -108,20 +108,18 @@ The `labctl` CLI reads these configuration values and generates all tool-specifi
 
 ### Bootstrap infrastructure
 
-Provision each server — this hardens the OS, installs KVM/libvirt, creates a workload VM, configures OVN overlay networking, and joins k3s:
+Provision each server — this hardens the OS, installs WireGuard (on the designated VPN host), installs a hypervisor (Incus), creates a workload VM with Traefik, configures OVN overlay networking, and joins k3s:
 
 ```bash
 labctl setup                     # setup all hosts specified in your config
 labctl setup --host <your-host>  # setup only one host. If a cluster already exists, join this host to that cluster. Otherwise, initialize a new cluster
 ```
 
-After provisioning, each host has a hardened OS, a VPN endpoint (if designated), a workload VM running Traefik as a reverse proxy, and is joined to the k3s cluster.
-
 ### Generate VPN client configs
 
 ```bash
-iac generate vpn-client --name "danny-laptop"
-iac generate vpn-client --name "danny-phone"
+labctl generate vpn-client --name "danny-laptop"
+labctl generate vpn-client --name "danny-phone"
 ```
 
 Client configs are saved to `.generated/vpn-clients/`. Import them into the WireGuard app on each device, then delete the `.conf` files from your workstation — they contain the client's private key and preshared key. The `.generated/` directory is gitignored and the files are created with `0600` permissions, but they should be treated as sensitive and not kept around longer than needed.
@@ -170,37 +168,25 @@ labctl <command> [options]
 
 Commands:
   setup                Setup a physical host (hardening, hypervisor, VPN, Reverse Proxy, VM, OVN, k3s)
-  vpn deploy           Deploy WireGuard VPN on designated host
-  vpn generate client  Generate a WireGuard client config
-  proxy deploy         Deploy reverse proxy into workload VMs
-  service deploy       Deploy a service from a manifest file
+  generate vpn-client  Generate a WireGuard client config
   status               Show cluster status (hosts, services, VPN, k3s)
   teardown             Tear down all VMs
   version              Print version
 ```
 
-All commands read infrastructure configuration from `homelab.yml` at the repository root. All commands read infrastructure configuration from `homelab.yml` at the repository root. Services are deployed with `kubectl` using standard Kubernetes manifests.
-
 ## Project structure
 
 ```
-homelab.yml.example          # example config — copy to homelab.yml
+config/                      # config directory
+  all.yml                    # global config
+  host-01.yml                # host-specific config
 services/                    # service manifests (one per app)
-iac/
-  cli/                       # Go CLI source
-    main.go                  # entrypoint and command routing
-    cmd/                     # command implementations
-    config/                  # config loader and validator
-    generators/              # Ansible/Terraform config generators
-    wireguard/               # WireGuard key/peer management
-  ansible/
-    playbooks/               # setup-host, configure-vm, deploy-service,
-                             # deploy-proxy, deploy-vpn, security-audit
-    roles/                   # hardening, hypervisor, vm-guest, wireguard,
-                             # service-container, proxy-container, k3s, ovn
-  terraform/                 # libvirt VM lifecycle
-tests/
-  integration/               # e2e deployment test script
+cmd/                         # Go CLI source
+  labctl/                    # entrypoint and command routing
+ansible/
+  playbooks/                 # ansible playbooks
+  roles/                     # ansible roles
+terraform/                   # incus VM lifecycle
 .generated/                  # auto-generated configs (gitignored)
 ```
 
@@ -208,8 +194,8 @@ tests/
 
 When you add or migrate servers:
 
-1. Update `homelab.yml` with the new host IPs and storage paths
-2. Run `iac provision host` for each new host
+1. Update `config/` with the new host IPs and storage paths
+2. Run `labctl setup --host <new-host>` for each new host
 3. k3s automatically joins the new node to the cluster
 4. OVN extends the overlay network to the new host
 5. Deploy services with `kubectl` — no changes to manifests needed, k3s schedules across the cluster
