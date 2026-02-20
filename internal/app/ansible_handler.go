@@ -24,6 +24,7 @@ func (h ansibleHandler) getConfig(playbook string) (ansibleConfig, error) {
 	case "setup-host":
 		return newAnsibleSetupHostConfig(), nil
 	case "setup-vm":
+		return newAnsibleSetupVMConfig(), nil
 	}
 
 	return nil, fmt.Errorf("error: config for playbook %s %w", playbook, errNotFound)
