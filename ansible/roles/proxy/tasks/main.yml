@@ -37,14 +37,8 @@
       - /tmp
     recreate: "{{ proxy_pull.changed or traefik_config.changed | default(false) }}"
 
-- name: Create run script directory
-  ansible.builtin.file:
-    path: /opt/homelab
-    state: directory
-    mode: "0755"
-
 - name: Template proxy run script
   ansible.builtin.template:
     src: run-proxy.sh.j2
-    dest: /opt/homelab/run-traefik.sh
+    dest: "{{ proxy_config_dir }}/run-traefik.sh"
     mode: "0755"
