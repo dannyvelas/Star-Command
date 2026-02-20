@@ -26,7 +26,7 @@ func main() {
 		conflux.WithBitwardenSecretReader(),
 	)
 
-	rootCmd := rootCmd(ctx, configMux)
+	rootCmd := rootCmd(configMux)
 	if err := rootCmd.ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}

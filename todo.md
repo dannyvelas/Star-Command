@@ -106,6 +106,7 @@
 - [~] (CONFLUX) maybe make bitwarden secrets read things piecemeal, instead of just dumping everything into a map
   - i don't think i can do this
 - [~] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
+- [ ] see if i really need `PersistentFlags` in `cmd/labctl/root.go` or if i should use something else
 - [ ] add support where the user can check the configs that were missing/found that are necessary to run:
   - `iac setup`, or `iac setup --host <host>`
   - `iac inventory [--host <host>]`

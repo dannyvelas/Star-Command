@@ -1,7 +1,6 @@
-package handlers
+package app
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,36 +11,29 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var _ Handler = AnsibleProxmoxHandler{}
+type ansibleHandler struct{}
 
-type AnsibleProxmoxHandler struct{}
-
-func NewAnsibleProxmoxHandler() AnsibleProxmoxHandler {
-	return AnsibleProxmoxHandler{}
+func newAnsibleHandler() ansibleHandler {
+	return ansibleHandler{}
 }
 
-func (h AnsibleProxmoxHandler) GetConfig(_ string) any {
-	return newAnsibleProxmoxConfig()
+func (h ansibleHandler) getConfig(playbook string) ansibleConfig {
+	return nil
 }
 
-func (h AnsibleProxmoxHandler) Execute(_ context.Context, config any, hostAlias string) (map[string]string, error) {
+func (h ansibleHandler) execute(config ansibleConfig) (map[string]string, error) {
 	diagnostics := make(map[string]string)
 
-	ansibleProxmoxConfig, ok := config.(*ansibleProxmoxConfig)
-	if !ok {
-		return diagnostics, fmt.Errorf("internal type error converting config to ansible proxmox config. found: %T", config)
-	}
-
-	if err := h.runAnsiblePlaybook(ansibleProxmoxConfig); err != nil {
+	if err := h.runAnsiblePlaybook(config); err != nil {
 		return diagnostics, fmt.Errorf("error running ansible playbook: %v", err)
 	}
 
 	return diagnostics, nil
 }
 
-func (h AnsibleProxmoxHandler) runAnsiblePlaybook(config *ansibleProxmoxConfig) error {
-	proxmoxAddr := fmt.Sprintf("%s:%s", config.NodeIP, config.SSHPort)
-	client, sshErr := h.getSSHClient(config.SSHUser, proxmoxAddr, config.SSHPrivateKeyPath)
+func (h ansibleHandler) runAnsiblePlaybook(config ansibleConfig) error {
+	proxmoxAddr := fmt.Sprintf("%s:%s", config.NodeIP(), config.SSHPort())
+	client, sshErr := h.getSSHClient(config.SSHUser(), proxmoxAddr, config.SSHPrivateKeyPath())
 	if sshErr != nil && !errors.Is(sshErr, errConnectingSSH) {
 		return fmt.Errorf("error checking if ssh is accessible to proxmox host: %v", sshErr)
 	} else if sshErr == nil {
@@ -73,7 +65,7 @@ func (h AnsibleProxmoxHandler) runAnsiblePlaybook(config *ansibleProxmoxConfig) 
 	return nil
 }
 
-func (h AnsibleProxmoxHandler) getSSHClient(user, addr, privateKeyPath string) (*ssh.Client, error) {
+func (h ansibleHandler) getSSHClient(user, addr, privateKeyPath string) (*ssh.Client, error) {
 	key, err := os.ReadFile(privateKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read private key: %v", err)

@@ -1,4 +1,4 @@
-package handlers
+package app
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type sshConfig struct {
 	NodeCIDRAddress string `json:"node_cidr_address" required:"true"`
 }
 
-func NewSSHHost(hostAlias string) *sshConfig {
+func newSSHHost(hostAlias string) *sshConfig {
 	return &sshConfig{Alias: hostAlias}
 }
 

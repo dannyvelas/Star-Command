@@ -17,7 +17,7 @@ func ansiblePlaybookCmd(configMux *conflux.ConfigMux, preflight bool) []*cobra.C
 			Use:   playbook,
 			Short: fmt.Sprintf("Run the %s ansible playbook", playbook),
 			Args:  cobra.ExactArgs(1),
-			RunE:  run(configMux, playbook, preflight),
+			RunE:  ansiblePlaybookCLI(configMux, playbook, preflight),
 		}
 
 		commands = append(commands, command)
@@ -25,7 +25,7 @@ func ansiblePlaybookCmd(configMux *conflux.ConfigMux, preflight bool) []*cobra.C
 	return commands
 }
 
-func run(configMux *conflux.ConfigMux, playbook string, preflight bool) func(cmd *cobra.Command, args []string) error {
+func ansiblePlaybookCLI(configMux *conflux.ConfigMux, playbook string, preflight bool) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
 

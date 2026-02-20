@@ -1,4 +1,4 @@
-package handlers
+package app
 
 import (
 	"bytes"
@@ -11,19 +11,19 @@ import (
 	"github.com/spf13/afero"
 )
 
-type SSHHandler struct {
+type sshHandler struct {
 	fs      afero.Fs
 	homeDir string
 }
 
-func NewSSHHandler(homeDir string) SSHHandler {
-	return SSHHandler{
+func newSSHHandler(homeDir string) sshHandler {
+	return sshHandler{
 		fs:      afero.NewOsFs(),
 		homeDir: homeDir,
 	}
 }
 
-func (h SSHHandler) Execute(sshConfig *sshConfig, hostAlias string) (map[string]string, error) {
+func (h sshHandler) Execute(sshConfig *sshConfig, hostAlias string) (map[string]string, error) {
 	diagnostics := make(map[string]string)
 
 	sshFilePath := filepath.Join(h.homeDir, ".ssh", "config")
@@ -45,12 +45,12 @@ func (h SSHHandler) Execute(sshConfig *sshConfig, hostAlias string) (map[string]
 	return diagnostics, nil
 }
 
-func (h SSHHandler) contentAlreadyExists(sshFilePath, hostAlias string) (bool, error) {
+func (h sshHandler) contentAlreadyExists(sshFilePath, hostAlias string) (bool, error) {
 	f, err := h.fs.OpenFile(sshFilePath, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {
 		return false, fmt.Errorf("error opening ssh config file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	cfg, err := ssh_config.Decode(f)
 	if err != nil {
@@ -68,12 +68,12 @@ func (h SSHHandler) contentAlreadyExists(sshFilePath, hostAlias string) (bool, e
 	return false, nil
 }
 
-func (h SSHHandler) writeFile(config *sshConfig, sshFilePath string) error {
+func (h sshHandler) writeFile(config *sshConfig, sshFilePath string) error {
 	f, err := h.fs.OpenFile(sshFilePath, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {
 		return fmt.Errorf("error opening ssh config file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	hostBlock := h.buildHostBlock(config)
 	if _, err := f.Seek(0, 2); err != nil {
@@ -84,7 +84,7 @@ func (h SSHHandler) writeFile(config *sshConfig, sshFilePath string) error {
 	return err
 }
 
-func (h SSHHandler) buildHostBlock(config *sshConfig) []byte {
+func (h sshHandler) buildHostBlock(config *sshConfig) []byte {
 	const hostTmpl = `
 Host {{ .Alias }}
   HostName {{ .HostName }}

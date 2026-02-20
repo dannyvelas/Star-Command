@@ -1,4 +1,4 @@
-package handlers
+package app
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/dannyvelas/homelab/internal/helpers"
 )
 
-type terraformPlexConfig struct {
+type terraformConfig struct {
 	Endpoint                   string `json:"endpoint" required:"true"`
 	GatewayAddress             string `json:"gateway_address" required:"true"`
 	IP                         string `json:"ip" required:"true"`
@@ -21,14 +21,14 @@ type terraformPlexConfig struct {
 	UserRealm string `json:"user_realm"`
 }
 
-func newTerraformPlexConfig() *terraformPlexConfig {
-	return &terraformPlexConfig{
+func newTerraformConfig() *terraformConfig {
+	return &terraformConfig{
 		SSHUser:  "root",
 		SSHRealm: "pam",
 	}
 }
 
-func (c *terraformPlexConfig) FillInKeys() error {
+func (c *terraformConfig) FillInKeys() error {
 	expandedPath, err := helpers.ExpandPath(c.SSHPublicKeyPath)
 	if err != nil {
 		return err
