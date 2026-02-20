@@ -1,17 +1,14 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
-	"github.com/dannyvelas/homelab/internal/client"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -37,21 +34,6 @@ func (h AnsibleProxmoxHandler) Execute(_ context.Context, config any, hostAlias 
 
 	if err := h.runAnsiblePlaybook(ansibleProxmoxConfig); err != nil {
 		return diagnostics, fmt.Errorf("error running ansible playbook: %v", err)
-	}
-
-	token, err := h.createTokenForTerraformUser(ansibleProxmoxConfig)
-	if errors.Is(err, errAlreadyExists) {
-		diagnostics["Create Terraform API token"] = fmt.Sprintf("skipping: %v", errAlreadyExists)
-		return diagnostics, nil
-	} else if err != nil {
-		return diagnostics, fmt.Errorf("error creating token for terraform user: %v", err)
-	}
-
-	if err := h.addTerraformTokenToBitwarden(ansibleProxmoxConfig, token); errors.Is(err, errAlreadyExists) {
-		diagnostics["Add Terraform API token to Bitwarden"] = fmt.Sprintf("skipping: %v", errAlreadyExists)
-		return diagnostics, nil
-	} else if err != nil {
-		return diagnostics, fmt.Errorf("error adding secret to bitwarden: %v", err)
 	}
 
 	return diagnostics, nil
@@ -86,71 +68,6 @@ func (h AnsibleProxmoxHandler) runAnsiblePlaybook(config *ansibleProxmoxConfig) 
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("error running ansible proxmox command: %v", err)
-	}
-
-	return nil
-}
-
-func (h AnsibleProxmoxHandler) createTokenForTerraformUser(config *ansibleProxmoxConfig) (string, error) {
-	proxmoxAddr := fmt.Sprintf("%s:%s", config.NodeIP, config.SSHPort)
-	sshClient, err := h.getSSHClient(config.SSHUser, proxmoxAddr, config.SSHPrivateKeyPath)
-	if err != nil {
-		return "", fmt.Errorf("error getting ssh client after running ansible: %v", err)
-	}
-	defer func() { _ = sshClient.Close() }()
-
-	session, err := sshClient.NewSession()
-	if err != nil {
-		return "", fmt.Errorf("error creating ssh session after running ansible: %v", err)
-	}
-
-	var stdout, stderr bytes.Buffer
-	session.Stdout = &stdout
-	session.Stderr = &stderr
-
-	cmd := fmt.Sprintf("sudo pveum user token add %s@pve provider --privsep=0", config.TerraformUsername)
-	err = session.Run(cmd)
-	if stderrString := stderr.String(); err != nil && strings.Contains(stderrString, "Token already exists") {
-		return "", errAlreadyExists
-	} else if err != nil {
-		return "", fmt.Errorf("error creating token for terraform user in proxmox: %v", stderrString)
-	}
-
-	return stdout.String(), nil
-}
-
-func (h AnsibleProxmoxHandler) addTerraformTokenToBitwarden(config *ansibleProxmoxConfig, token string) error {
-	bwClient, err := client.NewBitwardenClient(
-		config.BitwardenAPIURL,
-		config.BitwardenIdentityURL,
-		config.BitwardenAccessToken,
-		config.BitwardenOrganizationID,
-		config.BitwardenProjectID,
-		config.BitwardenStateFilePath,
-	)
-	if err != nil {
-		return fmt.Errorf("error initializing bitwarden client: %v", err)
-	}
-
-	secrets, err := bwClient.ReadSecrets()
-	if err != nil {
-		return fmt.Errorf("error reading bitwarden secrets: %v", err)
-	}
-
-	existingSecret, ok := secrets["proxmox_terraform_user_api_token"]
-	if ok && token == existingSecret.Value {
-		return errAlreadyExists
-	}
-
-	if ok && token != existingSecret.Value {
-		// without this, bwClient will create an additional secret with the same key
-		if err := bwClient.DeleteSecret(existingSecret.ID); err != nil {
-			return fmt.Errorf("error deleting previously-existing secret with a different value: %v", err)
-		}
-	}
-
-	if err := bwClient.CreateSecret("proxmox_terraform_user_api_token", token); err != nil {
-		return fmt.Errorf("error creating bitwarden secret: %v", err)
 	}
 
 	return nil

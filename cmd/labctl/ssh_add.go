@@ -24,7 +24,7 @@ func sshAddCLI(configMux *conflux.ConfigMux, preflight bool) func(cmd *cobra.Com
 		ctx := cmd.Context()
 
 		hostAlias := args[0]
-		diagnostics, err := app.SSHAdd(ctx, configMux, preflight, hostAlias)
+		diagnostics, err := app.SSHAdd(ctx, configMux, hostAlias, preflight)
 		if err != nil {
 			return err
 		}
