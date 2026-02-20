@@ -1,5 +1,0 @@
----
-# VM guest setup role defaults
-
-# Docker configuration
-vm_guest_docker_storage_driver: overlay2
