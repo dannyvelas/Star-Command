@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var FallbackFile = "config/all.yml"
+var ConfigFile = "config/all.yml"
 
 func GetConfigPath(hostAlias string) string {
 	return fmt.Sprintf("config/%s.yml", hostAlias)

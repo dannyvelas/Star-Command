@@ -2,28 +2,25 @@ package main
 
 import (
 	"context"
-	"os"
 
+	"github.com/dannyvelas/conflux"
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "labctl",
-	Short: "An internal CLI to configure a homelab",
-}
-
-// execute adds all child commands to the root command and sets flags appropriately.
-// this is called by main.main(). It only needs to happen once to the rootCmd.
-func execute(ctx context.Context) {
-	if err := rootCmd.ExecuteContext(ctx); err != nil {
-		os.Exit(1)
+func rootCmd(ctx context.Context, configMux *conflux.ConfigMux) *cobra.Command {
+	// rootCmd represents the base command when called without any subcommands
+	rootCmd := &cobra.Command{
+		Use:   "labctl",
+		Short: "An internal CLI to configure a homelab",
 	}
-}
 
-func initialize() {
-	rootCmd.AddCommand(ansibleCmd())
-	rootCmd.AddCommand(sshCmd())
-	rootCmd.AddCommand(terraformCmd())
-	rootCmd.AddCommand(checkCmd())
+	// get preflight flag
+	var preflight bool
+	rootCmd.PersistentFlags().BoolVar(&preflight, "preflight", false, "Display config diagnostic table instead of executing")
+
+	rootCmd.AddCommand(ansibleCmd(configMux, preflight))
+	rootCmd.AddCommand(sshCmd(configMux, preflight))
+	rootCmd.AddCommand(terraformCmd(configMux, preflight))
+
+	return rootCmd
 }

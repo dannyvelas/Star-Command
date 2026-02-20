@@ -1,14 +1,17 @@
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/dannyvelas/conflux"
+	"github.com/spf13/cobra"
+)
 
-func sshCmd() *cobra.Command {
+func sshCmd(configMux *conflux.ConfigMux, preflight bool) *cobra.Command {
 	sshCmd := &cobra.Command{
 		Use:   "ssh",
-		Short: "Execute ssh commands",
+		Short: "ssh-related utilities",
 	}
 
-	sshCmd.AddCommand(sshAddCmd())
+	sshCmd.AddCommand(sshAddCmd(configMux, preflight))
 
 	return sshCmd
 }

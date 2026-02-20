@@ -71,6 +71,10 @@
   - this is solved with labctl
 - [x] make Ansible playbook send terraform API token directly to Bitwarden Secrets Manager (BWS)
   - this is solved with labctl
+- [x] create a "base" terraform LXC module
+  - WONT DO
+- [x] create a "base" terraform VM module
+  - WONT DO
 
 ## infra todos
 - [x] make sure incus server host has firewall rules like it did before with terraform
@@ -93,22 +97,27 @@
 - [ ] use Netboot.xyz + https://pikvm.org/ + proxmox answers file to remotely shutdown/reboot and re-install proxmox
 - [ ] migrate to OVN instead of ufw
 
-## infra maybe
-- [ ] create a "base" terraform LXC module
-- [ ] create a "base" terraform VM module
-
 ## coding todos
 - [x] make `handler.SetFile` more testable
 - [x] make it so that my home directory doesn't have to be hardcoded in the tests for `SetFile`
 - [x] make it so that ansible configs are read from a file
 - [x] add context.Background() which is initialized at main and passed into Execute
-- [ ] migrate labctl to use terraform for incus plex LXC instead of proxmox
-- [ ] migrate labctl to use ansible for incus instead of proxmox
-- [ ] make it so that if labctl detects that "terraform init" needs to be run, it will run it
-- [ ] maybe switch "ansibleProxmox" to be called "proxmoxAnsible", and also for terraformProxmox so that its consistent with bitwarden secret "proxmox_terraform_user_api_token"
-- [ ] use `runE` in cobra
-- [ ] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
-- [ ] (CONFLUX) maybe make bitwarden secrets read things piecemeal, instead of just dumping everything into a map
+- [x] use `runE` in cobra
+- [~] (CONFLUX) maybe make bitwarden secrets read things piecemeal, instead of just dumping everything into a map
+  - i don't think i can do this
+- [~] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
+- [ ] add support where the user can check the configs that were missing/found that are necessary to run:
+  - `iac setup`, or `iac setup --host <host>`
+  - `iac inventory [--host <host>]`
+  - `iac ansible bootstrap-server`
+  - `iac ansible bootstrap-server --vms`
+  - `iac ansible setup-host`
+  - `iac ansible setup-vm`
+  - `iac ssh add <host>`
+  - `iac terraform apply`
+- [ ] iac runs terraform to create VM. still need to test.
+- [ ] iac uses ansible to bootstrap+setupVM. still need to test
+- [ ] make it so that iac always runs "terraform init"
 
 ## terraform-provider-proxmox repo
 - [x] make PR to correct the steps necessary to run `make example`
