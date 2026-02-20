@@ -10,11 +10,9 @@ import (
 var _ ansibleConfig = (*ansibleBootstrapConfig)(nil)
 
 type ansibleBootstrapConfig struct {
+	ansibleBaseConfig
+
 	// Required
-	NodeIP               string `json:"node_ip" required:"true"`
-	SSHUser              string `json:"ssh_user" required:"true"`
-	SSHPort              string `json:"ssh_port" required:"true"`
-	SSHPrivateKeyPath    string `json:"ssh_private_key_path" required:"true"`
 	SSHPublicKeyPath     string `json:"ssh_public_key_path" required:"true"`
 	AutoUpdateRebootTime string `json:"auto_update_reboot_time" required:"true"`
 	AdminEmail           string `json:"admin_email" required:"true"`
@@ -22,24 +20,21 @@ type ansibleBootstrapConfig struct {
 
 	// Injected
 	SSHPublicKey string `json:"ssh_public_key"`
-	AnsibleUser  string `json:"ansible_user"`
-	AnsiblePort  string `json:"ansible_port"`
 }
 
-// newAnsibleBootstrapConfig returns a pointer to an ansibleBootstrapConfig struct with some defaults
 func newAnsibleBootstrapConfig() *ansibleBootstrapConfig {
 	return &ansibleBootstrapConfig{
-		SSHPort:              "22",
+		ansibleBaseConfig: ansibleBaseConfig{
+			SSHPort: "22",
+		},
 		AutoUpdateRebootTime: "05:00",
 	}
 }
 
 func (c *ansibleBootstrapConfig) FillInKeys() error {
-	expandedPrivateKeyPath, err := helpers.ExpandPath(c.SSHPrivateKeyPath)
-	if err != nil {
-		return fmt.Errorf("error expanding path(%s): %v", c.SSHPrivateKeyPath, err)
+	if err := c.fillInBaseKeys(); err != nil {
+		return err
 	}
-	c.SSHPrivateKeyPath = expandedPrivateKeyPath
 
 	expandedPublicKeyPath, err := helpers.ExpandPath(c.SSHPublicKeyPath)
 	if err != nil {
@@ -53,24 +48,5 @@ func (c *ansibleBootstrapConfig) FillInKeys() error {
 	}
 	c.SSHPublicKey = string(bytes)
 
-	c.AnsibleUser = c.SSHUser
-	c.AnsiblePort = c.SSHPort
-
 	return nil
-}
-
-func (c *ansibleBootstrapConfig) GetNodeIP() string {
-	return c.NodeIP
-}
-
-func (c *ansibleBootstrapConfig) GetSSHUser() string {
-	return c.SSHUser
-}
-
-func (c *ansibleBootstrapConfig) GetSSHPort() string {
-	return c.SSHPort
-}
-
-func (c *ansibleBootstrapConfig) GetSSHPrivateKeyPath() string {
-	return c.SSHPrivateKeyPath
 }
