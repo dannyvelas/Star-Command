@@ -106,8 +106,7 @@
 - [~] (CONFLUX) maybe make bitwarden secrets read things piecemeal, instead of just dumping everything into a map
   - i don't think i can do this
 - [~] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
-- [ ] see if i really need `PersistentFlags` in `cmd/labctl/root.go` or if i should use something else
-- [ ] add support where the user can check the configs that were missing/found that are necessary to run:
+- [x] add support where the user can check the configs that were missing/found that are necessary to run:
   - `iac setup`, or `iac setup --host <host>`
   - `iac inventory [--host <host>]`
   - `iac ansible bootstrap-server`
@@ -116,6 +115,9 @@
   - `iac ansible setup-vm`
   - `iac ssh add <host>`
   - `iac terraform apply`
+- [ ] see if i can just embed a struct inside of all ansible configs that has {nodeIP, sshPrivateKey, sshUser, sshPort} so i don't have to do as much copy-paste
+- [ ] see if i really need `PersistentFlags` in `cmd/labctl/root.go` or if i should use something else
+- [ ] make sure no playbook except for "bootstrap" has become: true.
 - [ ] iac runs terraform to create VM. still need to test.
 - [ ] iac uses ansible to bootstrap+setupVM. still need to test
 - [ ] make it so that iac always runs "terraform init"
