@@ -8,8 +8,8 @@ import (
 func rootCmd(configMux *conflux.ConfigMux) *cobra.Command {
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
-		Use:   "labctl",
-		Short: "An internal CLI to configure a homelab",
+		Use:   "iac",
+		Short: "Scaffold production infrastructure",
 	}
 
 	// get preflight flag
