@@ -45,20 +45,12 @@ Private Network (192.168.1.0/24)
 6. **Reverse proxy** — Single ingress point with TLS, security headers, rate limiting
 7. **Read-only containers** — Immutable root filesystem, writable only for data volumes
 
-### Monitoring and alerting
+### Optional services
 
-- **Grafana dashboard** — real-time metrics for all deployed services (resource usage, uptime, response times)
-- **Alerting** — automatic notifications when any service goes down or degrades (email, Slack, PagerDuty)
-
-### Go links
-
-Internal short URLs for quick access to services and dashboards:
-
-| Link | Destination |
-|------|-------------|
-| `go/grafana` | Monitoring dashboard |
-| `go/alerts` | Alert configuration |
-| `go/vpn` | VPN client setup guide |
+After provisioning, you can deploy these manually with `kubectl apply`:
+- **Grafana** — monitoring dashboard, accessible via subdomain
+- **Alertmanager** — alerting service, accessible via subdomain
+- **Go Links** — internal short URLs, accessible via subdomain
 
 ## Prerequisites
 
