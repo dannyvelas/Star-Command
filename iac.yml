@@ -1,12 +1,14 @@
+defaults:
+  ssh:
+    user: admin
+    port: 17031
+    private_key_path: ~/.ssh/id_ed25519
+    public_key_path: ~/.ssh/id_ed25519.pub
+  auto_update_reboot_time: "05:00"
+
 hosts:
   - name: host-01
     ip: 10.0.0.50
-    ssh:
-      user: admin
-      port: 17031
-      private_key_path: ~/.ssh/id_ed25519
-      public_key_path: ~/.ssh/id_ed25519.pub
-    auto_update_reboot_time: "05:00"
     wireguard_endpoint: true
     # admin_email: in bitwarden
     # admin_password: in bitwarden
@@ -16,46 +18,16 @@ hosts:
     vms:
       - name: host-01-vm-01
         ip: 10.0.100.01
-        ssh:
-          user: admin
-          port: 17031
-          private_key_path: ~/.ssh/id_ed25519
-          public_key_path: ~/.ssh/id_ed25519.pub
-        auto_update_reboot_time: "05:00"
       - name: host-01-vm-02
         ip: 10.0.100.02
-        ssh:
-          user: admin
-          port: 17031
-          private_key_path: ~/.ssh/id_ed25519
-          public_key_path: ~/.ssh/id_ed25519.pub
-        auto_update_reboot_time: "05:00"
 
   - name: host-02
     ip: 10.0.0.85
-    ssh:
-      user: admin
-      port: 17031
-      private_key_path: ~/.ssh/id_ed25519
-      public_key_path: ~/.ssh/id_ed25519.pub
-    auto_update_reboot_time: "05:00"
     wireguard_endpoint: false
     # admin_email: in bitwarden
     # admin_password: in bitwarden
     vms:
       - name: host-02-vm-01
         ip: 10.0.100.01
-        ssh:
-          user: admin
-          port: 17031
-          private_key_path: ~/.ssh/id_ed25519
-          public_key_path: ~/.ssh/id_ed25519.pub
-        auto_update_reboot_time: "05:00"
       - name: host-02-vm-02
         ip: 10.0.100.02
-        ssh:
-          user: admin
-          port: 17031
-          private_key_path: ~/.ssh/id_ed25519
-          public_key_path: ~/.ssh/id_ed25519.pub
-        auto_update_reboot_time: "05:00"
