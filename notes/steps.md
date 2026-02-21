@@ -22,7 +22,7 @@
 8.   ansible-playbook bootstrap-server.yml --limit vms -u root
 9.   ansible-playbook setup-vm.yml
      for vm in host.vms {
-10.     add vm to ~/.ssh/config (if not already there)
+10.    add vm to ~/.ssh/config (if not already there)
        # k3s agent: VM joins the cluster as a worker
 11.    k3s agent join vm
      }
