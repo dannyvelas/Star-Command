@@ -13,7 +13,7 @@ func Setup(ctx context.Context, configMux *conflux.ConfigMux, hostAliases []stri
 	return nil, nil
 }
 
-func InventoryGenerate(ctx context.Context, configMux *conflux.ConfigMux, preflight bool) (map[string]string, error) {
+func InventoryGenerate(ctx context.Context, configMux *conflux.ConfigMux, host *string, preflight bool) (map[string]string, error) {
 	return nil, nil
 }
 
