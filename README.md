@@ -96,27 +96,18 @@ make
 
 ### 2. Configure
 
-Copy the environment file and fill in your Bitwarden credentials:
-
 ```bash
-cp .env.example .env
+vim ./iac.yml  # fill in infrastructure config
 ```
 
-The `.env` file (see `.env.example` for required values) is used by `iac` to authenticate to Bitwarden Secrets Manager. At runtime, `iac` merges configuration from two sources, with BWS taking priority:
-
-| Priority | Source | Notes |
-|----------|--------|-------|
-| 1 (highest) | Bitwarden Secrets Manager | Secrets and sensitive values |
-| 2 | `iac.yml` | Infrastructure configuration |
-
-Populate both:
+Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
 
 ```bash
-bws secret create <KEY> <VALUE> <PROJECT_ID>   # store sensitive values in BWS
-vim ./iac.yml                                  # fill in infrastructure config
+export IAC_ADMIN_PASSWORD=...
+iac setup
 ```
 
-`iac` generates all tool-specific configs (Ansible inventory, Terraform tfvars) into `.generated/`. You never edit those files directly.
+`iac` generates all tool-specific configs (Ansible inventory, Terraform vars) into `.generated/`. You never edit those files directly.
 
 ## Usage
 
