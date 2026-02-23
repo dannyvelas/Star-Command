@@ -34,7 +34,7 @@ func AnsibleRun(ctx context.Context, configMux *conflux.ConfigMux, playbook stri
 		return nil, fmt.Errorf("internal error unmarshalling config to struct for %s playbook: %v", playbook, err)
 	}
 
-	if err := promptSensitiveFields(playbookConfig); err != nil {
+	if err := promptSensitiveFields(playbookConfig, os.Stdin, os.Stdout); err != nil {
 		return nil, fmt.Errorf("error prompting for sensitive fields: %v", err)
 	}
 

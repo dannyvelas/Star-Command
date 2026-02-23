@@ -2,11 +2,20 @@ package app
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
+)
+
+var (
+	errNotPointer      = errors.New("argument must be a pointer")
+	errEmptyEnvVar     = errors.New("environment variable is set but empty")
+	errEmptyInput      = errors.New("value cannot be empty")
+	errUnsupportedType = errors.New("unsupported field type")
 )
 
 // promptSensitiveFields fills fields tagged `sensitive:"true"` on the given
@@ -17,10 +26,10 @@ import (
 //
 // Returns an error if a sensitive field has a type other than string, int, float, or bool.
 // Also returns an error if v is not a pointer, or if the user enters an empty value.
-func promptSensitiveFields(v any) error {
+func promptSensitiveFields(v any, r io.Reader, w io.Writer) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Pointer {
-		return fmt.Errorf("promptSensitiveFields: argument must be a pointer")
+		return fmt.Errorf("promptSensitiveFields: %w", errNotPointer)
 	}
 	rv = rv.Elem()
 	if rv.Kind() != reflect.Struct {
@@ -46,30 +55,36 @@ func promptSensitiveFields(v any) error {
 
 		// Case-insensitive search in environment
 		value := ""
+		found := false
 		for _, entry := range os.Environ() {
 			parts := strings.SplitN(entry, "=", 2)
 			if len(parts) == 2 && strings.EqualFold(parts[0], envKey) {
 				value = parts[1]
+				found = true
 				break
 			}
 		}
 
-		if value == "" {
+		if found {
+			if value == "" {
+				return fmt.Errorf("environment variable %q: %w", envKey, errEmptyEnvVar)
+			}
+		} else {
 			// Fall back to interactive prompt
 			promptMsg := field.Tag.Get("prompt")
 			if promptMsg == "" {
 				promptMsg = field.Name
 			}
 
-			fmt.Printf("Enter a value for %q: ", promptMsg)
-			reader := bufio.NewReader(os.Stdin)
+			_, _ = fmt.Fprintf(w, "Enter a value for %q: ", promptMsg)
+			reader := bufio.NewReader(r)
 			input, err := reader.ReadString('\n')
 			if err != nil {
 				return fmt.Errorf("error reading input for %q: %v", promptMsg, err)
 			}
 			value = strings.TrimSpace(input)
 			if value == "" {
-				return fmt.Errorf("value for %q cannot be empty", promptMsg)
+				return fmt.Errorf("field %q: %w", promptMsg, errEmptyInput)
 			}
 		}
 
@@ -88,23 +103,23 @@ func setSensitiveField(fieldVal reflect.Value, field reflect.StructField, value 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		n, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
-			return fmt.Errorf("field %q: cannot parse %q as int: %v", field.Name, value, err)
+			return fmt.Errorf("field %q: cannot parse %q as int: %w", field.Name, value, err)
 		}
 		fieldVal.SetInt(n)
 	case reflect.Float32, reflect.Float64:
 		f, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			return fmt.Errorf("field %q: cannot parse %q as float: %v", field.Name, value, err)
+			return fmt.Errorf("field %q: cannot parse %q as float: %w", field.Name, value, err)
 		}
 		fieldVal.SetFloat(f)
 	case reflect.Bool:
 		b, err := strconv.ParseBool(value)
 		if err != nil {
-			return fmt.Errorf("field %q: cannot parse %q as bool: %v", field.Name, value, err)
+			return fmt.Errorf("field %q: cannot parse %q as bool: %w", field.Name, value, err)
 		}
 		fieldVal.SetBool(b)
 	default:
-		return fmt.Errorf("promptSensitiveFields: field %q has unsupported type %s", field.Name, fieldVal.Kind())
+		return fmt.Errorf("promptSensitiveFields: field %q: %w: %s", field.Name, errUnsupportedType, fieldVal.Kind())
 	}
 	return nil
 }
