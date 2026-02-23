@@ -47,12 +47,6 @@ Private Network (192.168.1.0/24)
 6. **Reverse proxy** — Single ingress point with TLS, security headers, rate limiting
 7. **Read-only containers** — Immutable root filesystem, writable only for data volumes
 
-### Optional services
-
-After provisioning, you can deploy these manually with `kubectl apply`:
-- **Grafana** — monitoring dashboard, accessible via subdomain
-- **Alertmanager** — alerting service, accessible via subdomain
-- **Go Links** — internal short URLs, accessible via subdomain
 
 ## Prerequisites
 
