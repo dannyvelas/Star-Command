@@ -15,11 +15,13 @@ type ansibleBootstrapConfig struct {
 	// Required
 	SSHPublicKeyPath     string `json:"ssh_public_key_path" required:"true"`
 	AutoUpdateRebootTime string `json:"auto_update_reboot_time" required:"true"`
-	AdminEmail           string `json:"admin_email" required:"true"`
-	AdminPassword        string `json:"admin_password" required:"true"`
 
 	// Injected
 	SSHPublicKey string `json:"ssh_public_key"`
+
+	// Sensitive
+	AdminEmail    string `json:"admin_email" sensitive:"true" prompt:"Admin email"`
+	AdminPassword string `json:"admin_password" sensitive:"true" prompt:"Admin password"`
 }
 
 func newAnsibleBootstrapConfig() *ansibleBootstrapConfig {

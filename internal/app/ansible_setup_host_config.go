@@ -9,9 +9,9 @@ type ansibleSetupHostConfig struct {
 	IncusStoragePoolName string `json:"incus_storage_pool_name" required:"true"`
 	IncusStorageDriver   string `json:"incus_storage_driver" required:"true"`
 
-	// Injected
-	SMTPUser     string `json:"smtp_user"`
-	SMTPPassword string `json:"smtp_password"`
+	// Sensitive
+	SMTPUser     string `json:"smtp_user" sensitive:"true" prompt:"SMTP username"`
+	SMTPPassword string `json:"smtp_password" sensitive:"true" prompt:"SMTP password"`
 }
 
 func newAnsibleSetupHostConfig() *ansibleSetupHostConfig {
