@@ -35,7 +35,7 @@ Private Network (192.168.1.0/24)
   +-- ...additional hosts...
 ```
 
-**Two-layer isolation**: Trusted infrastructure (WireGuard, KVM, OVN) runs on the host. Application workloads run inside VMs behind NAT. A container escape lands in the VM kernel, not the host.
+**Two-layer isolation**: Trusted infrastructure (WireGuard, Incus, OVN) runs on the host. Application workloads run inside VMs behind NAT. A container escape lands in the VM kernel, not the host.
 
 ### Security layers
 
@@ -109,12 +109,14 @@ iac setup
 
 ### Bootstrap infrastructure
 
-Provision each server — this hardens the OS, installs WireGuard (on the designated VPN host), installs a hypervisor (Incus), creates a workload VM with Traefik, configures OVN overlay networking, and joins k3s:
+Provision each server — this hardens the OS, installs WireGuard (on the designated VPN host), installs a hypervisor (Incus), configures OVN overlay networking, joins k3s, and deploys Traefik and CoreDNS on the cluster:
 
 ```bash
 iac setup                     # setup all hosts specified in your config
 iac setup --host <your-host>  # setup only one host. If a cluster already exists, join this host to that cluster. Otherwise, initialize a new cluster
 ```
+
+After `iac setup` completes, update your network's DHCP configuration to distribute the cluster as the DNS server. This is a one-time manual step — after this, every host on your network resolves service subdomains automatically.
 
 For a deeper look at how `iac setup` works internally, see [docs/internals.md](docs/internals.md).
 
@@ -126,16 +128,6 @@ iac wg add alice-phone
 ```
 
 Client configs are saved to `.generated/vpn-clients/`. Import them into the WireGuard app on each device, then delete the `.conf` files from your workstation — they contain the client's private key and preshared key. The `.generated/` directory is gitignored and the files are created with `0600` permissions, but they should be treated as sensitive and not kept around longer than needed.
-
-### Set up local DNS
-
-Deploy CoreDNS on the cluster so that `*.infra.example.com` resolves to the ingress host's IP. This is what allows hosts on your network to reach services by subdomain (e.g., `grafana.infra.example.com`).
-
-```bash
-kubectl apply -f services/coredns.yml
-```
-
-Then update your network's DHCP configuration to distribute the cluster as the DNS server. This is a one-time change — after this, every host on the network resolves service subdomains automatically.
 
 ### Deploy services
 
