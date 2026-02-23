@@ -2,7 +2,7 @@
 
 > **Work in progress.** Not everything described here is fully implemented yet. See [docs/progress.md](docs/progress.md) for a detailed breakdown of what's done and what's still being built.
 
-A CLI to provision one or more servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster. For a deeper look at how it works internally, see [docs/internals.md](docs/internals.md).
+A CLI to provision one or more servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster.
 
 ## Architecture
 
@@ -93,7 +93,7 @@ make
 ### 2. Configure
 
 ```bash
-vim ./iac.yml  # fill in infrastructure config
+vim ./iac.yml # fill in infrastructure config
 ```
 
 Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
@@ -115,6 +115,8 @@ Provision each server — this hardens the OS, installs WireGuard (on the design
 iac setup                     # setup all hosts specified in your config
 iac setup --host <your-host>  # setup only one host. If a cluster already exists, join this host to that cluster. Otherwise, initialize a new cluster
 ```
+
+For a deeper look at how `iac setup` works internally, see [docs/internals.md](docs/internals.md).
 
 ### Add VPN clients
 
