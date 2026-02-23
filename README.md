@@ -92,11 +92,14 @@ make
 
 ### 2. Configure
 
+Copy the example config and fill in your values:
+
 ```bash
-vim ./iac.yml # fill in infrastructure config
+cp iac.example.yml iac.yml
+vim iac.yml
 ```
 
-Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
+Each field is explained inline in [`iac.example.yml`](iac.example.yml). Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
 
 ```bash
 export IAC_ADMIN_PASSWORD=...

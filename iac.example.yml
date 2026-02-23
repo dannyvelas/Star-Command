@@ -1,0 +1,58 @@
+# iac.example.yml — copy this to iac.yml and fill in your values.
+
+hosts:
+  - name: host-01                       # label for the host; used as a CLI argument (e.g. iac setup --host host-01)
+    ip: 192.168.1.10                    # LAN IP address of the physical host
+    ssh:
+      user: admin                       # SSH username
+      port: 22                          # SSH port
+      private_key_path: ~/.ssh/id_ed25519
+      public_key_path: ~/.ssh/id_ed25519.pub
+    auto_update_reboot_time: "05:00"    # time to reboot after unattended security upgrades (HH:MM, 24-hour)
+    wireguard_endpoint: true            # exactly one host must be true — this host receives inbound VPN traffic
+
+    incus:
+      storage_pool_name: default        # name for the Incus storage pool (arbitrary)
+      storage_pool_driver: dir          # storage driver: "dir", "btrfs", "zfs", or "lvm"
+
+    vms:
+      - name: host-01-vm-01             # label for the VM; also used as its hostname
+        ip: 10.0.100.10                 # IP assigned to this VM on the OVN overlay network
+        ssh:
+          user: admin
+          port: 22
+          private_key_path: ~/.ssh/id_ed25519
+          public_key_path: ~/.ssh/id_ed25519.pub
+        auto_update_reboot_time: "05:00"
+
+  - name: host-02
+    ip: 192.168.1.11
+    ssh:
+      user: admin
+      port: 22
+      private_key_path: ~/.ssh/id_ed25519
+      public_key_path: ~/.ssh/id_ed25519.pub
+    auto_update_reboot_time: "05:00"
+    wireguard_endpoint: false
+
+    incus:
+      storage_pool_name: default
+      storage_pool_driver: dir
+
+    vms:
+      - name: host-02-vm-01
+        ip: 10.0.100.20
+        ssh:
+          user: admin
+          port: 22
+          private_key_path: ~/.ssh/id_ed25519
+          public_key_path: ~/.ssh/id_ed25519.pub
+        auto_update_reboot_time: "05:00"
+
+# Sensitive values are NOT stored here. iac prompts for them interactively at runtime,
+# or reads them from environment variables if you prefer automation:
+#
+#   IAC_ADMIN_EMAIL=...       email address for the server admin account
+#   IAC_ADMIN_PASSWORD=...    password for the server admin account
+#   IAC_SMTP_USER=...         SMTP username for outbound email (unattended-upgrades alerts)
+#   IAC_SMTP_PASSWORD=...     SMTP password

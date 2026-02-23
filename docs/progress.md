@@ -1,7 +1,8 @@
 ## Progress
 
-- [ ] Finish creating example `iac.yml` file structure, maybe switching to cue
+- [ ] Finish creating example `iac.yml` file structure
 - [ ] Finish writing logic to read config so that ansible playbooks have the data they need
+- [ ] Test if sensitive value reading works
 - [ ] Explore if there's a way to reduce duplication in `../internal/app/app.go`
 - [ ] Test that bootstrap-server.yml playbook works via `iac ansible bootstrap-server`
 - [ ] Test that setup-host.yml playbook works via `iac ansible setup-host`
