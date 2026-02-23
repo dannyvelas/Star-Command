@@ -1,6 +1,8 @@
 # Debian Server Infrastructure Automation
 
-A CLI to provision one or more servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster.
+> **Work in progress.** Not everything described here is fully implemented yet. See [docs/progress.md](docs/progress.md) for a detailed breakdown of what's done and what's still being built.
+
+A CLI to provision one or more servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster. For a deeper look at how it works internally, see [docs/internals.md](docs/internals.md).
 
 ## Architecture
 
@@ -216,7 +218,7 @@ When you add or migrate servers:
 
 | Component    | Tool                  | Why                                          |
 |--------------|-----------------------|----------------------------------------------|
-| CLI          | Go                    | Single binary, no runtime dependencies       |
+| CLI          | Go                    | Single binary, orchestrates Ansible and Terraform |
 | Provisioning | Ansible               | Agentless, SSH-based, idempotent             |
 | VM lifecycle | Terraform + Incus     | Declarative, reproducible                    |
 | Scheduling   | k3s                   | Kubernetes-native, rolling updates, auto-restart |
