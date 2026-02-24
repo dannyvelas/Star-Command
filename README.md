@@ -75,7 +75,7 @@ If you want to access services from outside the network perimeter without VPN, s
 
 1. Create an account with a DDNS provider (e.g., DuckDNS, No-IP)
 2. Register a hostname (e.g., `infra.example.com`)
-3. Note your login credentials — you'll add them to `iac.yml`
+3. Note your login credentials — you'll add them to `stc.yml`
 
 During provisioning, the system automatically installs ddclient to keep the hostname pointed at your public IP. If you skip this step, everything still works on your local network and over VPN.
 
@@ -84,7 +84,7 @@ During provisioning, the system automatically installs ddclient to keep the host
 ### 1. Install
 
 ```bash
-go install github.com/dannyvelas/starcommand/cmd/iac@latest
+go install github.com/dannyvelas/starcommand/cmd/stc@latest
 ```
 
 ### 2. Configure
@@ -93,17 +93,17 @@ Create a directory for your infrastructure config and initialize it:
 
 ```bash
 mkdir my-infra && cd my-infra
-iac init
+stc init
 ```
 
-`iac init` creates a starter `iac.yml` in the current directory with every field explained inline. Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
+`stc init` creates a starter `stc.yml` in the current directory with every field explained inline. Non-sensitive values live in `stc.yml`. Sensitive values (e.g. `admin_password`) are never stored by `stc` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
 
 ```bash
 export IAC_ADMIN_PASSWORD=...
-iac setup
+stc setup
 ```
 
-`iac` generates all tool-specific configs (Ansible inventory, Terraform vars) into `.generated/`. You never edit those files directly.
+`stc` generates all tool-specific configs (Ansible inventory, Terraform vars) into `.generated/`. You never edit those files directly.
 
 ## Usage
 
@@ -112,19 +112,19 @@ iac setup
 Provision each server — this hardens the OS, installs WireGuard (on the designated VPN host), installs a hypervisor (Incus), configures OVN overlay networking, joins k3s, and deploys Traefik and CoreDNS on the cluster:
 
 ```bash
-iac setup                     # setup all hosts specified in your config
-iac setup --host <your-host>  # setup only one host. If a cluster already exists, join this host to that cluster. Otherwise, initialize a new cluster
+stc setup                     # setup all hosts specified in your config
+stc setup --host <your-host>  # setup only one host. If a cluster already exists, join this host to that cluster. Otherwise, initialize a new cluster
 ```
 
-After `iac setup` completes, update your network's DHCP configuration to distribute the cluster as the DNS server. This is a one-time manual step — after this, every host on your network resolves service subdomains automatically.
+After `stc setup` completes, update your network's DHCP configuration to distribute the cluster as the DNS server. This is a one-time manual step — after this, every host on your network resolves service subdomains automatically.
 
-For a deeper look at how `iac setup` works internally, see [docs/internals.md](docs/internals.md).
+For a deeper look at how `stc setup` works internally, see [docs/internals.md](docs/internals.md).
 
 ### Add VPN clients
 
 ```bash
-iac wg add alice-laptop
-iac wg add alice-phone
+stc wg add alice-laptop
+stc wg add alice-phone
 ```
 
 Client configs are saved to `.generated/vpn-clients/`. Import them into the WireGuard app on each device, then delete the `.conf` files from your workstation — they contain the client's private key and preshared key. The `.generated/` directory is gitignored and the files are created with `0600` permissions, but they should be treated as sensitive and not kept around longer than needed.
@@ -143,22 +143,22 @@ kubectl apply -f services/golinks.yml
 ### Verify
 
 ```bash
-iac status # cluster overview: hosts, services, VPN, k3s
+stc status # cluster overview: hosts, services, VPN, k3s
 ```
 
 ### Tear down
 
 ```bash
-iac teardown # destroy all VMs via Terraform
+stc teardown # destroy all VMs via Terraform
 ```
 
 ## CLI reference
 
 ```
-iac <command> [options]
+stc <command> [options]
 
 Commands:
-  init                                   Create a starter iac.yml in the current directory
+  init                                   Create a starter stc.yml in the current directory
   setup [--host <host>]                  Set up one or more physical hosts (hardening, hypervisor, VPN, reverse proxy, VM, OVN, k3s)
   wg add <name>                          Add a WireGuard client (registers peer server-side, generates client config)
   status                                 Show cluster status (hosts, services, VPN, k3s)
@@ -177,14 +177,14 @@ Low-level commands:
 All commands above accept --preflight to display a config diagnostic table instead of executing.
 ```
 
-`iac` wraps these low-level commands because they require config resolution — secret fetching, inventory generation, and var merging — that would otherwise need to be done manually.
+`stc` wraps these low-level commands because they require config resolution — secret fetching, inventory generation, and var merging — that would otherwise need to be done manually.
 
 ## Project structure
 
-Your working directory after `iac init`:
+Your working directory after `stc init`:
 
 ```
-iac.yml                      # infrastructure configuration
+stc.yml                      # infrastructure configuration
 services/                    # service manifests (one per app)
 .generated/                  # auto-generated configs (gitignored)
 ```
@@ -193,8 +193,8 @@ services/                    # service manifests (one per app)
 
 When you add or migrate servers:
 
-1. Update `iac.yml` with the new host IPs and storage paths
-2. Run `iac setup --host <new-host>` for each new host
+1. Update `stc.yml` with the new host IPs and storage paths
+2. Run `stc setup --host <new-host>` for each new host
 3. k3s automatically joins the new node to the cluster
 4. OVN extends the overlay network to the new host
 5. Deploy services with `kubectl` — no changes to manifests needed, k3s schedules across the cluster

@@ -1,21 +1,21 @@
 # Internals
 
-## How `iac setup` works
+## How `stc setup` works
 
-`iac setup` provisions one or more hosts end-to-end. It runs the same sequence of steps for each host, detecting existing cluster state along the way so that subsequent hosts join rather than reinitialize.
+`stc setup` provisions one or more hosts end-to-end. It runs the same sequence of steps for each host, detecting existing cluster state along the way so that subsequent hosts join rather than reinitialize.
 
 ### 1. Generate Ansible inventory
-> `iac inventory generate`
+> `stc inventory generate`
 
-An Ansible inventory file is generated from `iac.yml`. It includes all configured hosts and their VMs. VMs are configured with `ProxyJump` pointing to their parent host, so that later Ansible steps can reach them through the host without requiring the VMs to be directly accessible on the network.
+An Ansible inventory file is generated from `stc.yml`. It includes all configured hosts and their VMs. VMs are configured with `ProxyJump` pointing to their parent host, so that later Ansible steps can reach them through the host without requiring the VMs to be directly accessible on the network.
 
 ### 2. Bootstrap hosts
-> `iac ansible bootstrap-server`
+> `stc ansible bootstrap-server`
 
 Runs against all hosts. Hardens the OS: configures UFW, enforces SSH key-only authentication, and enables unattended security updates.
 
 ### 3. Set up hosts
-> `iac ansible setup-host`
+> `stc ansible setup-host`
 
 Runs against all hosts. Installs and configures host-level services:
 
@@ -29,7 +29,7 @@ Runs against all hosts. Installs and configures host-level services:
 The following steps run once per host, in order:
 
 ### 4. Register host in `~/.ssh/config`
-> `iac ssh add <host>`
+> `stc ssh add <host>`
 
 The host is added to `~/.ssh/config` on your workstation if not already present, so that subsequent SSH and Ansible commands can refer to it by name.
 
@@ -82,22 +82,22 @@ Incus clustering is set up before VMs are created so that Terraform provisions V
   ```
 
 ### 8. Create VMs with Terraform
-> `iac terraform apply`
+> `stc terraform apply`
 
 Terraform provisions the VMs for this host via Incus. Each VM is on a private NAT subnet and is not directly reachable from the physical network.
 
 ### 9. Bootstrap VMs
-> `iac ansible bootstrap-server --vms`
+> `stc ansible bootstrap-server --vms`
 
 Same OS hardening as step 2, now applied to the newly created VMs.
 
 ### 10. Set up VMs
-> `iac ansible setup-vm`
+> `stc ansible setup-vm`
 
 Runs against all VMs for this host. Installs VM-level services: Docker and storage mount points.
 
 ### 11. Register VMs in `~/.ssh/config`
-> `iac ssh add <vm>`
+> `stc ssh add <vm>`
 
 Each VM is added to `~/.ssh/config` with a `ProxyJump` directive pointing to its parent host, making it reachable by name from your workstation.
 

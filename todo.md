@@ -105,20 +105,20 @@
   - i don't think i can do this
 - [~] (CONFLUX) make conflux read configs once instead of every single time that `conflux.Unmarshal` is called. file reads and bitwarden api calls are expensive.
 - [x] add support where the user can check the configs that were missing/found that are necessary to run:
-  - `iac setup`, or `iac setup --host <host>`
-  - `iac inventory [--host <host>]`
-  - `iac ansible bootstrap-server`
-  - `iac ansible bootstrap-server --vms`
-  - `iac ansible setup-host`
-  - `iac ansible setup-vm`
-  - `iac ssh add <host>`
-  - `iac terraform apply`
+  - `stc setup`, or `stc setup --host <host>`
+  - `stc inventory [--host <host>]`
+  - `stc ansible bootstrap-server`
+  - `stc ansible bootstrap-server --vms`
+  - `stc ansible setup-host`
+  - `stc ansible setup-vm`
+  - `stc ssh add <host>`
+  - `stc terraform apply`
 - [x] see if i can just embed a struct inside of all ansible configs that has {nodeIP, sshPrivateKey, sshUser, sshPort} so i don't have to do as much copy-paste
 - [ ] see if i really need `PersistentFlags` in `cmd/labctl/root.go` or if i should use something else
 - [ ] make sure no playbook except for "bootstrap" has become: true.
-- [ ] iac runs terraform to create VM. still need to test.
-- [ ] iac uses ansible to bootstrap+setupVM. still need to test
-- [ ] make it so that iac always runs "terraform init"
+- [ ] stc runs terraform to create VM. still need to test.
+- [ ] stc uses ansible to bootstrap+setupVM. still need to test
+- [ ] make it so that stc always runs "terraform init"
 
 ## terraform-provider-proxmox repo
 - [x] make PR to correct the steps necessary to run `make example`
