@@ -98,7 +98,6 @@ Create a directory for your infrastructure config and initialize it:
 ```bash
 mkdir my-infra && cd my-infra
 iac init
-vim iac.yml
 ```
 
 `iac init` creates a starter `iac.yml` in the current directory with every field explained inline. Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
