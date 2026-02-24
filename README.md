@@ -2,7 +2,7 @@
 
 > **Work in progress.** Not everything described here is fully implemented yet. See [docs/progress.md](docs/progress.md) for a detailed breakdown of what's done and what's still being built.
 
-A CLI to provision one or more Debian servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster.
+Fork this repo to get a fully declarative, version-controlled infrastructure for one or more Debian servers. It provisions a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN overlay networking, and a k3s cluster.
 
 ## Architecture
 
@@ -58,7 +58,7 @@ Private Network (192.168.1.0/24)
 
 ### Software (on your workstation)
 
-- [Go](https://go.dev/) 1.21+ (to install the CLI)
+- [Go](https://go.dev/) 1.21+ (to build the CLI)
 - [Terraform](https://www.terraform.io/) (latest stable)
 - [Ansible](https://docs.ansible.com/) (latest stable)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) (for deploying and managing services)
@@ -81,23 +81,28 @@ During provisioning, the system automatically installs ddclient to keep the host
 
 ## Setup
 
-### 1. Install
+### 1. Fork and clone
+
+Fork this repo on GitHub, then clone your fork:
 
 ```bash
-go install github.com/dannyvelas/starcommand/cmd/stc@latest
+git clone https://github.com/<your-username>/starcommand
+cd starcommand
+make
 ```
+
+Your fork is your infrastructure repo — commit your config, playbook changes, and service manifests to it.
 
 ### 2. Configure
 
-Initialize a new project directory and fill in your values:
+Copy the example config and fill in your values:
 
 ```bash
-stc init my-infra
-cd my-infra
+cp stc.example.yml stc.yml
 vim stc.yml
 ```
 
-`stc init <dir>` creates `<dir>/` and populates it with a starter `stc.yml` with every field explained inline. Non-sensitive values live in `stc.yml`. Sensitive values (e.g. `admin_password`) are never stored by `stc` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
+Each field is explained inline in [`stc.example.yml`](stc.example.yml). Non-sensitive values live in `stc.yml`. Sensitive values (e.g. `admin_password`) are never stored by `stc` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
 
 ```bash
 export STC_ADMIN_PASSWORD=...
@@ -159,7 +164,6 @@ stc teardown # destroy all VMs via Terraform
 stc <command> [options]
 
 Commands:
-  init <dir>                             Create <dir>/ with a starter stc.yml
   setup [--host <host>]                  Set up one or more physical hosts (hardening, hypervisor, VPN, reverse proxy, VM, OVN, k3s)
   wg add <name>                          Add a WireGuard client (registers peer server-side, generates client config)
   status                                 Show cluster status (hosts, services, VPN, k3s)
@@ -182,13 +186,28 @@ All commands above accept --preflight to display a config diagnostic table inste
 
 ## Project structure
 
-Your working directory after `stc init`:
-
 ```
-stc.yml                      # infrastructure configuration
+stc.yml                      # infrastructure configuration (your values)
+stc.example.yml              # example config with field descriptions
 services/                    # service manifests (one per app)
+ansible/
+  playbooks/                 # ansible playbooks
+  roles/                     # ansible roles
+terraform/                   # incus VM lifecycle
+cmd/                         # Go CLI source
 .generated/                  # auto-generated configs (gitignored)
 ```
+
+## Pulling upstream changes
+
+To get improvements from this repo into your fork:
+
+```bash
+git fetch upstream
+git merge upstream/main
+```
+
+If you've modified playbooks or Terraform files, standard git conflict resolution applies.
 
 ## Scaling to new hardware
 
