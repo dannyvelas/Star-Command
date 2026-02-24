@@ -199,6 +199,10 @@ When you add or migrate servers:
 4. OVN extends the overlay network to the new host
 5. Deploy services with `kubectl` — no changes to manifests needed, k3s schedules across the cluster
 
+## Why Star Command?
+
+Debian names its releases after characters from Toy Story — Woody, Buzz, Jessie, Buster, Bookworm. Star Command is where Buzz Lightyear comes from. It seemed like the right name for a command-line tool built for Debian.
+
 ## Tech stack
 
 | Component    | Tool                  | Why                                          |
@@ -214,7 +218,3 @@ When you add or migrate servers:
 | Monitoring   | Grafana + Prometheus  | Dashboards, alerting, service health         |
 | Go links     | golinks               | Internal short URLs for quick service access |
 | OS           | Debian 12             | Stable, security updates, KVM support        |
-
-## Why Star Command?
-
-Debian names its releases after characters from Toy Story — Woody, Buzz, Jessie, Buster, Bookworm. Star Command is where Buzz Lightyear comes from. It seemed like the right name for a command-line tool built for Debian.
