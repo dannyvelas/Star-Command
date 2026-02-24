@@ -97,7 +97,7 @@ cd my-infra
 vim stc.yml
 ```
 
-`stc init <dir>` creates `<dir>/` and populates it with a starter `stc.yml` with every field explained inline. Run `stc init` with no argument to initialize the current directory instead. Non-sensitive values live in `stc.yml`. Sensitive values (e.g. `admin_password`) are never stored by `stc` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
+`stc init <dir>` creates `<dir>/` and populates it with a starter `stc.yml` with every field explained inline. Non-sensitive values live in `stc.yml`. Sensitive values (e.g. `admin_password`) are never stored by `stc` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
 
 ```bash
 export STC_ADMIN_PASSWORD=...
@@ -159,7 +159,7 @@ stc teardown # destroy all VMs via Terraform
 stc <command> [options]
 
 Commands:
-  init [dir]                             Create a starter stc.yml in <dir> (or the current directory if omitted)
+  init <dir>                             Create <dir>/ with a starter stc.yml
   setup [--host <host>]                  Set up one or more physical hosts (hardening, hypervisor, VPN, reverse proxy, VM, OVN, k3s)
   wg add <name>                          Add a WireGuard client (registers peer server-side, generates client config)
   status                                 Show cluster status (hosts, services, VPN, k3s)
