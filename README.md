@@ -1,8 +1,12 @@
-# Debian Server Infrastructure Automation
+# Star Command
 
 > **Work in progress.** Not everything described here is fully implemented yet. See [docs/progress.md](docs/progress.md) for a detailed breakdown of what's done and what's still being built.
 
-A CLI to provision one or more servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster.
+A CLI to provision one or more Debian servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster.
+
+## Why Star Command?
+
+Debian names its releases after characters from Toy Story — Woody, Buzz, Jessie, Buster, Bookworm. Star Command is where Buzz Lightyear comes from. It seemed like the right name for a command-line tool built for Debian.
 
 ## Architecture
 
@@ -58,12 +62,11 @@ Private Network (192.168.1.0/24)
 
 ### Software (on your workstation)
 
-- [Go](https://go.dev/) 1.21+ (to build the CLI)
+- [Go](https://go.dev/) 1.21+ (to install the CLI)
 - [Terraform](https://www.terraform.io/) (latest stable)
 - [Ansible](https://docs.ansible.com/) (latest stable)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) (for deploying and managing services)
 - [WireGuard client](https://www.wireguard.com/install/) (for VPN access)
-- A C toolchain (e.g., `xcode-select --install` on macOS)
 - SSH client with key-based auth configured to all servers
 
 ### Network preparation
@@ -82,24 +85,23 @@ During provisioning, the system automatically installs ddclient to keep the host
 
 ## Setup
 
-### 1. Clone and build
+### 1. Install
 
 ```bash
-git clone <repo-url>
-cd <repo>
-make
+go install github.com/dannyvelas/starcommand/cmd/iac@latest
 ```
 
 ### 2. Configure
 
-Copy the example config and fill in your values:
+Create a directory for your infrastructure config and initialize it:
 
 ```bash
-cp iac.example.yml iac.yml
+mkdir my-infra && cd my-infra
+iac init
 vim iac.yml
 ```
 
-Each field is explained inline in [`iac.example.yml`](iac.example.yml). Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
+`iac init` creates a starter `iac.yml` in the current directory with every field explained inline. Non-sensitive values live in `iac.yml`. Sensitive values (e.g. `admin_password`) are never stored by `iac` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
 
 ```bash
 export IAC_ADMIN_PASSWORD=...
@@ -161,6 +163,7 @@ iac teardown # destroy all VMs via Terraform
 iac <command> [options]
 
 Commands:
+  init                                   Create a starter iac.yml in the current directory
   setup [--host <host>]                  Set up one or more physical hosts (hardening, hypervisor, VPN, reverse proxy, VM, OVN, k3s)
   wg add <name>                          Add a WireGuard client (registers peer server-side, generates client config)
   status                                 Show cluster status (hosts, services, VPN, k3s)
@@ -183,15 +186,11 @@ All commands above accept --preflight to display a config diagnostic table inste
 
 ## Project structure
 
+Your working directory after `iac init`:
+
 ```
 iac.yml                      # infrastructure configuration
 services/                    # service manifests (one per app)
-cmd/                         # Go CLI source
-  iac/                       # entrypoint and command routing
-ansible/
-  playbooks/                 # ansible playbooks
-  roles/                     # ansible roles
-terraform/                   # incus VM lifecycle
 .generated/                  # auto-generated configs (gitignored)
 ```
 
