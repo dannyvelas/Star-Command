@@ -20,7 +20,7 @@ var (
 
 // promptSensitiveFields fills fields tagged `sensitive:"true"` on the given
 // struct pointer. For each such field, it first checks for a matching
-// environment variable (case-insensitive, prefixed with "IAC_" + json tag or
+// environment variable (case-insensitive, prefixed with "STC_" + json tag or
 // field name). If no env var is found, it prompts the user interactively using
 // the `prompt` tag value, or the field name if no prompt tag is set.
 //
@@ -69,14 +69,14 @@ func resolveFieldValue(field reflect.StructField, r io.Reader, w io.Writer) (str
 	return readPromptValue(r, w, promptLabel(field))
 }
 
-// fieldEnvKey returns "IAC_" + the json tag name, or "IAC_" + the field name
+// fieldEnvKey returns "STC_" + the json tag name, or "STC_" + the field name
 // if no json tag is set.
 func fieldEnvKey(field reflect.StructField) string {
 	suffix := field.Name
 	if jsonTag := field.Tag.Get("json"); jsonTag != "" {
 		suffix = strings.Split(jsonTag, ",")[0]
 	}
-	return "IAC_" + suffix
+	return "STC_" + suffix
 }
 
 // promptLabel returns the prompt tag value, or the field name if no prompt tag is set.

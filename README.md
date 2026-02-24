@@ -99,7 +99,7 @@ stc init
 `stc init` creates a starter `stc.yml` in the current directory with every field explained inline. Non-sensitive values live in `stc.yml`. Sensitive values (e.g. `admin_password`) are never stored by `stc` — it will prompt for them interactively at runtime when needed. For automation (e.g. CI), you can supply them as environment variables instead:
 
 ```bash
-export IAC_ADMIN_PASSWORD=...
+export STC_ADMIN_PASSWORD=...
 stc setup
 ```
 

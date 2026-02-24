@@ -34,7 +34,7 @@ type testSliceJSONTag struct {
 // --- Env var tests ---
 
 func TestPromptSensitiveFields_EnvJSONTagExactMatch(t *testing.T) {
-	t.Setenv("IAC_json_tag_value", "val123")
+	t.Setenv("STC_json_tag_value", "val123")
 	s := &testStrJSONTag{}
 	if err := promptSensitiveFields(s, strings.NewReader(""), io.Discard); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -45,7 +45,7 @@ func TestPromptSensitiveFields_EnvJSONTagExactMatch(t *testing.T) {
 }
 
 func TestPromptSensitiveFields_EnvJSONTagCaseInsensitiveMatch(t *testing.T) {
-	t.Setenv("IAC_JSON_TAG_VALUE", "val123")
+	t.Setenv("STC_JSON_TAG_VALUE", "val123")
 	s := &testStrJSONTag{}
 	if err := promptSensitiveFields(s, strings.NewReader(""), io.Discard); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -56,7 +56,7 @@ func TestPromptSensitiveFields_EnvJSONTagCaseInsensitiveMatch(t *testing.T) {
 }
 
 func TestPromptSensitiveFields_EnvEmptyValueReturnsError(t *testing.T) {
-	t.Setenv("IAC_json_tag_value", "")
+	t.Setenv("STC_json_tag_value", "")
 	s := &testStrJSONTag{}
 	err := promptSensitiveFields(s, strings.NewReader(""), io.Discard)
 	if !errors.Is(err, errEmptyEnvVar) {
@@ -65,7 +65,7 @@ func TestPromptSensitiveFields_EnvEmptyValueReturnsError(t *testing.T) {
 }
 
 func TestPromptSensitiveFields_EnvInvalidValueForIntReturnsError(t *testing.T) {
-	t.Setenv("IAC_json_tag_value", "val123")
+	t.Setenv("STC_json_tag_value", "val123")
 	s := &testIntJSONTag{}
 	err := promptSensitiveFields(s, strings.NewReader(""), io.Discard)
 	if !errors.Is(err, strconv.ErrSyntax) {
@@ -74,7 +74,7 @@ func TestPromptSensitiveFields_EnvInvalidValueForIntReturnsError(t *testing.T) {
 }
 
 func TestPromptSensitiveFields_EnvFieldNameExactMatch(t *testing.T) {
-	t.Setenv("IAC_FieldName", "val123")
+	t.Setenv("STC_FieldName", "val123")
 	s := &testStrNoJSONTag{}
 	if err := promptSensitiveFields(s, strings.NewReader(""), io.Discard); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -85,7 +85,7 @@ func TestPromptSensitiveFields_EnvFieldNameExactMatch(t *testing.T) {
 }
 
 func TestPromptSensitiveFields_EnvFieldNameCaseInsensitiveMatch(t *testing.T) {
-	t.Setenv("IAC_FIELDNAME", "val123")
+	t.Setenv("STC_FIELDNAME", "val123")
 	s := &testStrNoJSONTag{}
 	if err := promptSensitiveFields(s, strings.NewReader(""), io.Discard); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -158,7 +158,7 @@ func TestPromptSensitiveFields_NotPointerReturnsError(t *testing.T) {
 }
 
 func TestPromptSensitiveFields_UnsupportedTypeReturnsError(t *testing.T) {
-	t.Setenv("IAC_json_tag_value", "val123")
+	t.Setenv("STC_json_tag_value", "val123")
 	s := &testSliceJSONTag{}
 	err := promptSensitiveFields(s, strings.NewReader(""), io.Discard)
 	if !errors.Is(err, errUnsupportedType) {

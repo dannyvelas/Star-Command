@@ -52,7 +52,7 @@ hosts:
 # Sensitive values are NOT stored here. iac prompts for them interactively at runtime,
 # or reads them from environment variables if you prefer automation:
 #
-#   IAC_ADMIN_EMAIL=...       email address for the server admin account
-#   IAC_ADMIN_PASSWORD=...    password for the server admin account
-#   IAC_SMTP_USER=...         SMTP username for outbound email (unattended-upgrades alerts)
-#   IAC_SMTP_PASSWORD=...     SMTP password
+#   STC_ADMIN_EMAIL=...       email address for the server admin account
+#   STC_ADMIN_PASSWORD=...    password for the server admin account
+#   STC_SMTP_USER=...         SMTP username for outbound email (unattended-upgrades alerts)
+#   STC_SMTP_PASSWORD=...     SMTP password
