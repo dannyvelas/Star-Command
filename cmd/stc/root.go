@@ -8,7 +8,7 @@ import (
 func rootCmd(configMux *conflux.ConfigMux) *cobra.Command {
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
-		Use:   "iac",
+		Use:   "stc",
 		Short: "Scaffold production infrastructure",
 	}
 
