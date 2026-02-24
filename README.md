@@ -4,10 +4,6 @@
 
 A CLI to provision one or more Debian servers with a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN networking, and a k3s cluster.
 
-## Why Star Command?
-
-Debian names its releases after characters from Toy Story — Woody, Buzz, Jessie, Buster, Bookworm. Star Command is where Buzz Lightyear comes from. It seemed like the right name for a command-line tool built for Debian.
-
 ## Architecture
 
 ```
@@ -218,3 +214,7 @@ When you add or migrate servers:
 | Monitoring   | Grafana + Prometheus  | Dashboards, alerting, service health         |
 | Go links     | golinks               | Internal short URLs for quick service access |
 | OS           | Debian 12             | Stable, security updates, KVM support        |
+
+## Why Star Command?
+
+Debian names its releases after characters from Toy Story — Woody, Buzz, Jessie, Buster, Bookworm. Star Command is where Buzz Lightyear comes from. It seemed like the right name for a command-line tool built for Debian.
