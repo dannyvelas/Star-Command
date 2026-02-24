@@ -1,4 +1,4 @@
-module github.com/dannyvelas/homelab
+module github.com/dannyvelas/starcommand
 
 go 1.25.1
 

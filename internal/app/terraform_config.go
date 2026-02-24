@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 
-	"github.com/dannyvelas/homelab/internal/helpers"
+	"github.com/dannyvelas/starcommand/internal/helpers"
 )
 
 type terraformConfig struct {

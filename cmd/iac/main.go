@@ -7,7 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/dannyvelas/conflux"
-	"github.com/dannyvelas/homelab/internal/helpers"
+	"github.com/dannyvelas/starcommand/internal/helpers"
 	"github.com/joho/godotenv"
 )
 

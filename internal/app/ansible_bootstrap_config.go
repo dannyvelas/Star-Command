@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dannyvelas/homelab/internal/helpers"
+	"github.com/dannyvelas/starcommand/internal/helpers"
 )
 
 var _ ansibleConfig = (*ansibleBootstrapConfig)(nil)

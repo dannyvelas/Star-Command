@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dannyvelas/conflux"
-	"github.com/dannyvelas/homelab/internal/app"
+	"github.com/dannyvelas/starcommand/internal/app"
 	"github.com/spf13/cobra"
 )
 
