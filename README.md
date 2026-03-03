@@ -4,8 +4,6 @@
 
 Fork this repo to get a fully declarative, version-controlled infrastructure for one or more Debian servers.
 
-This repo comes with Ansible/Terraform logic to provisions a hypervisor, a WireGuard VPN, a Traefik reverse proxy, OVN overlay networking, and a k3s cluster.
-
 This repo also comes with a CLI which runs Ansible/Terraform under-the-hood. This CLI makes sure there is only one source-of-truth for your infrastructure configuration, and that all the tools have the data they need to do their jobs without you having to manually copy-paste values around.
 
 ## Architecture
