@@ -4,7 +4,9 @@
 
 Fork this repo to get a fully declarative, version-controlled infrastructure for one or more Debian servers.
 
-This repo also comes with a CLI which runs Ansible/Terraform under-the-hood. This CLI makes sure there is only one source-of-truth for your infrastructure configuration, and that all the tools have the data they need to do their jobs without you having to manually copy-paste values around.
+This repo also comes with a CLI which runs Ansible/Terraform under-the-hood. This CLI:
+- Allows you to have one source-of-truth for all your infrastructure configuration, so that you don't have to manually copy-paste values between Ansible and Terraform config files
+- Abstracts Ansible and Terraform steps, so that you can run a single command to provision your entire infrastructure without having to worry about the order of operations or the specific commands to run for each tool
 
 ## Architecture
 
