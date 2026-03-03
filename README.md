@@ -110,7 +110,6 @@ Each field is explained inline in [`stc.example.yml`](stc.example.yml). Non-sens
 
 ```bash
 export STC_ADMIN_PASSWORD=...
-stc setup
 ```
 
 `stc` generates all tool-specific configs (Ansible inventory, Terraform vars) into `.generated/`. You never edit those files directly.
