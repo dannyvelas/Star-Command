@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"strconv"
+	"slices"
 
 	"github.com/dannyvelas/starcommand/config"
 )
@@ -12,38 +12,21 @@ type sshConfig struct {
 	HostName      string `json:"host_name" required:"true"`
 	User          string `json:"ssh_user" required:"true"`
 	PublicKeyPath string `json:"ssh_public_key_path" required:"true"`
-	Port          string `json:"ssh_port" required:"true"`
+	Port          int    `json:"ssh_port" required:"true"`
 }
 
-func newSSHHost(hostAlias string) *sshConfig {
-	return &sshConfig{Alias: hostAlias}
-}
-
-func (c *sshConfig) FillFromConfig(cfg *config.Config) error {
-	for _, h := range cfg.Hosts {
-		if h.Name == c.Alias {
-			c.HostName = h.IP
-			c.User = h.SSH.User
-			c.Port = portToString(h.SSH.Port)
-			c.PublicKeyPath = h.SSH.PublicKeyPath
-			return nil
-		}
-		for _, vm := range h.VMs {
-			if vm.Name == c.Alias {
-				c.HostName = vm.IP
-				c.User = vm.SSH.User
-				c.Port = portToString(vm.SSH.Port)
-				c.PublicKeyPath = vm.SSH.PublicKeyPath
-				return nil
-			}
-		}
+func newSSHConfig(c *config.Config, hostAlias string) (*sshConfig, error) {
+	i := slices.IndexFunc(c.Hosts, func(h config.Host) bool { return h.Name == hostAlias })
+	if i < 0 {
+		return nil, fmt.Errorf("host alias %s not found in config", hostAlias)
 	}
-	return fmt.Errorf("host %q %w", c.Alias, errNotFound)
-}
+	configHost := c.Hosts[i]
 
-func portToString(port int) string {
-	if port != 0 {
-		return strconv.Itoa(port)
-	}
-	return "22"
+	return &sshConfig{
+		Alias:         configHost.Name,
+		HostName:      configHost.IP,
+		User:          configHost.SSH.User,
+		PublicKeyPath: configHost.SSH.PublicKeyPath,
+		Port:          configHost.SSH.Port,
+	}, nil
 }
