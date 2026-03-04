@@ -11,7 +11,7 @@ import (
 var _ playbookConfig = (*ansibleBootstrapConfig)(nil)
 
 type ansibleBootstrapConfig struct {
-	Hosts []hostConfig `json:"-" required:"true"`
+	Hosts []hostConfig
 
 	// Sensitive
 	AdminEmail    string `json:"admin_email" sensitive:"true" prompt:"Admin email"`
