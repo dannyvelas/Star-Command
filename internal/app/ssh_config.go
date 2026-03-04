@@ -27,8 +27,8 @@ func newSSHConfig(c *config.Config, hostAlias string) (*sshConfig, map[string]st
 	setDiagnostic(diagnostics, prefix+".name", configHost.Name)
 	setDiagnostic(diagnostics, prefix+".ip", configHost.IP)
 	setDiagnostic(diagnostics, prefix+".ssh.user", configHost.SSH.User)
-	setDiagnostic(diagnostics, prefix+".ssh.public_key_path", configHost.SSH.PublicKeyPath)
 	setDiagnostic(diagnostics, prefix+".ssh.port", configHost.SSH.Port)
+	setDiagnostic(diagnostics, prefix+".ssh.public_key_path", configHost.SSH.PublicKeyPath)
 
 	return &sshConfig{
 		Alias:         configHost.Name,

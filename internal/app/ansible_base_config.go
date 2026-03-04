@@ -23,13 +23,12 @@ func newAnsibleBaseConfig(prefix, name, ip, sshUser string, sshPort int, sshPriv
 	setDiagnostic(diagnostics, prefix+".ssh.private_key_path", sshPrivateKeyPath)
 
 	return ansibleBaseConfig{
-			Name:              name,
-			IP:                ip,
-			SSHUser:           sshUser,
-			SSHPort:           sshPort,
-			SSHPrivateKeyPath: sshPrivateKeyPath,
-		},
-		diagnostics
+		Name:              name,
+		IP:                ip,
+		SSHUser:           sshUser,
+		SSHPort:           sshPort,
+		SSHPrivateKeyPath: sshPrivateKeyPath,
+	}, diagnostics
 }
 
 func (c ansibleBaseConfig) asMap() (map[string]any, error) {
