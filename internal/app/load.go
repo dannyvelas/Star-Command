@@ -46,7 +46,9 @@ func buildDiagnostics(v any) (map[string]string, error) {
 
 // getTagToFieldMap takes a struct and returns a map where each key is
 // the value of tag `tagName`. each value is a reflect.Value.
-// if `tagName` is not found, it will iterate through `fallbackTags` until it finds a value
+// if `tagName` is not found, it will iterate through `fallbackTags` until it finds a value.
+// Anonymous (embedded) struct fields are recursed into so their fields appear at the top level.
+// Slice-of-struct fields are recursed into so required fields within each element are checked.
 func getTagToFieldMap(v any, tagName string, fallbackTags ...string) (map[string]reflectField, error) {
 	rv := reflect.ValueOf(v)
 
@@ -60,18 +62,40 @@ func getTagToFieldMap(v any, tagName string, fallbackTags ...string) (map[string
 		return nil, fmt.Errorf("expected a struct as argument")
 	}
 
-	tagToFieldMap := make(map[string]reflectField)
+	result := make(map[string]reflectField)
+	collectFields(rv, tagName, fallbackTags, result)
+	return result, nil
+}
 
+func collectFields(rv reflect.Value, tagName string, fallbackTags []string, result map[string]reflectField) {
 	rt := rv.Type()
 	for i := 0; i < rt.NumField(); i++ {
 		field := rt.Field(i)
+		fieldVal := rv.Field(i)
+
+		// Recurse into anonymous (embedded) struct fields to inline their fields.
+		if field.Anonymous && fieldVal.Kind() == reflect.Struct {
+			collectFields(fieldVal, tagName, fallbackTags, result)
+			continue
+		}
+
+		// Recurse into slice fields (of struct or interface elements) to expose required fields within each element.
+		if fieldVal.Kind() == reflect.Slice {
+			for j := 0; j < fieldVal.Len(); j++ {
+				elem := fieldVal.Index(j)
+				if elem.Kind() == reflect.Interface {
+					elem = elem.Elem()
+				}
+				if elem.Kind() == reflect.Struct {
+					collectFields(elem, tagName, fallbackTags, result)
+				}
+			}
+			continue
+		}
 
 		foundTag := queryForTags(field, tagName, fallbackTags)
-
-		tagToFieldMap[foundTag] = reflectField{field, rv.Field(i)}
+		result[foundTag] = reflectField{field, fieldVal}
 	}
-
-	return tagToFieldMap, nil
 }
 
 func queryForTags(field reflect.StructField, tagName string, fallbackTags []string) string {
