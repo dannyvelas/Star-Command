@@ -49,15 +49,31 @@ func AnsibleRun(ctx context.Context, c *config.Config, playbook string, prefligh
 }
 
 func SSHAdd(ctx context.Context, c *config.Config, hostAlias string, preflight bool) (map[string]string, error) {
-	sshConfig := newSSHHost(hostAlias)
-	//m, err := loadConfig(sshConfig, c, "ssh add "+hostAlias, preflight)
-	//if preflight || err != nil {
-	//	return m, err
-	//}
+	sshConfig, err := newSSHConfig(c, hostAlias)
+	if err != nil {
+		return nil, fmt.Errorf("error creating ssh config: %v", err)
+	}
+
+	m, err := buildDiagnostics(sshConfig)
+	if err != nil {
+		return m, err
+	}
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, fmt.Errorf("error getting user home dir: %v", err)
+	}
+
+	if preflight {
+		return m, nil
+	}
+
+	if hasMissingFields(m) {
+		return m, fmt.Errorf("error getting config for ssh command:\n%s", diagnosticsToTable(m))
+	}
+
+	if err := promptSensitiveFields(sshConfig, os.Stdin, os.Stdout); err != nil {
+		return nil, fmt.Errorf("error prompting for sensitive fields: %v", err)
 	}
 
 	sshHandler := newSSHHandler(homeDir)
@@ -71,10 +87,6 @@ func SSHAdd(ctx context.Context, c *config.Config, hostAlias string, preflight b
 
 func TerraformApply(ctx context.Context, c *config.Config, preflight bool) (map[string]string, error) {
 	terraformConfig := newTerraformConfig()
-	//m, err := loadConfig(terraformConfig, c, "terraform apply")
-	//if preflight || err != nil {
-	//	return m, err
-	//}
 
 	terraformHandler := newTerraformHandler("./terraform/main.tf")
 	handlerDiagnostics, err := terraformHandler.execute(ctx, terraformConfig)
