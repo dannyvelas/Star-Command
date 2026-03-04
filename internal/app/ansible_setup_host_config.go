@@ -10,7 +10,7 @@ import (
 var _ playbookConfig = (*ansibleSetupHostConfig)(nil)
 
 type ansibleSetupHostConfig struct {
-	Hosts []hostConfig `json:"-" required:"true"`
+	Hosts []hostConfig
 
 	// Sensitive
 	SMTPUser     string `json:"smtp_user" sensitive:"true" prompt:"SMTP username"`
