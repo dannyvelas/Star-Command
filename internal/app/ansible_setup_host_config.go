@@ -11,10 +11,8 @@ import (
 )
 
 type setupHostEntry struct {
-	Name  string
-	IP    string
-	SSH   config.SSHConfig
-	Incus config.IncusConfig
+	AnsibleBaseConfig ansibleBaseConfig
+	Incus             config.IncusConfig
 }
 
 type setupHostHostVars struct {
@@ -38,10 +36,8 @@ func newAnsibleSetupHostConfig(c *config.Config) *ansibleSetupHostConfig {
 	setupConfig := new(ansibleSetupHostConfig)
 	for _, host := range c.Hosts {
 		setupConfig.Hosts = append(setupConfig.Hosts, setupHostEntry{
-			Name:  host.Name,
-			IP:    host.IP,
-			SSH:   host.SSH,
-			Incus: host.Incus,
+			AnsibleBaseConfig: newAnsibleBaseConfig(host.Name, host.IP, host.SSH),
+			Incus:             host.Incus,
 		})
 	}
 	return setupConfig
@@ -49,37 +45,37 @@ func newAnsibleSetupHostConfig(c *config.Config) *ansibleSetupHostConfig {
 
 func (c *ansibleSetupHostConfig) generateHostVars() error {
 	for _, host := range c.Hosts {
-		ansibleUser, err := determineAnsibleUser(host.SSH.User, host.IP, host.SSH.Port, host.SSH.PrivateKeyPath)
+		ansibleUser, err := determineAnsibleUser(host.AnsibleBaseConfig.SSH.User, host.AnsibleBaseConfig.IP, host.AnsibleBaseConfig.SSH.Port, host.AnsibleBaseConfig.SSH.PrivateKeyPath)
 		if err != nil {
-			return fmt.Errorf("error determining ansible user for host %s: %v", host.Name, err)
+			return fmt.Errorf("error determining ansible user for host %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
-		expandedPrivateKey, err := helpers.ExpandPath(host.SSH.PrivateKeyPath)
+		expandedPrivateKey, err := helpers.ExpandPath(host.AnsibleBaseConfig.SSH.PrivateKeyPath)
 		if err != nil {
-			return fmt.Errorf("error expanding private key path for host %s: %v", host.Name, err)
+			return fmt.Errorf("error expanding private key path for host %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
 		vars := setupHostHostVars{
-			AnsibleHost:          host.IP,
-			AnsiblePort:          host.SSH.Port,
+			AnsibleHost:          host.AnsibleBaseConfig.IP,
+			AnsiblePort:          host.AnsibleBaseConfig.SSH.Port,
 			AnsibleSSHPrivateKey: expandedPrivateKey,
 			AnsibleUser:          ansibleUser,
 			IncusStoragePoolName: host.Incus.StoragePoolName,
 			IncusStorageDriver:   host.Incus.StoragePoolDriver,
 		}
 
-		dir := filepath.Join(".generated", "host_vars", host.Name)
+		dir := filepath.Join(".generated", "host_vars", host.AnsibleBaseConfig.Name)
 		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return fmt.Errorf("error creating host_vars dir for %s: %v", host.Name, err)
+			return fmt.Errorf("error creating host_vars dir for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
 		data, err := yaml.Marshal(vars)
 		if err != nil {
-			return fmt.Errorf("error marshaling host vars for %s: %v", host.Name, err)
+			return fmt.Errorf("error marshaling host vars for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
 		if err := os.WriteFile(filepath.Join(dir, "vars.yml"), data, 0o644); err != nil {
-			return fmt.Errorf("error writing host vars file for %s: %v", host.Name, err)
+			return fmt.Errorf("error writing host vars file for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 	}
 	return nil

@@ -11,9 +11,7 @@ import (
 )
 
 type bootstrapHostEntry struct {
-	Name                 string
-	IP                   string
-	SSH                  config.SSHConfig
+	AnsibleBaseConfig    ansibleBaseConfig
 	AutoUpdateRebootTime string
 }
 
@@ -38,9 +36,7 @@ func newAnsibleBootstrapConfig(c *config.Config) *ansibleBootstrapConfig {
 	bootstrapConfig := new(ansibleBootstrapConfig)
 	for _, host := range c.Hosts {
 		bootstrapConfig.Hosts = append(bootstrapConfig.Hosts, bootstrapHostEntry{
-			Name:                 host.Name,
-			IP:                   host.IP,
-			SSH:                  host.SSH,
+			AnsibleBaseConfig:    newAnsibleBaseConfig(host.Name, host.IP, host.SSH),
 			AutoUpdateRebootTime: host.AutoUpdateRebootTime,
 		})
 	}
@@ -49,24 +45,24 @@ func newAnsibleBootstrapConfig(c *config.Config) *ansibleBootstrapConfig {
 
 func (c *ansibleBootstrapConfig) generateHostVars() error {
 	for _, host := range c.Hosts {
-		ansibleUser, err := determineAnsibleUser(host.SSH.User, host.IP, host.SSH.Port, host.SSH.PrivateKeyPath)
+		ansibleUser, err := determineAnsibleUser(host.AnsibleBaseConfig.SSH.User, host.AnsibleBaseConfig.IP, host.AnsibleBaseConfig.SSH.Port, host.AnsibleBaseConfig.SSH.PrivateKeyPath)
 		if err != nil {
-			return fmt.Errorf("error determining ansible user for %s: %v", host.Name, err)
+			return fmt.Errorf("error determining ansible user for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
-		expandedPrivateKey, err := helpers.ExpandPath(host.SSH.PrivateKeyPath)
+		expandedPrivateKey, err := helpers.ExpandPath(host.AnsibleBaseConfig.SSH.PrivateKeyPath)
 		if err != nil {
-			return fmt.Errorf("error expanding private key path for %s: %v", host.Name, err)
+			return fmt.Errorf("error expanding private key path for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
-		expandedPublicKey, err := helpers.ExpandPath(host.SSH.PublicKeyPath)
+		expandedPublicKey, err := helpers.ExpandPath(host.AnsibleBaseConfig.SSH.PublicKeyPath)
 		if err != nil {
-			return fmt.Errorf("error expanding public key path for %s: %v", host.Name, err)
+			return fmt.Errorf("error expanding public key path for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
 		pubKeyBytes, err := os.ReadFile(expandedPublicKey)
 		if err != nil {
-			return fmt.Errorf("error reading public key for %s: %v", host.Name, err)
+			return fmt.Errorf("error reading public key for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
 		autoUpdateRebootTime := host.AutoUpdateRebootTime
@@ -75,26 +71,26 @@ func (c *ansibleBootstrapConfig) generateHostVars() error {
 		}
 
 		vars := bootstrapHostVars{
-			AnsibleHost:          host.IP,
-			AnsiblePort:          host.SSH.Port,
+			AnsibleHost:          host.AnsibleBaseConfig.IP,
+			AnsiblePort:          host.AnsibleBaseConfig.SSH.Port,
 			AnsibleSSHPrivateKey: expandedPrivateKey,
 			AnsibleUser:          ansibleUser,
 			SSHPublicKey:         string(pubKeyBytes),
 			AutoUpdateRebootTime: autoUpdateRebootTime,
 		}
 
-		dir := filepath.Join(".generated", "host_vars", host.Name)
+		dir := filepath.Join(".generated", "host_vars", host.AnsibleBaseConfig.Name)
 		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return fmt.Errorf("error creating host_vars dir for %s: %v", host.Name, err)
+			return fmt.Errorf("error creating host_vars dir for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
 		data, err := yaml.Marshal(vars)
 		if err != nil {
-			return fmt.Errorf("error marshaling host vars for %s: %v", host.Name, err)
+			return fmt.Errorf("error marshaling host vars for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 
 		if err := os.WriteFile(filepath.Join(dir, "vars.yml"), data, 0o644); err != nil {
-			return fmt.Errorf("error writing host vars file for %s: %v", host.Name, err)
+			return fmt.Errorf("error writing host vars file for %s: %v", host.AnsibleBaseConfig.Name, err)
 		}
 	}
 	return nil
