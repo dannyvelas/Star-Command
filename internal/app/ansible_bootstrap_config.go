@@ -18,15 +18,57 @@ type ansibleBootstrapConfig struct {
 	AdminPassword string `json:"admin_password" sensitive:"true" prompt:"Admin password"`
 }
 
-func newAnsibleBootstrapConfig(c *config.Config) *ansibleBootstrapConfig {
+func newAnsibleBootstrapConfig(c *config.Config) (*ansibleBootstrapConfig, map[string]string, error) {
 	bootstrapConfig := new(ansibleBootstrapConfig)
-	for _, host := range c.Hosts {
+	diagnostics := make(map[string]string)
+
+	if len(c.Hosts) == 0 {
+		diagnostics[".hosts"] = statusMissing
+		return bootstrapConfig, diagnostics, nil
+	}
+
+	for i, host := range c.Hosts {
+		key := fmt.Sprintf(".hosts[%d]", i)
+		if host.Name == "" {
+			diagnostics[key+".name"] = statusMissing
+		} else {
+			diagnostics[key+".name"] = statusLoaded
+		}
+		if host.IP == "" {
+			diagnostics[key+".ip"] = statusMissing
+		} else {
+			diagnostics[key+".ip"] = statusLoaded
+		}
+		if host.SSH.User == "" {
+			diagnostics[key+".ssh.user"] = statusMissing
+		} else {
+			diagnostics[key+".ssh.user"] = statusLoaded
+		}
+		if host.SSH.Port == 0 {
+			diagnostics[key+".ssh.port"] = statusMissing
+		} else {
+			diagnostics[key+".ssh.port"] = statusLoaded
+		}
+		if host.SSH.PrivateKeyPath == "" {
+			diagnostics[key+".ssh.private_key_path"] = statusMissing
+		} else {
+			diagnostics[key+".ssh.private_key_path"] = statusLoaded
+		}
+		if host.SSH.PublicKeyPath == "" {
+			diagnostics[key+".ssh.public_key_path"] = statusMissing
+		} else {
+			diagnostics[key+".ssh.public_key_path"] = statusLoaded
+		}
+		if host.AutoUpdateRebootTime == "" {
+			host.AutoUpdateRebootTime = "05:00"
+		}
+
 		bootstrapConfig.Hosts = append(bootstrapConfig.Hosts, bootstrapHostEntry{
 			AnsibleBaseConfig:    newAnsibleBaseConfig(host.Name, host.IP, host.SSH),
 			AutoUpdateRebootTime: host.AutoUpdateRebootTime,
 		})
 	}
-	return bootstrapConfig
+	return bootstrapConfig, diagnostics, nil
 }
 
 func (c *ansibleBootstrapConfig) hosts() []hostConfig {
