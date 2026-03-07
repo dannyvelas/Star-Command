@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func inventoryGenerateCmd(c *models.Config, preflight bool) *cobra.Command {
+func inventoryGenerateCmd(c *models.Config, preflight *bool) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate the Ansible inventory file for all hosts, or a single host",
@@ -18,10 +18,10 @@ func inventoryGenerateCmd(c *models.Config, preflight bool) *cobra.Command {
 	return command
 }
 
-func inventoryGenerateCLI(c *models.Config, preflight bool) func(cmd *cobra.Command, args []string) error {
+func inventoryGenerateCLI(c *models.Config, preflight *bool) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
-		if err := app.InventoryGenerate(ctx, c, preflight); err != nil {
+		if err := app.InventoryGenerate(ctx, c, *preflight); err != nil {
 			return err
 		}
 

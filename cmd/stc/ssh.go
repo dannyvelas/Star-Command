@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func sshCmd(c *models.Config, preflight bool) *cobra.Command {
+func sshCmd(c *models.Config, preflight *bool) *cobra.Command {
 	sshCmd := &cobra.Command{
 		Use:   "ssh",
 		Short: "ssh-related utilities",

@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ansiblePlaybookCmd(c *models.Config, preflight bool) []*cobra.Command {
+func ansiblePlaybookCmd(c *models.Config, preflight *bool) []*cobra.Command {
 	playbooks := []string{"bootstrap-host", "setup-host", "setup-vm"}
 	commands := make([]*cobra.Command, 0, len(playbooks))
 
@@ -17,7 +17,7 @@ func ansiblePlaybookCmd(c *models.Config, preflight bool) []*cobra.Command {
 		command := &cobra.Command{
 			Use:   playbook,
 			Short: fmt.Sprintf("Run the %s ansible playbook", playbook),
-			RunE:  ansiblePlaybookCLI(c, playbook, &hosts, &preflight),
+			RunE:  ansiblePlaybookCLI(c, playbook, &hosts, preflight),
 		}
 		command.Flags().StringArrayVar(&hosts, "host", nil, "Limit to specific hosts (repeatable)")
 
