@@ -19,7 +19,7 @@ type ansibleBootstrapConfig struct {
 }
 
 func newAnsibleBootstrapConfig(hosts []models.Host) (*ansibleBootstrapConfig, *Diagnostics) {
-	bootstrapConfig := &ansibleBootstrapConfig{}
+	bootstrapConfig := new(ansibleBootstrapConfig)
 	diagnostics := new(Diagnostics)
 
 	for i, host := range hosts {
