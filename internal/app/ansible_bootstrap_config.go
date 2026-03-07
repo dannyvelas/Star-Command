@@ -25,7 +25,6 @@ func newAnsibleBootstrapConfig(hosts []models.Host) (*ansibleBootstrapConfig, *D
 	for i, host := range hosts {
 		prefix := fmt.Sprintf(".hosts[%d]", i)
 
-		// query data
 		baseConfig, baseDiagnostics := newAnsibleBaseConfig(host.Name, host.IP, host.SSH.User, host.SSH.Port, host.SSH.PrivateKeyPath)
 		diagnostics.appendWithPrefix(prefix, *baseDiagnostics...)
 
@@ -36,7 +35,6 @@ func newAnsibleBootstrapConfig(hosts []models.Host) (*ansibleBootstrapConfig, *D
 			diagnostics.set(prefix+".ssh.public_key_path", pubKeyContent)
 		}
 
-		// set fields
 		baseConfig.Map = map[string]any{
 			"ssh_public_key":          pubKeyContent,
 			"auto_update_reboot_time": autoUpdateRebootTime(host.AutoUpdateRebootTime),
