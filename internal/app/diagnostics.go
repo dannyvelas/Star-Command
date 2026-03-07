@@ -16,7 +16,7 @@ type Diagnostic struct {
 
 type Diagnostics []Diagnostic
 
-// DiagnosticsToTable takes a diagnostics slice and returns it as a pretty-printed formatted table
+// ToTable takes a diagnostics slice and returns it as a pretty-printed formatted table
 // This is useful as a user-friendly report of missing and found configuration values
 func (d *Diagnostics) ToTable() string {
 	headerCol1 := "SUBJECT"
