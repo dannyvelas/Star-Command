@@ -92,7 +92,7 @@ Fork this repo on GitHub, then clone your fork:
 ```bash
 git clone https://github.com/ <your-username >/starcommand
 cd starcommand
-make
+make # builds the stc binary
 ```
 
 Your fork is your infrastructure repo — commit your config, playbook changes, and service manifests to it.
@@ -134,21 +134,23 @@ This prints a diagnostic table without executing the command. Any field showing 
 --------------------------------------------------
 ```
 
-`stc` generates all tool-specific configs (Ansible inventory, Terraform vars) into `.generated/`. You never edit those files directly.
+`stc` generates all tool-specific configs (Ansible inventory, Terraform vars) into `.generated/`. You never edit those files directly. The directory is created automatically the first time you run `stc setup` or any low-level command (without `--preflight`). It is safe to delete and regenerate at any time — re-running `stc setup` will recreate everything correctly.
 
 ## Usage
 
 ### Provision hosts
 
-Apply the desired state to all hosts in `stc.yml`. Ansible's idempotency means this is safe to run at any time — already-provisioned hosts are verified quickly, new hosts are fully provisioned:
+`stc setup` is the single command to run after configuration. It orchestrates everything end-to-end — inventory generation, host bootstrapping, host setup, VM provisioning, VM bootstrapping, VM setup, and service deployment — in the correct order with no manual steps in between:
 
 ```bash
 stc setup # apply desired state to all hosts
 ```
 
+Ansible's idempotency means this is safe to run at any time — already-provisioned hosts are verified quickly, new hosts are fully provisioned. Pass one or more `--host` flags to limit execution to a specific subset of hosts.
+
 After the first `stc setup` completes, update your network's DHCP configuration to distribute the cluster as the DNS server. This is a one-time manual step — after this, every host on your network resolves service subdomains automatically.
 
-For a deeper look at how `stc setup` works internally, see [docs/internals.md](docs/internals.md).
+For a detailed breakdown of each step `stc setup` runs internally, see [docs/internals.md](docs/internals.md).
 
 ### Add VPN clients
 
@@ -202,10 +204,11 @@ Low-level commands:
   ssh add <host>                           Add a host to ~/.ssh/config
   terraform apply                          Apply the Terraform project
 
-All commands above accept --preflight to display a config diagnostic table instead of executing (see [Configure](#2-configure)).
+All commands above accept --preflight to display a config diagnostic table instead of executing.
+<h> is the host name as defined in stc.yml.
 ```
 
-`stc` wraps these low-level commands because they require config resolution — secret fetching, inventory generation, and var merging — that would otherwise need to be done manually.
+Most users only need `stc setup`. The low-level commands are there for when you want to re-run a single step in isolation — one playbook, one Terraform apply, one SSH key — without running the full setup sequence.
 
 ## Project structure
 
