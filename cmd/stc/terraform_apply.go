@@ -6,19 +6,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func terraformApplyCmd(c *models.Config) *cobra.Command {
+func terraformApplyCmd(c *models.Config, preflight bool) *cobra.Command {
 	terraformApplyCmd := &cobra.Command{
 		Use:   "apply",
 		Short: "Apply the terraform project",
-		RunE:  terraformApplyCLI(c),
+		RunE:  terraformApplyCLI(c, preflight),
 	}
 
 	return terraformApplyCmd
 }
 
-func terraformApplyCLI(c *models.Config) func(cmd *cobra.Command, args []string) error {
+func terraformApplyCLI(c *models.Config, preflight bool) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
-		return app.TerraformApply(ctx, c)
+		return app.TerraformApply(ctx, c, preflight)
 	}
 }

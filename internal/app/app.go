@@ -12,7 +12,7 @@ func Setup(ctx context.Context, c *models.Config, hosts []string) error {
 	return nil
 }
 
-func InventoryGenerate(ctx context.Context, c *models.Config) error {
+func InventoryGenerate(ctx context.Context, c *models.Config, preflight bool) error {
 	resolvedHostNames := resolveHostNames(c, nil)
 	targets, err := resolveHosts(c, resolvedHostNames...)
 	if err != nil {
@@ -56,7 +56,7 @@ func AnsibleRun(ctx context.Context, c *models.Config, playbook string, hosts []
 	return nil, nil
 }
 
-func SSHAdd(ctx context.Context, c *models.Config, host string) error {
+func SSHAdd(ctx context.Context, c *models.Config, host string, preflight bool) error {
 	targets, err := resolveHosts(c, host)
 	if err != nil {
 		return fmt.Errorf("error resolving hosts: %v", err)
@@ -84,7 +84,7 @@ func SSHAdd(ctx context.Context, c *models.Config, host string) error {
 	return nil
 }
 
-func TerraformApply(ctx context.Context, c *models.Config) error {
+func TerraformApply(ctx context.Context, c *models.Config, preflight bool) error {
 	terraformConfig := newTerraformConfig()
 
 	terraformHandler := newTerraformHandler("./terraform/main.tf")

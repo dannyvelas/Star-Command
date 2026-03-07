@@ -12,10 +12,14 @@ func rootCmd(c *models.Config) *cobra.Command {
 		Short: "Scaffold production infrastructure",
 	}
 
-	rootCmd.AddCommand(inventoryCmd(c))
-	rootCmd.AddCommand(ansibleCmd(c))
-	rootCmd.AddCommand(sshCmd(c))
-	rootCmd.AddCommand(terraformCmd(c))
+	// get preflight flag
+	var preflight bool
+	rootCmd.PersistentFlags().BoolVar(&preflight, "preflight", false, "Display config diagnostic table instead of executing")
+
+	rootCmd.AddCommand(inventoryCmd(c, preflight))
+	rootCmd.AddCommand(ansibleCmd(c, preflight))
+	rootCmd.AddCommand(sshCmd(c, preflight))
+	rootCmd.AddCommand(terraformCmd(c, preflight))
 
 	return rootCmd
 }

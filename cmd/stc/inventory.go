@@ -5,13 +5,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func inventoryCmd(c *models.Config) *cobra.Command {
+func inventoryCmd(c *models.Config, preflight bool) *cobra.Command {
 	inventoryCmd := &cobra.Command{
 		Use:   "inventory",
 		Short: "Execute ansible inventory commands",
 	}
 
-	inventoryCmd.AddCommand(inventoryGenerateCmd(c))
+	inventoryCmd.AddCommand(inventoryGenerateCmd(c, preflight))
 
 	return inventoryCmd
 }
