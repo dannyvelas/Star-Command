@@ -35,7 +35,7 @@ func AnsibleRun(ctx context.Context, c *models.Config, playbook string, hosts []
 		return nil, fmt.Errorf("error resolving hosts: %v", err)
 	}
 
-	playbookConfig, diagnostics, err := getAnsibleConfig(playbook, targets)
+	ansibleConfig, diagnostics, err := getAnsibleConfig(playbook, targets)
 	if err != nil {
 		return nil, fmt.Errorf("error getting config for %s: %v", playbook, err)
 	}
@@ -48,12 +48,12 @@ func AnsibleRun(ctx context.Context, c *models.Config, playbook string, hosts []
 		return diagnostics, fmt.Errorf("config validation failed")
 	}
 
-	if err := promptSensitiveFields(playbookConfig, os.Stdin, os.Stdout); err != nil {
+	if err := promptSensitiveFields(ansibleConfig, os.Stdin, os.Stdout); err != nil {
 		return nil, fmt.Errorf("error prompting for sensitive fields: %v", err)
 	}
 
 	ansibleHandler := newAnsibleHandler()
-	if err := ansibleHandler.execute(playbookConfig, playbook); err != nil {
+	if err := ansibleHandler.execute(ansibleConfig, playbook); err != nil {
 		return nil, fmt.Errorf("error executing command: %v", err)
 	}
 

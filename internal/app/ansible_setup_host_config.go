@@ -6,7 +6,7 @@ import (
 	"github.com/dannyvelas/starcommand/internal/models"
 )
 
-var _ playbookConfig = (*ansibleSetupHostConfig)(nil)
+var _ ansibleConfig = (*ansibleSetupHostConfig)(nil)
 
 type ansibleSetupHostConfig struct {
 	Hosts []ansibleHostConfig

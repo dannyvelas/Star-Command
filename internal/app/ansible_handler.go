@@ -20,7 +20,7 @@ func newAnsibleHandler() ansibleHandler {
 	return ansibleHandler{}
 }
 
-func (h ansibleHandler) execute(c playbookConfig, playbook string) error {
+func (h ansibleHandler) execute(c ansibleConfig, playbook string) error {
 	if err := h.generateHostVars(c); err != nil {
 		return fmt.Errorf("error generating host vars: %v", err)
 	}
@@ -32,7 +32,7 @@ func (h ansibleHandler) execute(c playbookConfig, playbook string) error {
 	return nil
 }
 
-func (h ansibleHandler) generateHostVars(c playbookConfig) error {
+func (h ansibleHandler) generateHostVars(c ansibleConfig) error {
 	for _, host := range c.hosts() {
 		ansibleUser, err := determineAnsibleUser(host.SSHUser, host.IP, host.SSHPort, host.SSHPrivateKey)
 		if err != nil {
