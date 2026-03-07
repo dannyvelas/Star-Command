@@ -10,6 +10,10 @@ func rootCmd(c *models.Config) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "stc",
 		Short: "Scaffold production infrastructure",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return nil
+		},
 	}
 
 	// get preflight flag
