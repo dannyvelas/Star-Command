@@ -20,7 +20,7 @@ func newAnsibleBaseConfig(name, ip, sshUser string, sshPort int, sshPrivateKeyPa
 
 	expandedPrivateKey, err := helpers.ExpandPath(sshPrivateKeyPath)
 	if err != nil {
-		diagnostics.append(Diagnostic{Field: ".ssh.private_key_path", Status: fmt.Sprintf("error expanding path: %v", err)})
+		diagnostics.append(diagnostic{Field: ".ssh.private_key_path", Status: fmt.Sprintf("error expanding path: %v", err)})
 	}
 
 	diagnostics.appendChecked(".name", name)

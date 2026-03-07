@@ -9,12 +9,12 @@ import (
 
 const statusLoaded = "loaded"
 
-type Diagnostic struct {
+type diagnostic struct {
 	Field  string
 	Status string
 }
 
-type Diagnostics []Diagnostic
+type Diagnostics []diagnostic
 
 // ToTable takes a diagnostics slice and returns it as a pretty-printed formatted table
 // This is useful as a user-friendly report of missing and found configuration values
@@ -35,7 +35,7 @@ func (d *Diagnostics) ToTable() string {
 	}
 
 	type tableContext struct {
-		Data       []Diagnostic
+		Data       []diagnostic
 		HeaderCol1 string
 		HeaderCol2 string
 		KeyWidth   int
@@ -89,19 +89,19 @@ func (d *Diagnostics) hasErrors() bool {
 
 func (d *Diagnostics) appendChecked(field string, val any) {
 	if reflect.ValueOf(val).IsZero() {
-		*d = append(*d, Diagnostic{Field: field, Status: errNotFound.Error()})
+		*d = append(*d, diagnostic{Field: field, Status: errNotFound.Error()})
 	} else {
-		*d = append(*d, Diagnostic{Field: field, Status: statusLoaded})
+		*d = append(*d, diagnostic{Field: field, Status: statusLoaded})
 	}
 }
 
-func (d *Diagnostics) appendWithPrefix(prefix string, src ...Diagnostic) {
+func (d *Diagnostics) appendWithPrefix(prefix string, src ...diagnostic) {
 	for _, v := range src {
-		*d = append(*d, Diagnostic{Field: prefix + v.Field, Status: v.Status})
+		*d = append(*d, diagnostic{Field: prefix + v.Field, Status: v.Status})
 	}
 }
 
-func (d *Diagnostics) append(src ...Diagnostic) {
+func (d *Diagnostics) append(src ...diagnostic) {
 	*d = append(*d, Diagnostics(src)...)
 }
 
