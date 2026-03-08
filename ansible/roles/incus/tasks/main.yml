@@ -2,7 +2,6 @@
   ansible.builtin.apt:
     name:
       - incus
-      - incus-tools
     state: present
     update_cache: yes
 
