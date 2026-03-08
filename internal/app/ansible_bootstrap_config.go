@@ -37,6 +37,7 @@ func newAnsibleBootstrapConfig(hosts []models.Host) *ansibleBootstrapConfig {
 		}
 
 		baseConfig.Map = map[string]any{
+			"ssh_port":                baseConfig.SSHPort,
 			"ssh_public_key":          pubKeyContent,
 			"auto_update_reboot_time": autoUpdateRebootTime(host.AutoUpdateRebootTime),
 		}

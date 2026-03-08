@@ -44,6 +44,7 @@ func AnsibleRun(ctx context.Context, c *models.Config, playbook string, hosts []
 	if err != nil {
 		return nil, fmt.Errorf("error validating config: %v", err)
 	}
+
 	if preflight {
 		return diagnostics, nil
 	}
