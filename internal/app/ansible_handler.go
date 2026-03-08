@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dannyvelas/starcommand/internal/helpers"
@@ -25,7 +26,13 @@ func (h ansibleHandler) execute(c ansibleConfig, playbook string) error {
 		return fmt.Errorf("error generating host vars: %v", err)
 	}
 
-	if err := h.runAnsiblePlaybook(playbook); err != nil {
+	hosts := c.getHosts()
+	hostNames := make([]string, 0, len(hosts))
+	for _, host := range hosts {
+		hostNames = append(hostNames, host.Name)
+	}
+
+	if err := h.runAnsiblePlaybook(playbook, hostNames); err != nil {
 		return fmt.Errorf("error running ansible playbook: %v", err)
 	}
 
@@ -53,10 +60,11 @@ func (h ansibleHandler) generateHostVars(c ansibleConfig) error {
 	return nil
 }
 
-func (h ansibleHandler) runAnsiblePlaybook(playbook string) error {
+func (h ansibleHandler) runAnsiblePlaybook(playbook string, hostNames []string) error {
 	playbookPath := filepath.Join("ansible", "playbooks", playbook+".yml")
 	args := []string{
 		"-i", filepath.Join(".generated", "ansible", "inventory", "hosts.yml"),
+		"--limit", strings.Join(hostNames, ","),
 		playbookPath,
 	}
 
