@@ -1,6 +1,7 @@
 ---
 - name: Setup Host with additional hardening, email notifications, incus, VPN, and reverse proxy
-  hosts: incus
+  hosts: all
+  become: true
 
   roles:
     #- host_harden
