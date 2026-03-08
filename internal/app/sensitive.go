@@ -174,3 +174,17 @@ func setSensitiveField(fieldVal reflect.Value, field reflect.StructField, value 
 	}
 	return nil
 }
+
+// getSensitiveFields returns a map[string]any of all fields in the underlying struct of ansibleConfig
+// that have the tag `sensitive:"true"`. the keys are extracted from the json tag
+func getSensitiveFields(ansibleConfig ansibleConfig) (map[string]any, error) {
+	fields := make(map[string]any)
+	err := forEachSensitiveField(ansibleConfig, func(field reflect.StructField, fieldVal reflect.Value) error {
+		fields[fieldJSONKey(field)] = fieldVal.Interface()
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error iterating over sensitive fields: %v", err)
+	}
+	return fields, nil
+}
